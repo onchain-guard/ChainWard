@@ -3,7 +3,7 @@
 > 온체인 AI 에이전트 입력 무결성 가드 SDK — **실제 배포·운영될 버전**의 상세 설계.
 > 문서 버전 v1 · 2026-07-16 · 작성: 설계 확정본
 >
-> 관련 문서: [ARCHITECTURE-REAL.md](./ARCHITECTURE-REAL.md)(개념 아키텍처) · [ARCHITECTURE-DEMO.md](./ARCHITECTURE-DEMO.md)(현 데모) · [PROJECT-PLAN.md](./PROJECT-PLAN.md)(기획)
+> 관련 문서: [PROPOSAL.md](../PROPOSAL.md)(제안서·정본) · [plans/](./plans/)(구현 계획) · 이전 기획/아키텍처 문서는 [archive/](./archive/)에 이력 보존
 >
 > 이 문서는 **무엇을 어떻게 구현할지의 계약(spec)**이다. 구현 계획(작업 순서)은 별도 plan 문서로 분리한다.
 
