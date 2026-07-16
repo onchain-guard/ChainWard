@@ -16,8 +16,8 @@
 // The tool schema and handler below are exactly what you register.
 
 import { createInterface } from "node:readline";
-import type { FieldKind } from "../core/types.ts";
-import { defaultScanner } from "../core/scanner.ts";
+import type { FieldKind } from "../../packages/core/src/core/types.ts";
+import { defaultScanner } from "../../packages/core/src/core/scanner.ts";
 import { MockOnchainDataSource } from "../adapters/onchain.ts";
 
 const PROTOCOL_VERSION = "2024-11-05";

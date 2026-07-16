@@ -9,8 +9,8 @@
 // every interception to a local web UI. Zero runtime deps (node:http).
 
 import { createServer } from "node:http";
-import { guard } from "../index.ts";
-import type { ChatMessage } from "../index.ts";
+import { guard } from "../../packages/core/src/index.ts";
+import type { ChatMessage } from "../../packages/core/src/index.ts";
 
 interface Opts { port: number; inspectPort: number; inspect: boolean; upstream?: string; model?: string; }
 
