@@ -9,10 +9,10 @@
 // To run against real chains: swap MockOnchainDataSource -> RpcOnchainDataSource in the
 // factory below (see src/adapters/onchain.ts).
 
-import type { FieldKind, ScanTarget } from "./core/types.ts";
-import { defaultScanner } from "./core/scanner.ts";
+import type { FieldKind, ScanTarget } from "../packages/core/src/core/types.ts";
+import { defaultScanner } from "../packages/core/src/core/scanner.ts";
 import { MockOnchainDataSource } from "./adapters/onchain.ts";
-import { renderReport, renderField } from "./render.ts";
+import { renderReport, renderField } from "../packages/core/src/render.ts";
 
 async function main() {
   const [cmd, ...rest] = process.argv.slice(2);

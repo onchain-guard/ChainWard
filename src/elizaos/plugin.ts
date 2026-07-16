@@ -13,9 +13,9 @@
 // Strategy: wrap the on-chain data provider so any token/NFT text it would inject is
 // scanned and replaced with the sanitized rendering before it ever reaches the prompt.
 
-import { defaultScanner } from "../core/scanner.ts";
+import { defaultScanner } from "../../packages/core/src/core/scanner.ts";
 import { MockOnchainDataSource } from "../adapters/onchain.ts";
-import type { FieldKind } from "../core/types.ts";
+import type { FieldKind } from "../../packages/core/src/core/types.ts";
 
 const scanner = defaultScanner();
 

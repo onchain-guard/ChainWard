@@ -11,7 +11,7 @@
 //
 //   npx tsx src/demo/agent-sim.ts
 
-import { defaultScanner } from "../core/scanner.ts";
+import { defaultScanner } from "../../packages/core/src/core/scanner.ts";
 import { MockOnchainDataSource } from "../adapters/onchain.ts";
 import { MALICIOUS_TOKEN, HONEYPOT_TOKEN, BENIGN_TOKEN } from "./fixtures.ts";
 

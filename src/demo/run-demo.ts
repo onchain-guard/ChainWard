@@ -3,10 +3,10 @@
 //
 //   npx tsx src/demo/run-demo.ts
 
-import { defaultScanner } from "../core/scanner.ts";
+import { defaultScanner } from "../../packages/core/src/core/scanner.ts";
 import { MockOnchainDataSource } from "../adapters/onchain.ts";
-import { renderReport } from "../render.ts";
-import type { ScanTarget } from "../core/types.ts";
+import { renderReport } from "../../packages/core/src/render.ts";
+import type { ScanTarget } from "../../packages/core/src/core/types.ts";
 import {
   MALICIOUS_TOKEN, HONEYPOT_TOKEN, MALICIOUS_NFT, MEMO_ATTACK, BENIGN_TOKEN, BENIGN_MEME,
 } from "./fixtures.ts";

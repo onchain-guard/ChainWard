@@ -5,7 +5,7 @@
 // and drops in unchanged. This is the "substitutable but not vaporware" boundary:
 // the scanner never knows or cares whether text came from a fixture or a live RPC.
 
-import type { FieldKind } from "../core/types.ts";
+import type { FieldKind } from "../../packages/core/src/core/types.ts";
 import { MALICIOUS_TOKEN, HONEYPOT_TOKEN, MALICIOUS_NFT, MEMO_ATTACK, BENIGN_TOKEN, BENIGN_MEME } from "../demo/fixtures.ts";
 
 export interface OnchainFields {
