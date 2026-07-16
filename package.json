@@ -1,33 +1,15 @@
 {
-  "name": "chainward",
-  "version": "0.1.0-demo",
-  "description": "On-chain input integrity guard for web3 AI agents — scans on-chain text (token name, NFT metadata, tx memo) for prompt-injection & deception before it reaches an agent's model.",
+  "name": "onchain-guard",
+  "private": true,
+  "version": "0.0.0",
   "type": "module",
   "license": "MIT",
-  "exports": {
-    ".": "./src/index.ts",
-    "./proxy": "./src/proxy/server.ts"
-  },
-  "bin": {
-    "chainward": "src/cli.ts"
-  },
   "scripts": {
-    "demo": "npx tsx src/demo/run-demo.ts",
-    "agent-sim": "npx tsx src/demo/agent-sim.ts",
-    "cli": "npx tsx src/cli.ts",
-    "proxy": "npx tsx src/cli.ts proxy --inspect",
-    "mcp": "npx tsx src/mcp/server.ts",
-    "test": "npx tsx --test test/*.test.ts"
+    "test": "pnpm -r test",
+    "typecheck": "pnpm -r typecheck"
   },
-  "keywords": ["web3", "ai-agent", "prompt-injection", "security", "mcp", "elizaos"],
   "devDependencies": {
     "tsx": "^4.23.0",
     "typescript": "^5.6.0"
-  },
-  "//dependencies-for-real-impl": {
-    "_comment": "The working demo runs with ZERO runtime deps (pure Node). These are the packages you add when swapping the mock adapters for the real ones — see README §'실제 구현으로 전환'.",
-    "viem": "^2.21.0",
-    "@modelcontextprotocol/sdk": "^1.0.0",
-    "@huggingface/transformers": "^3.0.0"
   }
 }

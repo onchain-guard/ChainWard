@@ -1,0 +1,12 @@
+{
+  "name": "@onchain-guard/core",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "On-chain input integrity guard — detection engine + library.",
+  "exports": { ".": "./src/index.ts" },
+  "scripts": {
+    "test": "npx tsx --test test/*.test.ts",
+    "typecheck": "npx tsc --noEmit -p tsconfig.json"
+  }
+}
