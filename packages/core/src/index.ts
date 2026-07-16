@@ -42,8 +42,9 @@ export interface GuardResult {
   findings: GuardFinding[];
 }
 
-/** Scan+sanitize a chat-message array before it reaches the model. Non-string content
- *  (tool blocks, images) is passed through untouched. */
+/** Scan+sanitize a chat-message array before it reaches the model. Handles both plain-string
+ *  content (OpenAI shape) and Anthropic block-array content — guarding `text` and `tool_result`
+ *  blocks while passing `tool_use`/`image`/unknown blocks through untouched. */
 export async function guard(messages: ChatMessage[], opts: GuardOptions = {}): Promise<GuardResult> {
   const scanner = defaultScanner();
   const untrusted = new Set(opts.untrustedRoles ?? ["user", "tool"]);
@@ -51,19 +52,74 @@ export async function guard(messages: ChatMessage[], opts: GuardOptions = {}): P
   const findings: GuardFinding[] = [];
   const out: ChatMessage[] = [];
 
+  const scan = (text: string) =>
+    scanner.scanField("agent_context", text, { targetContexts, model: opts.model });
+
   for (let i = 0; i < messages.length; i++) {
     const m = messages[i];
-    if (typeof m.content !== "string" || !untrusted.has(m.role)) {
-      out.push(m);
+    if (!untrusted.has(m.role)) { out.push(m); continue; }
+
+    // (a) plain string content (OpenAI shape)
+    if (typeof m.content === "string") {
+      const s = await scan(m.content);
+      if (s.severity !== "CLEAN") {
+        const f = { index: i, role: m.role, severity: s.severity, codes: s.signals.map((x) => x.code) };
+        findings.push(f); opts.onFinding?.(f);
+      }
+      out.push({ ...m, content: s.sanitized });
       continue;
     }
-    const scan = await scanner.scanField("agent_context", m.content, { targetContexts, model: opts.model });
-    if (scan.severity !== "CLEAN") {
-      const f: GuardFinding = { index: i, role: m.role, severity: scan.severity, codes: scan.signals.map((s) => s.code) };
-      findings.push(f);
-      opts.onFinding?.(f);
+
+    // (b) block array content (Anthropic shape)
+    if (Array.isArray(m.content)) {
+      let flagged: GuardFinding | null = null;
+      const blocks = await Promise.all((m.content as any[]).map(async (b) => {
+        if (b?.type === "text" && typeof b.text === "string") {
+          const s = await scan(b.text);
+          if (s.severity !== "CLEAN") flagged = mergeFinding(flagged, i, m.role, s);
+          return { ...b, text: s.sanitized };
+        }
+        if (b?.type === "tool_result") {
+          if (typeof b.content === "string") {
+            const s = await scan(b.content);
+            if (s.severity !== "CLEAN") flagged = mergeFinding(flagged, i, m.role, s);
+            return { ...b, content: s.sanitized };
+          }
+          if (Array.isArray(b.content)) {
+            const inner = await Promise.all(b.content.map(async (c: any) => {
+              if (c?.type === "text" && typeof c.text === "string") {
+                const s = await scan(c.text);
+                if (s.severity !== "CLEAN") flagged = mergeFinding(flagged, i, m.role, s);
+                return { ...c, text: s.sanitized };
+              }
+              return c;
+            }));
+            return { ...b, content: inner };
+          }
+        }
+        return b; // tool_use / image / unknown → untouched
+      }));
+      if (flagged) { findings.push(flagged); opts.onFinding?.(flagged); }
+      out.push({ ...m, content: blocks });
+      continue;
     }
-    out.push({ ...m, content: scan.sanitized });
+
+    out.push(m); // non-string, non-array → untouched
   }
   return { messages: out, findings };
+}
+
+// Combine per-block findings for one message into a single message-level finding
+// (worst severity wins, codes unioned).
+function mergeFinding(
+  prev: GuardFinding | null, index: number, role: string,
+  s: { severity: Severity; signals: Array<{ code: string }> },
+): GuardFinding {
+  const codes = new Set([...(prev?.codes ?? []), ...s.signals.map((x) => x.code)]);
+  const sev = worseSeverity(prev?.severity ?? "CLEAN", s.severity);
+  return { index, role, severity: sev, codes: [...codes] };
+}
+function worseSeverity(a: Severity, b: Severity): Severity {
+  const order: Record<Severity, number> = { CLEAN: 0, SUSPICIOUS: 1, MALICIOUS: 2 };
+  return order[a] >= order[b] ? a : b;
 }
