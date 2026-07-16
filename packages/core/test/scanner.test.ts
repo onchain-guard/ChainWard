@@ -6,7 +6,7 @@ import { defaultScanner } from "../src/core/scanner.ts";
 import { normalizeText, analyzeStructure } from "../src/core/normalize.ts";
 import {
   MALICIOUS_TOKEN, HONEYPOT_TOKEN, MALICIOUS_NFT, MEMO_ATTACK, BENIGN_TOKEN, BENIGN_MEME,
-} from "../src/demo/fixtures.ts";
+} from "./fixtures.ts";
 
 const scanner = defaultScanner();
 
