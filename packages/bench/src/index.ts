@@ -1,0 +1,137 @@
+// ChainWard benchmark CLI.
+//
+//   npx tsx src/index.ts --guard-only            # engine verdicts only — no model, no key
+//   npx tsx src/index.ts --provider stub         # plumbing smoke test (NOT results)
+//   npx tsx src/index.ts --provider anthropic --model claude-sonnet-5 --runs 5
+//
+// Reports four numbers together: ASR(off), ASR(on), false-positive rate, utility retained.
+// Reporting ASR without the last two is meaningless — a guard that redacts everything
+// scores ASR(on)=0.
+
+import { CASES, caseById } from "./cases.ts";
+import { buildToolResult, scanCase } from "./engine.ts";
+import { SYSTEM_PROMPT, TOOLS, buildMessages } from "./prompt.ts";
+import { aggregate, scoreRun } from "./score.ts";
+import { guardTable, metricsTable, perCaseRuns, reached } from "./report.ts";
+import { anthropicProvider } from "./providers/anthropic.ts";
+import { stubProvider } from "./providers/stub.ts";
+import type { Arm, BenchCase, GuardResultRow, Provider, RunRow } from "./types.ts";
+
+interface Opts {
+  provider: string;
+  model: string;
+  runs: number;
+  guardOnly: boolean;
+  only: string[];
+}
+
+function parseArgs(argv: string[]): Opts {
+  const get = (flag: string, fallback: string) => {
+    const i = argv.indexOf(flag);
+    return i >= 0 && argv[i + 1] ? argv[i + 1] : fallback;
+  };
+  return {
+    provider: get("--provider", "stub"),
+    model: get("--model", "claude-sonnet-5"),
+    runs: Number(get("--runs", "1")),
+    guardOnly: argv.includes("--guard-only"),
+    only: get("--cases", "").split(",").map((s) => s.trim()).filter(Boolean),
+  };
+}
+
+function resolveProvider(id: string): Provider {
+  if (id === "anthropic") {
+    const key = process.env.ANTHROPIC_API_KEY;
+    if (!key) {
+      console.error(
+        "ANTHROPIC_API_KEY is not set.\n" +
+          "  export ANTHROPIC_API_KEY=sk-ant-...   then re-run\n" +
+          "  (or use --guard-only for engine metrics that need no model)",
+      );
+      process.exit(1);
+    }
+    return anthropicProvider(key);
+  }
+  if (id === "stub") return stubProvider();
+  console.error(`unknown provider: ${id}`);
+  process.exit(1);
+}
+
+async function runGuardOnly(cases: BenchCase[]): Promise<GuardResultRow[]> {
+  const rows: GuardResultRow[] = [];
+  for (const c of cases) {
+    const s = await scanCase(c);
+    rows.push({ caseId: s.caseId, severity: s.severity, perField: s.perField });
+  }
+  return rows;
+}
+
+async function main() {
+  const opts = parseArgs(process.argv.slice(2));
+  const cases = opts.only.length
+    ? opts.only.map((id) => caseById(id)).filter((c): c is BenchCase => Boolean(c))
+    : CASES;
+
+  const guardRows = await runGuardOnly(cases);
+
+  console.log("# ChainWard 벤치마크\n");
+  console.log("## 1. 엔진 판정 (결정적 — 모델 불필요)\n");
+  console.log(guardTable(guardRows));
+
+  const attacks = guardRows.filter((r) => r.caseId.startsWith("A"));
+  const benign = guardRows.filter((r) => r.caseId.startsWith("B"));
+  const detected = attacks.filter((r) => {
+    const c = caseById(r.caseId);
+    return c?.kind === "attack" && reached(r.severity, c.targetSeverity);
+  }).length;
+  const fpFlagged = benign.filter((r) => r.severity !== "CLEAN");
+
+  console.log(
+    `\n탐지: ${detected}/${attacks.length} · 오탐: ${fpFlagged.length}/${benign.length}` +
+      (fpFlagged.length ? ` (${fpFlagged.map((r) => r.caseId).join(", ")})` : ""),
+  );
+
+  if (opts.guardOnly) return;
+
+  const provider = resolveProvider(opts.provider);
+  if (provider.id === "stub") {
+    console.log("\n> ⚠️ provider=stub — 배관 점검용이며 결과로 보고할 수 없음. 실제 수치는 --provider anthropic.\n");
+  }
+
+  const runs: RunRow[] = [];
+  for (const c of cases) {
+    for (const arm of ["off", "on"] as Arm[]) {
+      const { json } = await buildToolResult(c, arm);
+      const messages = buildMessages(c, json);
+      for (let i = 0; i < opts.runs; i++) {
+        try {
+          const reply = await provider.complete({
+            model: opts.model,
+            system: SYSTEM_PROMPT,
+            messages,
+            tools: TOOLS,
+          });
+          runs.push(scoreRun(c, arm, opts.model, provider.id, reply));
+        } catch (e) {
+          console.error(`  ${c.id}/${arm}/run${i}: ${(e as Error).message}`);
+        }
+      }
+      process.stderr.write(`  ran ${c.id}/${arm}\n`);
+    }
+  }
+
+  const metrics = aggregate(
+    runs,
+    benign.map((b) => ({ caseId: b.caseId, flagged: b.severity !== "CLEAN" })),
+  );
+
+  console.log("\n## 2. 모델 실행 결과\n");
+  console.log(metricsTable(metrics, opts.model, provider.id));
+  console.log("\n### 케이스별 하이재킹 (하이재킹 횟수 / 실행 횟수)\n");
+  console.log(perCaseRuns(runs));
+}
+
+main().catch((e) => {
+  console.error(e);
+  process.exit(1);
+});
