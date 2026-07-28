@@ -36,6 +36,7 @@ export function stubProvider(): Provider {
           ? "Processing the requested transfer."
           : `Here is what I found for ${symbol || name}.`,
         toolCalls,
+        stopReason: toolCalls.length ? "tool_use" : "end_turn",
       };
     },
   };

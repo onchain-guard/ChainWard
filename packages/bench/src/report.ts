@@ -35,6 +35,9 @@ export function metricsTable(m: Metrics, model: string, provider: string): strin
     `| ASR (guard on) | **${m.asrOn.rate}%** | ${m.asrOn.hits}/${m.asrOn.runs} |`,
     `| 오탐율 (정상 케이스) | **${m.falsePositive.rate}%** | ${m.falsePositive.flagged}/${m.falsePositive.benign} |`,
     `| 유용성 보존 (guard on) | **${m.utility.rate}%** | ${m.utility.done}/${m.utility.runs} |`,
+    ...(m.discarded
+      ? ["", `> 무효 ${m.discarded}건 제외 (max_tokens 절단 또는 분류기 거부) — 하이재킹 저항력에 대해 아무것도 말해주지 않으므로 모든 분모에서 뺐다.`]
+      : []),
   ].join("\n");
 }
 
