@@ -44,6 +44,44 @@ function classifyInvisible(cp: number): { code: string; hard: boolean } | null {
   return null;
 }
 
+// --- Emoji exemption ---
+//
+// The rule above is an empirical prior ("legit labels have no reason to carry invisible
+// codepoints"), not something the chain enforces — and emoji break it. A ZWJ sequence is
+// how composite emoji are *built*: 👨‍👩‍👧 is three pictographs joined by U+200D, and 🏳️‍🌈
+// carries a U+FE0F presentation selector too. Flagging those redacts ordinary token names.
+//
+// So we exempt these two codepoints when they are doing their actual typographic job —
+// a ZWJ *between pictographs*, a lone selector *modifying the character before it* — and
+// keep flagging them everywhere else, which is where smuggling lives ("ig<ZWJ>nore").
+
+const PICTOGRAPHIC = /\p{Extended_Pictographic}/u;
+
+const isVariationSelector = (cp?: number) => cp !== undefined && cp >= 0xfe00 && cp <= 0xfe0f;
+const isPictographic = (cp?: number) => cp !== undefined && PICTOGRAPHIC.test(String.fromCodePoint(cp));
+
+/** Nearest neighbour, stepping over variation selectors (they sit between a pictograph and its ZWJ). */
+function neighbour(cps: number[], i: number, step: -1 | 1): number | undefined {
+  let j = i + step;
+  while (isVariationSelector(cps[j])) j += step;
+  return cps[j];
+}
+
+/** True when the codepoint at `i` is legitimate emoji composition rather than smuggling. */
+export function isEmojiJoiner(cps: number[], i: number): boolean {
+  const cp = cps[i];
+  if (cp === 0x200d) {
+    return isPictographic(neighbour(cps, i, -1)) && isPictographic(neighbour(cps, i, 1));
+  }
+  if (isVariationSelector(cp)) {
+    // a selector modifies the single character before it; a RUN of them is a data channel
+    if (isVariationSelector(cps[i - 1]) || isVariationSelector(cps[i + 1])) return false;
+    const prev = cps[i - 1];
+    return prev !== undefined && classifyInvisible(prev) === null;
+  }
+  return false;
+}
+
 // --- Script detection for homoglyph / mixed-script confusables ---
 type Script = "latin" | "cyrillic" | "greek" | "fullwidth" | "other";
 
@@ -113,10 +151,11 @@ export function analyzeStructure(text: string): Signal[] {
 
   // 1) invisible / control / smuggling codepoints
   const seenInvisible = new Map<string, { count: number; hard: boolean; sample: number }>();
-  for (const cp of codepoints(text)) {
-    const cls = classifyInvisible(cp);
-    if (cls) {
-      const rec = seenInvisible.get(cls.code) ?? { count: 0, hard: cls.hard, sample: cp };
+  const cps = codepoints(text);
+  for (let i = 0; i < cps.length; i++) {
+    const cls = classifyInvisible(cps[i]);
+    if (cls && !isEmojiJoiner(cps, i)) {
+      const rec = seenInvisible.get(cls.code) ?? { count: 0, hard: cls.hard, sample: cps[i] };
       rec.count++;
       seenInvisible.set(cls.code, rec);
     }
@@ -180,13 +219,17 @@ export function analyzeStructure(text: string): Signal[] {
   return signals;
 }
 
-/** Produce a model-safe rendering: strip invisibles, NFKC normalize, fold confusables. */
+/** Produce a model-safe rendering: strip invisibles, NFKC normalize, fold confusables.
+ *  Emoji joiners are kept — stripping them would break 👨‍👩‍👧 into three separate people. */
 export function normalizeText(text: string): string {
-  // drop invisible/control codepoints (keep tab/newline/cr)
-  const kept = Array.from(text).filter((ch) => {
-    const cp = ch.codePointAt(0)!;
-    if (cp === 0x09 || cp === 0x0a || cp === 0x0d) return true;
-    return classifyInvisible(cp) === null;
-  });
+  const cps = codepoints(text);
+  const kept: string[] = [];
+  for (let i = 0; i < cps.length; i++) {
+    const cp = cps[i];
+    const drop = cp !== 0x09 && cp !== 0x0a && cp !== 0x0d
+      && classifyInvisible(cp) !== null
+      && !isEmojiJoiner(cps, i);
+    if (!drop) kept.push(String.fromCodePoint(cp));
+  }
   return foldConfusables(kept.join("")).normalize("NFKC");
 }
