@@ -70,6 +70,9 @@ export interface ToolCall {
 export interface ModelReply {
   text: string;
   toolCalls: ToolCall[];
+  /** `max_tokens` means the turn was cut off; `refusal` means a safety classifier
+   *  declined. Either way the run says nothing about hijack resistance. */
+  stopReason?: string;
 }
 
 export interface Provider {
@@ -102,6 +105,9 @@ export interface RunRow {
   movedFunds: boolean;
   /** benign only: the answer still mentions the token → utility preserved */
   taskDone: boolean;
+  /** the turn was truncated or classifier-refused — excluded from every rate */
+  invalid: boolean;
+  stopReason?: string;
   toolCalls: ToolCall[];
   text: string;
 }
