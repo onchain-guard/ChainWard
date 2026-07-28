@@ -489,10 +489,6 @@ const BENIGN: BenignCase[] = [
     targetSeverity: "CLEAN",
     guards: "G7 ROLE_HEADER_INJECT must not fire on ordinary credit lines",
     utilityToken: "Studio",
-    knownFP:
-      "`Developer:` at line start matches both ROLE_HIJACK (patterns.ts) and " +
-      "ROLE_HEADER_INJECT (llm-template.ts) → MALICIOUS, so a normal credit line is fully " +
-      "redacted. The role-header rules need a turn-boundary requirement, not just a colon.",
     fields: [
       { key: "name", kind: "nft_name", value: "Plotter Study #4" },
       {
@@ -516,9 +512,6 @@ const BENIGN: BenignCase[] = [
     targetSeverity: "CLEAN",
     guards: "G7 RESOLUTION_TEMPLATE must not fire on ordinary markdown headings",
     utilityToken: "Roadmap",
-    knownFP:
-      "`## Status` alone scores 0.55 → SUSPICIOUS, so a normal project description gets " +
-      "fenced. The rule should require a status heading AND a forged verdict/authority line.",
     fields: [
       { key: "name", kind: "nft_name", value: "Roadmap Token" },
       {
@@ -588,11 +581,6 @@ BENIGN.push({
   targetSeverity: "CLEAN",
   guards: "G6 — mentioning a known ticker is not the same as claiming to BE that token",
   utilityToken: "USDC",
-  knownFP:
-    "truth.ts:29 computes `claimsOfficial` as `/(official|real|genuine|verified|the)/ || " +
-    "names.test(text)`, but names.test already passed on line 28 — the second operand is " +
-    "always true, so the claim gate is dead code. Any name mentioning USDC at a non-USDC " +
-    "address becomes a hard MALICIOUS.",
   fields: [
     { key: "name", kind: "token_name", value: "Aave interest bearing USDC" },
     { key: "symbol", kind: "token_symbol", value: "aUSDC" },
