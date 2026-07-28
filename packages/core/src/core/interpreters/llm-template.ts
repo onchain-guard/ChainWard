@@ -6,6 +6,7 @@
 // templates it into the prompt. We detect that emergent control construct.
 
 import type { Signal } from "../types.ts";
+import { findForgedRoleHeader } from "../roles.ts";
 
 // Special-token strings across the popular families. A production build narrows to the
 // exact set for the resolved `model`; the union is a safe superset for detection.
@@ -26,7 +27,8 @@ function tokensFor(model?: string): string[] {
   return all; // claude/mistral/unknown → full superset
 }
 
-const ROLE_HEADER = /(^|\n)\s{0,3}(#{1,6}\s*)?(system|assistant|developer|tool)\s*[:：]/i;
+// Role-header shape alone is ambiguous (`Developer: Northwind Studio` is a credit line),
+// so the turn-boundary test lives in roles.ts and is shared with the pattern layer.
 
 export function llmTemplateInterpret(text: string, model?: string): Signal[] {
   const out: Signal[] = [];
@@ -42,14 +44,14 @@ export function llmTemplateInterpret(text: string, model?: string): Signal[] {
       });
     }
   }
-  const m = ROLE_HEADER.exec(text);
-  if (m) {
+  const role = findForgedRoleHeader(text);
+  if (role) {
     out.push({
       layer: "differential",
       code: "ROLE_HEADER_INJECT",
-      detail: `Mimics a role header ("${m[0].trim()}") — reads as a new conversation turn once inside the chat context, not as data.`,
+      detail: `Mimics a "${role.role}" role header followed by turn content — reads as a new conversation turn once inside the chat context, not as data.`,
       weight: 0.8,
-      evidence: m[0].trim(),
+      evidence: role.evidence,
     });
   }
   return out;

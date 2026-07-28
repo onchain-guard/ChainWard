@@ -5,6 +5,7 @@
 // that's what the classifier (Layer 2b) is for. Together they cover the space.
 
 import type { Signal } from "./types.ts";
+import { findForgedRoleHeader } from "./roles.ts";
 
 interface Rule {
   code: string;
@@ -25,8 +26,10 @@ const RULES: Rule[] = [
     detail: "Tells the reader to ignore prior instructions — classic prompt-injection opener.",
   },
   {
+    // The `role:` form is handled separately (see roles.ts) — a bare colon also matches
+    // ordinary metadata credit lines, so it needs turn-shaped content to count.
     code: "ROLE_HIJACK",
-    re: /(^|\s)(system|assistant|developer)\s*:|<\/?(system|assistant)>|\[(system|assistant|instructions?)\b|\byou are (now|a|an)\b/i,
+    re: /<\/?(system|assistant)>|\[(system|assistant|instructions?)\b|\byou are (now|a|an)\b/i,
     weight: 0.8,
     detail: "Impersonates a system/assistant turn or reassigns the model's role.",
   },
@@ -44,10 +47,13 @@ const RULES: Rule[] = [
     needsAddress: false,
   },
   {
+    // A `## Status` heading is ordinary project prose; the template's teeth are the forged
+    // VERDICT under it ("Status: VERIFIED"). Require the resolution framing or the verdict,
+    // never a bare status heading.
     code: "RESOLUTION_TEMPLATE",
-    re: /##?\s*(resolution|transaction resolution|status|security (note|audit))\b/i,
+    re: /(^|\n)\s{0,3}#{1,6}\s*(?:transaction\s+)?resolution\b|\b(?:status|verdict|review|security (?:note|audit))\s*[:：]\s*(?:verified|approved|resolved|cleared|passed|completed?|safe)\b/i,
     weight: 0.55,
-    detail: "Mimics a trusted 'resolution/status' report block (the agentjacking template).",
+    detail: "Mimics a trusted resolution report and asserts a favorable verdict in attacker-written text.",
   },
   {
     code: "SAFETY_CLAIM_IMPERATIVE",
@@ -79,6 +85,17 @@ export function analyzePatterns(normalized: string): Signal[] {
       detail: rule.detail,
       weight,
       evidence: m[0].slice(0, 80),
+    });
+  }
+
+  const role = findForgedRoleHeader(normalized);
+  if (role) {
+    signals.push({
+      layer: "pattern",
+      code: "ROLE_HIJACK",
+      detail: `Opens a forged "${role.role}" turn — a role header followed by a sentence aimed at the model, not a metadata label.`,
+      weight: 0.8,
+      evidence: role.evidence,
     });
   }
 
