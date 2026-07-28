@@ -1,0 +1,16 @@
+{
+  "name": "@onchain-guard/bench",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Attack corpus + canary-scored hijack benchmark harness. Not published.",
+  "scripts": {
+    "test": "npx tsx --test test/*.test.ts",
+    "typecheck": "npx tsc --noEmit -p tsconfig.json",
+    "bench": "npx tsx src/index.ts"
+  },
+  "dependencies": {
+    "@onchain-guard/core": "workspace:*"
+  }
+}
