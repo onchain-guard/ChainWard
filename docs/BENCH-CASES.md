@@ -2,6 +2,7 @@
 
 > 이 문서는 **무엇을 측정하고, 각 정화 규칙이 왜 정당한지**의 정본이다.
 > 케이스 정의의 실행본은 [`packages/bench/src/cases.ts`](../packages/bench/src/cases.ts) — 이 표와 1:1로 대응한다.
+> 페이로드 원문과 케이스별 상세는 [ATTACK-CASES.md](./ATTACK-CASES.md)(카탈로그).
 > 관련: [PROPOSAL.md](../PROPOSAL.md)(문제·근거) · [PRODUCTION-DESIGN.md](./PRODUCTION-DESIGN.md)(엔진 계약)
 
 ---
