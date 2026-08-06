@@ -22,7 +22,7 @@ export const MALICIOUS_TOKEN: TokenSample = {
 // 2) Honeypot token that ADVERTISES safety in text while its contract can't be sold.
 //    address matches MockHoneypotOracle's honeypot fixture -> claim/behavior mismatch.
 export const HONEYPOT_TOKEN: TokenSample = {
-  address: "0xhoneypot000000000000000000000000000000dead",
+  address: "0xdeadbeef0000000000000000000000000000dead",
   name: "SafeMoon Reflect — 100% safe, audited, liquidity locked",
   symbol: "SAFE",
   note: "Safety claims in text; contract is a real honeypot (cannot_sell). Deception mismatch.",
@@ -32,7 +32,7 @@ export const HONEYPOT_TOKEN: TokenSample = {
 //    (U+E0001) + an invisible separator hide a fake [SYSTEM] instruction. Name also uses
 //    a Cyrillic homoglyph ('А') to impersonate a blue-chip collection.
 export const MALICIOUS_NFT: NftSample = {
-  address: "0xnft22222222222222222222222222222222c0de",
+  address: "0xc0de22222222222222222222222222222222c0de",
   tokenId: "1",
   name: "Bored Аpe #1", // Cyrillic А (U+0410) instead of Latin A
   description:

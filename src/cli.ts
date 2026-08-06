@@ -62,9 +62,9 @@ function usage(err?: string) {
       "",
       "demo addresses (mock source):",
       "  token 0xdead1111111111111111111111111111beef0001   (injection in name)",
-      "  token 0xhoneypot000000000000000000000000000000dead (honeypot + safety claim)",
+      "  token 0xdeadbeef0000000000000000000000000000dead (honeypot + safety claim)",
       "  token 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48   (USDC, clean)",
-      "  nft   0xnft22222222222222222222222222222222c0de 1  (metadata injection)",
+      "  nft   0xc0de22222222222222222222222222222222c0de 1  (metadata injection)",
       "  tx    0xabc...0001                                 (memo injection)",
     ].join("\n"),
   );

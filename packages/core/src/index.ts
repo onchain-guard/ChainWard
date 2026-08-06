@@ -12,6 +12,8 @@ import { defaultScanner } from "./core/scanner.ts";
 
 export * from "./core/types.ts";
 export { ChainWardScanner, defaultScanner, fuse, renderSafe } from "./core/scanner.ts";
+// exported so fixtures/benchmarks key off the oracle's own value instead of copying it
+export { MOCK_HONEYPOT_ADDRESS } from "./core/honeypot.ts";
 
 export interface ChatMessage {
   role: string;
