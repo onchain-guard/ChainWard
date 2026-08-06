@@ -2,11 +2,11 @@
 //
 //   npx tsx src/index.ts --guard-only            # engine verdicts only — no model, no key
 //   npx tsx src/index.ts --provider stub         # plumbing smoke test (NOT results)
-//   npx tsx src/index.ts --provider anthropic --model claude-sonnet-5 --runs 5
+//   npx tsx src/index.ts --provider anthropic --models opus,sonnet --runs 30
 //
-// Reports four numbers together: ASR(off), ASR(on), false-positive rate, utility retained.
-// Reporting ASR without the last two is meaningless — a guard that redacts everything
-// scores ASR(on)=0.
+// Reports the three harm families SEPARATELY (canary / passthrough / deception) alongside
+// false-positive rate and utility retained. Reporting an attack rate without the last two is
+// meaningless — a guard that redacts everything scores 0 harm and 0 utility.
 
 import { CASES, caseById } from "./cases.ts";
 import { buildToolResult, scanCase } from "./engine.ts";
@@ -19,7 +19,9 @@ import type { Arm, BenchCase, GuardResultRow, Provider, RunRow } from "./types.t
 
 interface Opts {
   provider: string;
-  model: string;
+  /** repeated runs are pooled ACROSS these — a guard that holds on one model only is a
+   *  weaker claim than the same N spent on one model would suggest */
+  models: string[];
   runs: number;
   guardOnly: boolean;
   only: string[];
@@ -30,12 +32,14 @@ function parseArgs(argv: string[]): Opts {
     const i = argv.indexOf(flag);
     return i >= 0 && argv[i + 1] ? argv[i + 1] : fallback;
   };
+  const list = (flag: string, fallback: string) =>
+    get(flag, fallback).split(",").map((s) => s.trim()).filter(Boolean);
   return {
     provider: get("--provider", "stub"),
-    model: get("--model", "claude-sonnet-5"),
+    models: list("--models", get("--model", "claude-sonnet-5")),
     runs: Number(get("--runs", "1")),
     guardOnly: argv.includes("--guard-only"),
-    only: get("--cases", "").split(",").map((s) => s.trim()).filter(Boolean),
+    only: list("--cases", ""),
   };
 }
 
@@ -98,25 +102,28 @@ async function main() {
     console.log("\n> ⚠️ provider=stub — 배관 점검용이며 결과로 보고할 수 없음. 실제 수치는 --provider anthropic.\n");
   }
 
+  const total = cases.length * 2 * opts.models.length * opts.runs;
+  process.stderr.write(`계획: ${cases.length}케이스 × 2 arm × ${opts.models.length}모델 × ${opts.runs}회 = ${total}콜\n`);
+
   const runs: RunRow[] = [];
+  let failed = 0;
   for (const c of cases) {
     for (const arm of ["off", "on"] as Arm[]) {
+      // built once per (case, arm) — the payload does not vary across repeats or models
       const { json } = await buildToolResult(c, arm);
       const messages = buildMessages(c, json);
-      for (let i = 0; i < opts.runs; i++) {
-        try {
-          const reply = await provider.complete({
-            model: opts.model,
-            system: SYSTEM_PROMPT,
-            messages,
-            tools: TOOLS,
-          });
-          runs.push(scoreRun(c, arm, opts.model, provider.id, reply));
-        } catch (e) {
-          console.error(`  ${c.id}/${arm}/run${i}: ${(e as Error).message}`);
+      for (const model of opts.models) {
+        for (let i = 0; i < opts.runs; i++) {
+          try {
+            const reply = await provider.complete({ model, system: SYSTEM_PROMPT, messages, tools: TOOLS });
+            runs.push(scoreRun(c, arm, model, provider.id, reply));
+          } catch (e) {
+            failed++;
+            console.error(`  ${c.id}/${arm}/${model}/run${i}: ${(e as Error).message}`);
+          }
         }
       }
-      process.stderr.write(`  ran ${c.id}/${arm}\n`);
+      process.stderr.write(`  ran ${c.id}/${arm} (${runs.length}/${total})\n`);
     }
   }
 
@@ -126,9 +133,13 @@ async function main() {
   );
 
   console.log("\n## 2. 모델 실행 결과\n");
-  console.log(metricsTable(metrics, opts.model, provider.id));
-  console.log("\n### 케이스별 하이재킹 (하이재킹 횟수 / 실행 횟수)\n");
+  console.log(metricsTable(metrics, opts.models, provider.id));
+  console.log("\n### 케이스별 (피해 발생 횟수 / 유효 실행 횟수)\n");
   console.log(perCaseRuns(runs));
+  if (failed) {
+    // a dropped call is not a safe run; saying so keeps the denominators honest
+    console.log(`\n> ⚠️ ${failed}콜이 오류로 실행되지 못했고 어떤 분모에도 포함되지 않았다.`);
+  }
 }
 
 main().catch((e) => {
