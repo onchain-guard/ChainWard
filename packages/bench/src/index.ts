@@ -2,7 +2,7 @@
 //
 //   npx tsx src/index.ts --guard-only            # engine verdicts only — no model, no key
 //   npx tsx src/index.ts --provider stub         # plumbing smoke test (NOT results)
-//   npx tsx src/index.ts --provider anthropic --models opus,sonnet --runs 30
+//   npx tsx src/index.ts --provider anthropic --models opus,sonnet --runs 30 --concurrency 6
 //
 // Reports the three harm families SEPARATELY (canary / passthrough / deception) alongside
 // false-positive rate and utility retained. Reporting an attack rate without the last two is
@@ -23,6 +23,8 @@ interface Opts {
    *  weaker claim than the same N spent on one model would suggest */
   models: string[];
   runs: number;
+  /** max API calls in flight; the corpus is embarrassingly parallel */
+  concurrency: number;
   guardOnly: boolean;
   only: string[];
 }
@@ -38,6 +40,7 @@ function parseArgs(argv: string[]): Opts {
     provider: get("--provider", "stub"),
     models: list("--models", get("--model", "claude-sonnet-5")),
     runs: Number(get("--runs", "1")),
+    concurrency: Number(get("--concurrency", "6")),
     guardOnly: argv.includes("--guard-only"),
     only: list("--cases", ""),
   };
@@ -59,6 +62,16 @@ function resolveProvider(id: string): Provider {
   if (id === "stub") return stubProvider();
   console.error(`unknown provider: ${id}`);
   process.exit(1);
+}
+
+/** Run `worker` over `items` with at most `limit` in flight. Results are collected as they
+ *  land, so ordering is not preserved — aggregation groups by case/arm/model anyway. */
+async function pool<T>(items: T[], limit: number, worker: (t: T) => Promise<void>): Promise<void> {
+  let next = 0;
+  const lanes = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    for (let i = next++; i < items.length; i = next++) await worker(items[i]);
+  });
+  await Promise.all(lanes);
 }
 
 async function runGuardOnly(cases: BenchCase[]): Promise<GuardResultRow[]> {
@@ -102,30 +115,45 @@ async function main() {
     console.log("\n> ⚠️ provider=stub — 배관 점검용이며 결과로 보고할 수 없음. 실제 수치는 --provider anthropic.\n");
   }
 
-  const total = cases.length * 2 * opts.models.length * opts.runs;
-  process.stderr.write(`계획: ${cases.length}케이스 × 2 arm × ${opts.models.length}모델 × ${opts.runs}회 = ${total}콜\n`);
-
-  const runs: RunRow[] = [];
-  let failed = 0;
+  // Payloads are deterministic and identical across repeats and models, so build them all
+  // up front — then every remaining unit of work is one independent API call.
+  const tasks: Array<{ c: BenchCase; arm: Arm; model: string; messages: unknown[] }> = [];
   for (const c of cases) {
     for (const arm of ["off", "on"] as Arm[]) {
-      // built once per (case, arm) — the payload does not vary across repeats or models
       const { json } = await buildToolResult(c, arm);
       const messages = buildMessages(c, json);
       for (const model of opts.models) {
-        for (let i = 0; i < opts.runs; i++) {
-          try {
-            const reply = await provider.complete({ model, system: SYSTEM_PROMPT, messages, tools: TOOLS });
-            runs.push(scoreRun(c, arm, model, provider.id, reply));
-          } catch (e) {
-            failed++;
-            console.error(`  ${c.id}/${arm}/${model}/run${i}: ${(e as Error).message}`);
-          }
-        }
+        for (let i = 0; i < opts.runs; i++) tasks.push({ c, arm, model, messages });
       }
-      process.stderr.write(`  ran ${c.id}/${arm} (${runs.length}/${total})\n`);
     }
   }
+
+  process.stderr.write(
+    `계획: ${cases.length}케이스 × 2 arm × ${opts.models.length}모델 × ${opts.runs}회 = ${tasks.length}콜 ` +
+      `(동시 ${opts.concurrency})\n`,
+  );
+
+  const runs: RunRow[] = [];
+  let failed = 0;
+  let done = 0;
+  await pool(tasks, opts.concurrency, async (t) => {
+    try {
+      const reply = await provider.complete({
+        model: t.model,
+        system: SYSTEM_PROMPT,
+        messages: t.messages,
+        tools: TOOLS,
+      });
+      runs.push(scoreRun(t.c, t.arm, t.model, provider.id, reply));
+    } catch (e) {
+      failed++;
+      console.error(`  ${t.c.id}/${t.arm}/${t.model}: ${(e as Error).message}`);
+    }
+    done++;
+    if (done % 25 === 0 || done === tasks.length) {
+      process.stderr.write(`  ${done}/${tasks.length} (실패 ${failed})\n`);
+    }
+  });
 
   const metrics = aggregate(
     runs,
