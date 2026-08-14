@@ -1,6 +1,6 @@
 {
   "name": "chainward",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "license": "MIT",
   "description": "Scan and sanitize attacker-writable on-chain text before it reaches an LLM. Zero-dependency prompt-injection guard for web3 AI agents.",

@@ -106,6 +106,31 @@ The honeypot oracle and the injection classifier are interfaces too, so the buil
 deterministic implementations swap out for live GoPlus / Prompt Guard 2 without touching
 anything downstream.
 
+### Composing a narrower registry
+
+You can also build a registry from scratch, and sometimes you must. Every layer above L1
+and L4 assumes the text it reads is attacker-written in its entirety. That holds for an
+on-chain field. It does **not** hold for an assembled prompt, where the agent's own system
+instructions sit next to the untrusted data — there, `You are a wallet assistant` reads as
+a role hijack and the agent's own transfer policy reads as a crypto action directive.
+
+For text that mixes trusted and untrusted content, take only the layers that key on form
+rather than intent:
+
+```ts
+import { ChainWardScanner, DetectorRegistry, structuralDetector, differentialDetector } from "chainward";
+
+// invisible characters, homoglyphs, encoded blobs, chat-template tokens, active URIs —
+// none of which an author of a system prompt has any reason to emit
+const promptScanner = new ChainWardScanner({
+  registry: new DetectorRegistry().use(structuralDetector).use(differentialDetector),
+});
+```
+
+Note that `renderSafe` is defined over a *field*: for a non-CLEAN verdict it replaces the
+whole input. Applying it to an assembled prompt would delete the agent's instructions along
+with the payload, so at that level use the verdict to warn or reject, not to rewrite.
+
 ## Status
 
 `0.x` — the API may still change. Detection layers and the sanitization contract are
