@@ -11,7 +11,27 @@ import type { Severity, TargetContext } from "./core/types.ts";
 import { defaultScanner } from "./core/scanner.ts";
 
 export * from "./core/types.ts";
-export { ChainWardScanner, defaultScanner, fuse, renderSafe } from "./core/scanner.ts";
+export { ChainWardScanner, defaultRegistry, defaultScanner, fuse, renderSafe } from "./core/scanner.ts";
+export type { FieldContext } from "./core/scanner.ts";
+
+// The registry is the documented extension point, so its pieces have to be reachable —
+// both to add a detector and to *remove* one. A consumer scanning something that is not
+// a single untrusted field (an assembled prompt, say, where the agent's own trusted
+// instructions sit next to the attacker's text) must be able to compose a registry from
+// the layers that stay near-zero-FP on mixed content, instead of taking all five.
+export { DetectorRegistry } from "./core/detector.ts";
+export type { Detector, DetectInput } from "./core/detector.ts";
+export { structuralDetector } from "./core/detectors/structural.ts";
+export { patternDetector } from "./core/detectors/pattern.ts";
+export { classifierDetector } from "./core/detectors/classifier.ts";
+export { differentialDetector } from "./core/detectors/differential.ts";
+export { deceptionDetector } from "./core/detectors/deception.ts";
+
+// Swappable oracles behind L2b and L3.
+export { HeuristicClassifier } from "./core/classifier.ts";
+export type { InjectionClassifier } from "./core/classifier.ts";
+export { MockHoneypotOracle, extractSafetyClaims } from "./core/honeypot.ts";
+export type { HoneypotOracle, HoneypotResult } from "./core/honeypot.ts";
 // exported so fixtures/benchmarks key off the oracle's own value instead of copying it
 export { MOCK_HONEYPOT_ADDRESS } from "./core/honeypot.ts";
 
