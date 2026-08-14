@@ -23,6 +23,13 @@ jobs:
       - name: Install
         run: pnpm install --frozen-lockfile
 
+      # core's package entry points at dist/, so the workspace link bench resolves
+      # through does not exist until core is built. Everything after this step —
+      # typecheck and tests included — therefore runs against the same artifact a
+      # consumer installs from npm, not against src.
+      - name: Build
+        run: pnpm -r build
+
       - name: Typecheck
         run: pnpm -r typecheck
 
