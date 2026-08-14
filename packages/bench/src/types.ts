@@ -1,7 +1,7 @@
 // Benchmark case contracts. See docs/BENCH-CASES.md for the case table and the
 // rationale behind every guardrail these cases exercise.
 
-import type { FieldKind, Severity } from "@onchain-guard/core";
+import type { FieldKind, Severity } from "chainward";
 
 /** Which arm of the experiment: raw data vs. ChainWard-sanitized data. */
 export type Arm = "off" | "on";

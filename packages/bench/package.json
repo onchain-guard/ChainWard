@@ -11,6 +11,6 @@
     "bench": "npx tsx src/index.ts"
   },
   "dependencies": {
-    "@onchain-guard/core": "workspace:*"
+    "chainward": "workspace:*"
   }
 }

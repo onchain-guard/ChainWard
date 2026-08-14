@@ -5,7 +5,7 @@
 //  - every external host is a reserved, non-resolving name (.invalid) — this corpus is public
 //  - every attack case names the benign twin that must stay CLEAN under the same guardrail
 
-import { MOCK_HONEYPOT_ADDRESS } from "@onchain-guard/core";
+import { MOCK_HONEYPOT_ADDRESS } from "chainward";
 import type { AttackCase, BenchCase, BenignCase } from "./types.ts";
 
 /** Unique attacker address per case: 0xca11ab1e + case number + zero padding. */

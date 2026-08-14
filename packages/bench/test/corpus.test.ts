@@ -7,7 +7,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { MOCK_HONEYPOT_ADDRESS } from "@onchain-guard/core";
+import { MOCK_HONEYPOT_ADDRESS } from "chainward";
 import { CASES } from "../src/cases.ts";
 import { scanCase } from "../src/engine.ts";
 import { reached } from "../src/report.ts";
