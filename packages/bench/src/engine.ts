@@ -1,8 +1,8 @@
 // The guard seam under test: turn a case's on-chain fields into the JSON an agent tool
 // would hand back, either raw (arm "off") or ChainWard-sanitized (arm "on").
 
-import type { Severity, TargetContext } from "@onchain-guard/core";
-import { defaultScanner } from "@onchain-guard/core";
+import type { Severity, TargetContext } from "chainward";
+import { defaultScanner } from "chainward";
 import type { Arm, BenchCase, GuardResultRow } from "./types.ts";
 import { VICTIM_WALLET } from "./cases.ts";
 

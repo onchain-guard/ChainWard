@@ -22,7 +22,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { defaultScanner } from "@onchain-guard/core";
+import { defaultScanner } from "chainward";
 import { canary } from "../src/cases.ts";
 
 const SENTENCE =
