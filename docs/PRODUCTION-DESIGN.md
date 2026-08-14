@@ -61,7 +61,7 @@
 ### 3.1 의존성 그래프
 
 ```
-              @onchain-guard/core          ← 엔진 = 개발용 라이브러리 (zero runtime dep)
+              chainward          ← 엔진 = 개발용 라이브러리 (zero runtime dep)
                 ▲        ▲                    L1 normalize · L2a patterns · L2b heuristic
                 │        │                    · L4 interpreters · L5 fuse/render · guard()
                 │        │
@@ -84,7 +84,7 @@
 
 | 패키지 | 배포 | runtime deps | 책임 | 현재 소스 이동원 |
 |---|---|---|---|---|
-| `@onchain-guard/core` | npm | **없음** | 엔진 5계층 + 인터페이스 + heuristic + block-aware `guard()` + `defaultScanner()`(heuristic) | `src/core/*`, `src/index.ts`, `src/render.ts` |
+| `chainward` | npm | **없음** | 엔진 5계층 + 인터페이스 + heuristic + block-aware `guard()` + `defaultScanner()`(heuristic) | `src/core/*`, `src/index.ts`, `src/render.ts` |
 | `@onchain-guard/detectors` | npm | `@huggingface/transformers`, `viem` | PromptGuard 분류기 · GoPlusOracle · RpcOnchainDataSource · truth 레지스트리 · 캐시 · `productionScanner()` | `src/adapters/onchain.ts`(REAL), `core/honeypot.ts`(REAL), `core/classifier.ts`(REAL), `core/truth.ts` |
 | `@onchain-guard/proxy` | npm bin + clone&run | `core`, `detectors` | Claude Code 미들웨어(Anthropic 스트리밍·block-aware) + Inspector 콜(`/events`·`/api/*`) 노출 + 정적 서빙 | `src/proxy/server.ts` |
 | `@onchain-guard/inspector` | 정적 자산(프록시 내장) | (빌드타임) Vite + 경량 프레임워크 | 겸용 웹 UI(Live/History/Stats/Replay). **디자이너 재디자인 대상** | `src/proxy/server.ts`의 INSPECTOR_HTML(1차안) |
@@ -327,7 +327,7 @@ chainward proxy [--port 8787] [--inspect] [--inspect-port 8788]
 - 반환: `{ messages(정화됨), findings[] }`. `onFinding` 콜백 유지.
 
 ```ts
-import { guard } from "@onchain-guard/core";
+import { guard } from "chainward";
 const { messages, findings } = await guard(rawMessages, { model, targetContext:["llm-chat"] });
 const res = await llm.messages.create({ ...req, messages });  // 정화본으로 호출
 ```
