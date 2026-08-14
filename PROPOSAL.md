@@ -122,7 +122,7 @@
 ## 8. 산출물 & 배포
 
 단일 GitHub repo(pnpm workspaces) — 공유 엔진 위에 여러 소비 진입점:
-`@onchain-guard/core`(엔진=라이브러리) · `detectors`(실 어댑터) · `proxy`(미들웨어+Inspector) · `mcp` · `eliza` · `cli`.
+`chainward`(엔진=라이브러리) · `detectors`(실 어댑터) · `proxy`(미들웨어+Inspector) · `mcp` · `eliza` · `cli`.
 npm 배포 + `git clone && build`(프록시). 라이선스 **MIT**, 의존성 MIT/Apache-2.0(viem, MCP SDK, transformers).
 
 ---
