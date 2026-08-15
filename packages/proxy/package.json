@@ -1,0 +1,63 @@
+{
+  "name": "@chainward/proxy",
+  "version": "0.1.0",
+  "type": "module",
+  "license": "MIT",
+  "description": "Drop-in LLM proxy that sanitizes attacker-writable on-chain text before it reaches the model. No code changes — just point your agent at it.",
+  "keywords": [
+    "prompt-injection",
+    "llm-security",
+    "llm-proxy",
+    "agent-security",
+    "web3",
+    "guardrail",
+    "onchain",
+    "anthropic",
+    "openai"
+  ],
+  "homepage": "https://github.com/onchain-guard/ChainWard#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/onchain-guard/ChainWard.git",
+    "directory": "packages/proxy"
+  },
+  "bugs": {
+    "url": "https://github.com/onchain-guard/ChainWard/issues"
+  },
+  "bin": {
+    "chainward-proxy": "./dist/cli.js"
+  },
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
+      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+    },
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsup",
+    "test": "npx tsx --test test/*.test.ts",
+    "typecheck": "npx tsc --noEmit -p tsconfig.json",
+    "prepublishOnly": "npm run build && npm test"
+  },
+  "dependencies": {
+    "chainward": "workspace:*"
+  },
+  "devDependencies": {
+    "tsup": "^8.5.1"
+  }
+}
