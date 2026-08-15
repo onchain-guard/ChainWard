@@ -98,17 +98,27 @@ async function forward(
   res: ServerResponse,
   upstream: string,
   body: unknown,
+  rawBody?: string,
 ): Promise<void> {
   const url = upstream.replace(/\/$/, "") + (req.url ?? "");
-  const headers: Record<string, string> = { "content-type": "application/json" };
+  const headers: Record<string, string> = {};
+  if (body !== undefined || rawBody) headers["content-type"] = "application/json";
   for (const h of FORWARD_HEADERS) {
     const v = req.headers[h];
     if (typeof v === "string") headers[h] = v;
   }
 
+  const method = req.method ?? "GET";
+  const payload =
+    method === "GET" || method === "HEAD"
+      ? undefined
+      : body !== undefined
+        ? JSON.stringify(body)
+        : rawBody;
+
   let up: Response;
   try {
-    up = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
+    up = await fetch(url, { method, headers, body: payload });
   } catch (e) {
     res.writeHead(502, { "content-type": "application/json" });
     res.end(JSON.stringify({ error: "chainward: upstream request failed", detail: String(e) }));
@@ -180,9 +190,27 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
   };
 
   const llm = createServer(async (req, res) => {
-    if (req.method !== "POST" || !LLM_PATHS.some((p) => req.url?.includes(p))) {
-      res.writeHead(404, { "content-type": "application/json" });
-      res.end(JSON.stringify({ error: "chainward: not an LLM endpoint", path: req.url }));
+    const isLLMCall = req.method === "POST" && LLM_PATHS.some((p) => req.url?.includes(p));
+
+    if (!isLLMCall) {
+      // A client pointed at this proxy sends it EVERYTHING, not just completions — token
+      // counts, model lists, org lookups. Refusing those would break the very setup this
+      // is for (`ANTHROPIC_BASE_URL=…` in front of an agent you don't control), so relay
+      // them untouched. There is nothing to guard in them: the payload rides in messages.
+      if (opts.upstream) {
+        await forward(req, res, opts.upstream, undefined, await readBody(req));
+      } else {
+        res.writeHead(404, {
+          "content-type": "application/json",
+        });
+        res.end(
+          JSON.stringify({
+            error: "chainward: no upstream configured, so only LLM endpoints are handled",
+            path: req.url,
+            hint: "pass --upstream to relay everything else through to the real API",
+          }),
+        );
+      }
       return;
     }
 

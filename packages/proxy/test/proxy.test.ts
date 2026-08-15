@@ -20,7 +20,8 @@ function fakeUpstream(opts: { stream?: boolean } = {}) {
   const server = createServer(async (req, res) => {
     let raw = "";
     for await (const c of req) raw += c;
-    received.push(JSON.parse(raw));
+    // GETs and relayed non-LLM calls may carry no body at all.
+    received.push(raw ? JSON.parse(raw) : {});
 
     if (!opts.stream) {
       res.writeHead(200, { "content-type": "application/json" });
@@ -181,10 +182,37 @@ test("dry-run guards and reports without an upstream", async () => {
   await proxy.close();
 });
 
-test("non-LLM paths are refused instead of silently proxied", async () => {
+test("non-LLM paths are relayed untouched when an upstream exists", async () => {
+  // A client configured with ANTHROPIC_BASE_URL sends this proxy every request it makes,
+  // not only completions. Refusing the rest would break the setup this form exists for.
+  const up = fakeUpstream();
+  const proxy = createProxy({ port: 0, upstream: up.url() });
+
+  const res = await fetch(`http://127.0.0.1:${portOf(proxy.llm)}/v1/models`, {
+    headers: { "x-api-key": "sk-test" },
+  });
+
+  assert.equal(res.status, 200);
+  await proxy.close();
+  up.close();
+});
+
+test("a non-LLM POST body is relayed verbatim, not parsed or rewritten", async () => {
+  const up = fakeUpstream();
+  const proxy = createProxy({ port: 0, upstream: up.url() });
+
+  await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/organizations/usage`, { window: "7d" });
+
+  assert.deepEqual(up.received[0], { window: "7d" });
+  await proxy.close();
+  up.close();
+});
+
+test("without an upstream, a non-LLM path explains itself instead of 200-ing", async () => {
   const proxy = createProxy({ port: 0 });
   const res = await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/models`, {});
   assert.equal(res.status, 404);
+  assert.match((await res.json()).hint, /--upstream/);
   await proxy.close();
 });
 

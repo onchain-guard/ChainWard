@@ -122,8 +122,10 @@ await proxy.close();  // stops both listeners and drops live SSE connections
   `GUARD_FAILED` finding. A guard that takes the caller's agent offline is a worse failure
   than one that misses, but the miss is never silent.
 - **Upstream unreachable** → `502` with a JSON body, rather than hanging.
-- **Non-LLM path** → `404`. This is a guard, not a general-purpose proxy; silently relaying
-  unknown routes would suggest coverage it does not have.
+- **Non-LLM path** → relayed to the upstream untouched. A client configured with
+  `ANTHROPIC_BASE_URL` sends this proxy *every* request it makes, not only completions, so
+  refusing the rest would break the setup this form exists for. In dry-run (no upstream)
+  those paths answer `404` with a hint, since there is nowhere to relay them to.
 
 ## What it cannot do
 
