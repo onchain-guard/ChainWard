@@ -329,6 +329,13 @@ export function createChainwardPlugin(opts: ChainwardOptions = {}): Plugin {
 /** Ready-made plugin with default options. */
 export const chainwardPlugin: Plugin = createChainwardPlugin();
 
+// A character file lists plugins as strings, and ElizaOS resolves one by importing the
+// package and testing, in order: an export named after the package, `default`, then every
+// other export. The first form only works for `@elizaos/plugin-*` names, so without a
+// default export `"@chainward/eliza"` would load only by falling through to the scan of
+// all exports — which happens to work today and is not a contract. Make it explicit.
+export default chainwardPlugin;
+
 function worse(a: Severity, b: Severity): Severity {
   const order: Record<Severity, number> = { CLEAN: 0, SUSPICIOUS: 1, MALICIOUS: 2 };
   return order[a] >= order[b] ? a : b;

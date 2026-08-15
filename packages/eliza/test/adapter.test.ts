@@ -278,3 +278,14 @@ test("the status provider stays silent on clean input", async () => {
 
   assert.equal(out.text, "");
 });
+
+test("the package exposes the shape ElizaOS's string-name loader looks for", async () => {
+  // `loadAndPreparePlugin` imports the package and checks an export named after the
+  // package, then `default`, then every other export. Only the first two are a contract.
+  const mod: Record<string, unknown> = await import("../src/index.ts");
+  const candidate = mod.default as { name?: string; description?: string };
+
+  assert.equal(typeof candidate, "object");
+  assert.equal(candidate.name, "chainward");
+  assert.equal(typeof candidate.description, "string", "isValidPluginShape requires it");
+});
