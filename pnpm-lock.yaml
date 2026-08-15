@@ -43,6 +43,16 @@ importers:
         specifier: ^8.5.1
         version: 8.5.1(tsx@4.23.1)(typescript@5.9.3)
 
+  packages/proxy:
+    dependencies:
+      chainward:
+        specifier: workspace:*
+        version: link:../core
+    devDependencies:
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(tsx@4.23.1)(typescript@5.9.3)
+
 packages:
 
   '@cfworker/json-schema@4.1.1':
