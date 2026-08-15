@@ -1,20 +1,22 @@
 {
   "name": "chainward",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "license": "MIT",
-  "description": "Scan and sanitize attacker-writable on-chain text before it reaches an LLM. Zero-dependency prompt-injection guard for web3 AI agents.",
+  "description": "Scan and sanitize attacker-writable on-chain text before it reaches an LLM. Zero-dependency prompt-injection guard for web3 AI agents — library, and a drop-in proxy.",
   "keywords": [
-    "prompt-injection",
-    "llm-security",
-    "ai-agent",
     "agent-security",
-    "web3",
+    "ai-agent",
     "blockchain",
+    "cli",
     "guardrail",
-    "sanitization",
+    "llm-proxy",
+    "llm-security",
     "onchain",
-    "wallet-agent"
+    "prompt-injection",
+    "sanitization",
+    "wallet-agent",
+    "web3"
   ],
   "homepage": "https://github.com/onchain-guard/ChainWard#readme",
   "repository": {
@@ -30,14 +32,31 @@
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": { "types": "./dist/index.d.ts", "default": "./dist/index.js" },
-      "require": { "types": "./dist/index.d.cts", "default": "./dist/index.cjs" }
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./proxy": {
+      "import": {
+        "types": "./dist/proxy.d.ts",
+        "default": "./dist/proxy.js"
+      },
+      "require": {
+        "types": "./dist/proxy.d.cts",
+        "default": "./dist/proxy.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
     "README.md",
+    "PROXY.md",
     "LICENSE"
   ],
   "sideEffects": false,
@@ -55,5 +74,8 @@
   },
   "devDependencies": {
     "tsup": "^8.5.1"
+  },
+  "bin": {
+    "chainward": "./dist/cli.js"
   }
 }

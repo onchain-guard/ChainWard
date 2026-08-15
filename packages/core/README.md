@@ -36,6 +36,25 @@ const res = await llm.messages.create({ ...req, messages }); // sanitized
 shapes. It guards `text` and `tool_result` blocks — the actual injection vector — and
 passes `tool_use`, `image` and unknown blocks through untouched.
 
+## The proxy — when you don't own the calling code
+
+`guard()` needs you to hold the code that calls the model. When you don't — Claude Code, a
+vendor agent, a binary — the one thing you can still change is where requests go:
+
+```bash
+npx chainward proxy --upstream https://api.anthropic.com
+```
+
+```bash
+export ANTHROPIC_BASE_URL=http://localhost:8787
+```
+
+That is the whole integration. Requests are guarded in flight, streamed responses are piped
+through, and everything else is relayed untouched. See [PROXY.md](./PROXY.md).
+
+Importing `chainward` does not pull the server in — the proxy lives behind its own subpath
+(`chainward/proxy`) and only loads if you ask for it.
+
 ## Scanning individual on-chain fields
 
 If you are the one reading the chain, scan each field directly. The field kind carries a
