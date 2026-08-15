@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createServer, type Server } from "node:http";
-import { createProxy, preview, type GuardEvent } from "../src/index.ts";
+import { createProxy, preview, type GuardEvent } from "../src/proxy/index.ts";
 
 /** An invisible tag block carrying an instruction — no visible trace in the raw string. */
 const SMUGGLED =

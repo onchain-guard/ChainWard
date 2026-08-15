@@ -1,18 +1,21 @@
 import { defineConfig } from "tsup";
 
-// The published artifact. `src/` ships TypeScript with explicit `.ts` import specifiers
-// (allowImportingTsExtensions), which no consumer runtime can resolve — so the package
-// entry MUST point at this build output, never at src.
+// Three entries, one package. The subpath split is what keeps `import { guard } from
+// "chainward"` from dragging node:http and a server into a consumer's bundle — the proxy
+// only loads for someone who asks for it by path or runs the bin.
 export default defineConfig({
-  entry: ["src/index.ts"],
-  // dual-format: `import` resolves esm, `require` resolves cjs. Dropping cjs would
-  // silently exclude every consumer still on require().
+  entry: {
+    index: "src/index.ts",
+    proxy: "src/proxy/index.ts",
+    cli: "src/proxy/cli.ts",
+  },
   format: ["esm", "cjs"],
-  dts: true,
+  dts: { entry: { index: "src/index.ts", proxy: "src/proxy/index.ts" } },
   clean: true,
   sourcemap: true,
   target: "node20",
-  // zero runtime dependencies — nothing to externalise, and bundling keeps the
-  // published tree a single file per format.
+  // keeps the `node:` prefix on builtins; without it esbuild emits bare "http", which a
+  // package of that name in node_modules could shadow.
+  platform: "node",
   treeshake: true,
 });

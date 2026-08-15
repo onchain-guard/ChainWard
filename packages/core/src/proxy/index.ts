@@ -12,7 +12,7 @@
 
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { Readable } from "node:stream";
-import { guard, type ChatMessage } from "chainward";
+import { guard, type ChatMessage } from "../index.ts";
 
 export interface GuardEvent {
   /** epoch ms */

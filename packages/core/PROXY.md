@@ -1,4 +1,4 @@
-# @chainward/proxy
+# chainward proxy
 
 **Guard the on-chain text an LLM reads — without touching the agent's code.**
 
@@ -7,7 +7,7 @@ don't: Claude Code, a vendor agent, a binary, someone else's bot. But there is s
 thing you can change — **where the requests go**. This process sits at that address.
 
 ```bash
-npx @chainward/proxy --upstream https://api.anthropic.com
+npx chainward proxy --upstream https://api.anthropic.com
 ```
 
 ```bash
@@ -36,7 +36,7 @@ Leave `--upstream` off and the proxy guards, reports, and answers with a summary
 calling a model:
 
 ```bash
-npx @chainward/proxy
+npx chainward proxy
 ```
 
 ```
@@ -53,6 +53,8 @@ Useful for seeing what a given agent actually sends before you put a key behind 
 --upstream <url>   forward here; omit for dry-run
 --port <n>         guarded endpoint       (default 8787)
 --events <n>       event API              (default 8788, "off" to disable)
+
+Ports also read `CHAINWARD_PORT` and `CHAINWARD_EVENTS_PORT`.
 --quiet            no stderr findings
 ```
 
@@ -104,7 +106,7 @@ es.onmessage = (e) => render(JSON.parse(e.data));
 ## Programmatic use
 
 ```ts
-import { createProxy } from "@chainward/proxy";
+import { createProxy } from "chainward/proxy";
 
 const proxy = createProxy({
   port: 8787,
