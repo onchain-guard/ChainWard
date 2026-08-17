@@ -1,0 +1,17 @@
+{
+  "name": "chainward-example-elizaos",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "description": "Runnable ElizaOS agent with ChainWard wired in. Not published.",
+  "scripts": {
+    "start": "npx tsx agent.ts",
+    "typecheck": "npx tsc --noEmit -p tsconfig.typecheck.json"
+  },
+  "dependencies": {
+    "@chainwards/eliza": "workspace:*",
+    "@elizaos/core": "^1.7.2",
+    "@elizaos/plugin-sql": "^1.7.2"
+  }
+}
