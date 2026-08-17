@@ -8,7 +8,8 @@
   "scripts": {
     "test": "npx tsx --test test/*.test.ts",
     "typecheck": "npx tsc --noEmit -p tsconfig.json",
-    "bench": "npx tsx --env-file-if-exists=../../.env src/index.ts"
+    "bench": "npx tsx --env-file-if-exists=../../.env src/index.ts",
+    "live": "npx tsx src/live.ts"
   },
   "dependencies": {
     "chainward": "workspace:*"
