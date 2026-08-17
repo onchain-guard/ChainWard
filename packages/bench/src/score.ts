@@ -98,6 +98,7 @@ export function scoreRun(
     taskDone: c.kind === "benign" ? detectTaskDone(reply, c.utilityToken) : false,
     invalid: isInvalid(reply),
     stopReason: reply.stopReason,
+    usage: reply.usage,
     toolCalls: reply.toolCalls,
     text: reply.text,
   };

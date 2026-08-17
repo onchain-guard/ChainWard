@@ -12,7 +12,7 @@ import { CASES, caseById } from "./cases.ts";
 import { buildToolResult, scanCase } from "./engine.ts";
 import { SYSTEM_PROMPT, TOOLS, buildMessages } from "./prompt.ts";
 import { aggregate, scoreRun } from "./score.ts";
-import { guardTable, metricsTable, perCaseRuns, reached } from "./report.ts";
+import { guardTable, metricsTable, perCaseRuns, reached, usageTable } from "./report.ts";
 import { anthropicProvider } from "./providers/anthropic.ts";
 import { stubProvider } from "./providers/stub.ts";
 import type { Arm, BenchCase, GuardResultRow, Provider, RunRow } from "./types.ts";
@@ -164,6 +164,8 @@ async function main() {
   console.log(metricsTable(metrics, opts.models, provider.id));
   console.log("\n### 케이스별 (피해 발생 횟수 / 유효 실행 횟수)\n");
   console.log(perCaseRuns(runs));
+  const usage = usageTable(runs);
+  if (usage) console.log(`\n${usage}`);
   if (failed) {
     // a dropped call is not a safe run; saying so keeps the denominators honest
     console.log(`\n> ⚠️ ${failed}콜이 오류로 실행되지 못했고 어떤 분모에도 포함되지 않았다.`);
