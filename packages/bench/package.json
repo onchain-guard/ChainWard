@@ -10,7 +10,8 @@
     "typecheck": "npx tsc --noEmit -p tsconfig.json",
     "bench": "npx tsx --env-file-if-exists=../../.env src/index.ts",
     "live": "npx tsx src/live.ts",
-    "e2e": "npx tsx --env-file-if-exists=../../.env src/e2e.ts"
+    "e2e": "npx tsx --env-file-if-exists=../../.env src/e2e.ts",
+    "pipeline": "npx tsx --env-file-if-exists=../../.env src/pipeline.ts"
   },
   "dependencies": {
     "chainward": "workspace:*"
