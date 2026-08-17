@@ -30,8 +30,12 @@ jobs:
       - name: Build
         run: pnpm -r build
 
+      # `pnpm run` rather than `pnpm -r`. The root is not a workspace member, so `-r` skips
+      # it — which is why src/ and test/ went unchecked long enough for a subcommand to keep
+      # importing a file that had moved packages. These scripts fan out to the packages AND
+      # the root.
       - name: Typecheck
-        run: pnpm -r typecheck
+        run: pnpm run typecheck
 
       - name: Test
-        run: pnpm -r test
+        run: pnpm run test
