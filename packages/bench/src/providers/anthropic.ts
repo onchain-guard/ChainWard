@@ -59,14 +59,26 @@ export function anthropicProvider(apiKey: string): Provider {
         await sleep(wait);
       }
 
-      const body = (await res.json()) as { content?: AnthropicBlock[]; stop_reason?: string };
+      const body = (await res.json()) as {
+        content?: AnthropicBlock[];
+        stop_reason?: string;
+        usage?: { input_tokens?: number; output_tokens?: number };
+      };
       const blocks = body.content ?? [];
       const text = blocks.filter((b) => b.type === "text").map((b) => b.text ?? "").join("\n");
       const toolCalls: ToolCall[] = blocks
         .filter((b) => b.type === "tool_use")
         .map((b) => ({ name: b.name ?? "", input: b.input }));
 
-      return { text, toolCalls, stopReason: body.stop_reason };
+      return {
+        text,
+        toolCalls,
+        stopReason: body.stop_reason,
+        usage: {
+          inputTokens: body.usage?.input_tokens ?? 0,
+          outputTokens: body.usage?.output_tokens ?? 0,
+        },
+      };
     },
   };
 }

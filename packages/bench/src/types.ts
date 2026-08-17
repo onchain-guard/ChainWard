@@ -86,12 +86,22 @@ export interface ToolCall {
   input: unknown;
 }
 
+/** Token counts as the API reported them. Recorded rather than estimated, because a run
+ *  that costs money should be able to say what it cost — and because the output count is
+ *  the only way to tell "the model answered briefly" from "adaptive thinking ate the
+ *  budget", which is the difference between a cheap corpus and a truncated one. */
+export interface Usage {
+  inputTokens: number;
+  outputTokens: number;
+}
+
 export interface ModelReply {
   text: string;
   toolCalls: ToolCall[];
   /** `max_tokens` means the turn was cut off; `refusal` means a safety classifier
    *  declined. Either way the run says nothing about hijack resistance. */
   stopReason?: string;
+  usage?: Usage;
 }
 
 export interface Provider {
@@ -127,6 +137,7 @@ export interface RunRow {
   /** the turn was truncated or classifier-refused — excluded from every rate */
   invalid: boolean;
   stopReason?: string;
+  usage?: Usage;
   toolCalls: ToolCall[];
   text: string;
 }
