@@ -1,4 +1,4 @@
-# @chainward/eliza
+# @chainwards/eliza
 
 **ChainWard for ElizaOS** — guards the attacker-writable on-chain text an agent reads
 before it reaches the model.
@@ -8,7 +8,7 @@ write those fields, and blockchain data is immutable, so a payload planted once 
 readable forever. This plugin puts ChainWard on the path.
 
 ```bash
-npm install @chainward/eliza
+npm install @chainwards/eliza
 ```
 
 ## Two seams, and why you want both
@@ -32,7 +32,7 @@ They are complements: the provider seam is precision, the model seam is coverage
 ## Model seam — one line
 
 ```ts
-import { createChainwardPlugin } from "@chainward/eliza";
+import { createChainwardPlugin } from "@chainwards/eliza";
 
 export const character = {
   name: "wallet-agent",
@@ -62,7 +62,7 @@ instructions along with the payload. So this seam annotates and reports; it does
 Wrap whatever provider surfaces on-chain text:
 
 ```ts
-import { guardProvider } from "@chainward/eliza";
+import { guardProvider } from "@chainwards/eliza";
 
 plugins: [
   {

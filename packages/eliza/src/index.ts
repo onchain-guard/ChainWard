@@ -302,7 +302,7 @@ function registerModelGuard(runtime: IAgentRuntime, opts: ChainwardOptions): voi
  * ChainWard plugin for ElizaOS.
  *
  * ```ts
- * import { createChainwardPlugin } from "@chainward/eliza";
+ * import { createChainwardPlugin } from "@chainwards/eliza";
  *
  * const character = {
  *   plugins: ["@elizaos/plugin-openai", createChainwardPlugin()],
@@ -332,7 +332,7 @@ export const chainwardPlugin: Plugin = createChainwardPlugin();
 // A character file lists plugins as strings, and ElizaOS resolves one by importing the
 // package and testing, in order: an export named after the package, `default`, then every
 // other export. The first form only works for `@elizaos/plugin-*` names, so without a
-// default export `"@chainward/eliza"` would load only by falling through to the scan of
+// default export `"@chainwards/eliza"` would load only by falling through to the scan of
 // all exports — which happens to work today and is not a contract. Make it explicit.
 export default chainwardPlugin;
 
