@@ -1,13 +1,12 @@
 {
-  "compilerOptions": {
-    "target": "ES2022",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "noEmit": true,
-    "verbatimModuleSyntax": true
-  },
+  // Extends the shared config like every package does. It did not, so the root's own
+  // `allowImportingTsExtensions` was missing and `npx tsc -p tsconfig.json` reported 33
+  // TS5097 errors on files that compile fine inside the packages.
+  //
+  // That mattered more than it looks: the root is not a workspace member, so `pnpm -r
+  // typecheck` and `pnpm -r test` both skip it, and CI ran only those two. Everything under
+  // src/ and test/ was therefore unchecked and untested — which is how a `proxy` subcommand
+  // kept importing a file that had been moved into packages/core months earlier.
+  "extends": "./tsconfig.base.json",
   "include": ["src", "test"]
 }
