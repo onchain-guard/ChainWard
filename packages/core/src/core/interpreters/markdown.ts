@@ -26,9 +26,24 @@ export function markdownInterpret(text: string): Signal[] {
         detail: "Markdown image auto-fetches an external URL carrying query params on render — a data-exfiltration channel.",
         weight: 0.9, evidence: url.slice(0, 60), hard: true });
     } else if (isImg && /^https?:\/\//i.test(url)) {
+      // A parameterless image URL carries nothing about the viewer — the host learns only
+      // that someone rendered it, which is true of every image on the web. The exfiltration
+      // case is the branch above, where query params carry the payload.
+      //
+      // Weight kept BELOW the SUSPICIOUS threshold (0.4) on purpose. At 0.5 this fired alone
+      // and fenced the whole field, which over-triggers on the single most common thing in
+      // real NFT metadata: an IPFS or Arweave thumbnail. A rule that flags the overwhelmingly
+      // legitimate case is over-broad by this project's own standard, and the harm
+      // passthrough measures is an ACTIVE construct surviving — a working thumbnail is the
+      // NFT behaving correctly, not harm.
+      //
+      // It still contributes through the noisy-OR, so an auto-fetch image alongside anything
+      // else (injection intent, an address, a role header) still reaches a verdict. The
+      // signal is reported either way; what changed is that it no longer convicts on its own.
       out.push({ layer: "differential", code: "AUTO_FETCH_IMAGE",
-        detail: "Markdown image auto-fetches an external URL on render (SSRF/tracking surface).",
-        weight: 0.5, evidence: url.slice(0, 60) });
+        detail: "Markdown image auto-fetches an external URL on render (SSRF/tracking surface). " +
+          "No query params, so nothing about the viewer is carried — reported, not convicting on its own.",
+        weight: 0.3, evidence: url.slice(0, 60) });
     }
   }
 
