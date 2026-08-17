@@ -46,6 +46,7 @@
   },
   "scripts": {
     "build": "tsup",
+    "demo:ab": "npx tsx --env-file-if-exists=../../.env demo/ab.ts",
     "test": "npx tsx --test test/*.test.ts",
     "typecheck": "npx tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build && npm test"
