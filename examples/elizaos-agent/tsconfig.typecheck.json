@@ -1,0 +1,16 @@
+{
+  // Typecheck only. Kept separate from tsconfig.json because tsx honours `paths` at runtime
+  // and would try to import a .d.ts.
+  //
+  // @elizaos/core puts a top-level `"types"` FIRST inside `exports["."]`, and TypeScript
+  // matches conditions in order — so that entry always wins and the per-condition `node.types`
+  // never gets a look in. The winning file is a 1.2k subset with no AgentRuntime and no
+  // resolvePlugins; the full surface is dist/index.node.d.ts. Node resolves the runtime
+  // correctly, which is why the example runs while failing to typecheck without this.
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "paths": {
+      "@elizaos/core": ["./node_modules/@elizaos/core/dist/index.node.d.ts"]
+    }
+  }
+}
