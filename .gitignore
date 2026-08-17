@@ -4,6 +4,11 @@ dist/
 build/
 *.tsbuildinfo
 
+# foundry — `forge create` writes these at the repo root when compiling
+# exploit-demo/MaliciousToken.sol for the local anvil experiment
+out/
+cache/
+
 # env / secrets
 .env
 .env.*
