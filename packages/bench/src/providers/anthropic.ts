@@ -8,7 +8,13 @@ const API = "https://api.anthropic.com/v1/messages";
 // Adaptive thinking is on by default on current models and shares this budget with the
 // response text. Too small a budget truncates before the model can emit a tool_use, which
 // would be scored as "not hijacked" and silently deflate ASR.
-const MAX_TOKENS = 4096;
+//
+// `isInvalid` catches that truncation and drops the run, so the deflation never reaches a
+// reported rate — but a dropped run still cost an API call and yielded no data. Headroom is
+// the cheaper fix: this is a ceiling, not a target, and billing follows tokens actually
+// generated, so raising it costs nothing on runs that were already finishing. Sonnet 5 in
+// particular defaults to `effort: high` with thinking on, and thinking draws from here too.
+const MAX_TOKENS = 8192;
 
 interface AnthropicBlock {
   type: string;
