@@ -1,7 +1,8 @@
 # 측정 결과 — 가드 on/off 비교
 
 전체 코퍼스를 실제 모델에 태워 **가드를 켠 팔과 끈 팔을 같은 조건으로** 비교한 결과다.
-케이스 정의는 [BENCH-CASES.md](BENCH-CASES.md), 공격 원리는 [ATTACK-CASES.md](ATTACK-CASES.md).
+케이스 정의는 [BENCH-CASES.md](BENCH-CASES.md), 공격 원리는 [ATTACK-CASES.md](ATTACK-CASES.md),
+**하네스가 데이터를 어떻게 흘리고 정화가 어디서 끼어드는지는 [HOW-THE-HARNESSES-WORK.md](HOW-THE-HARNESSES-WORK.md)**.
 
 ## 한 줄 결론
 
