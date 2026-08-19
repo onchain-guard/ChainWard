@@ -119,30 +119,59 @@
     .rule-dot.yellow { background: var(--color-suspicious); box-shadow: 0 0 6px var(--color-suspicious); }
     .rule-hits { color: var(--text-secondary); }
 
-    /* === 2. LIVE PROXY VIEW === */
+    /* === 2. LIVE PROXY VIEW (DATA FLOW) === */
     .chat-view { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-chat); position: relative; }
     .chat-header { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 24px; font-weight: 600; color: var(--text-secondary); }
-    .chat-history { flex: 1; overflow-y: auto; padding: 32px 0; display: flex; flex-direction: column; gap: 24px; }
-    .chat-bubble-container { max-width: 800px; margin: 0 auto; width: 100%; padding: 0 24px; display: flex; gap: 16px; }
-    .chat-avatar { width: 32px; height: 32px; border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: bold; }
-    .avatar-user { background: #333; color: #fff; }
-    .avatar-ai { background: var(--accent-brand-bg); color: var(--accent-brand); border: 1px solid rgba(255, 179, 173, 0.4); }
-    .chat-message { flex: 1; font-size: 0.95rem; line-height: 1.6; color: var(--text-primary); padding-top: 4px; }
+    .chat-history { flex: 1; overflow-y: auto; padding: 32px 24px; display: flex; flex-direction: column; gap: 16px; }
     
-    .status-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; margin-top: 8px; border: 1px solid; }
-    .status-badge.clean { background: var(--color-clean-bg); color: var(--color-clean); border-color: rgba(46, 204, 113, 0.3); }
-    .status-badge.suspicious { background: var(--color-suspicious-bg); color: var(--color-suspicious); border-color: rgba(241, 196, 15, 0.3); }
-    .status-badge.blocked { background: var(--color-malicious-bg); color: var(--color-malicious); border-color: rgba(255, 75, 75, 0.3); }
+    /* Flow Message Blocks */
+    .flow-message {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 16px;
+      width: 100%;
+      max-width: 800px;
+      margin: 0 auto;
+      animation: fadeIn 0.3s ease-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .flow-header {
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .flow-source, .flow-dest {
+      background: rgba(255,255,255,0.05);
+      padding: 4px 8px;
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+    .flow-arrow { color: var(--accent-brand); font-weight: bold; }
+    .flow-body { font-size: 0.9rem; color: var(--text-primary); line-height: 1.6; }
+    
+    /* Proxy Action Blocks */
+    .flow-proxy-action.malicious { border-left: 3px solid var(--color-malicious); background: var(--color-malicious-bg); }
+    .flow-proxy-action.suspicious { border-left: 3px solid var(--color-suspicious); background: var(--color-suspicious-bg); }
+    .flow-proxy-action.clean { border-left: 3px solid var(--color-clean); background: var(--color-clean-bg); }
+    
+    .inline-diff { display: flex; gap: 16px; margin-top: 12px; }
+    .inline-diff > div { flex: 1; background: #111; padding: 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.8rem; word-break: break-all; }
+    .diff-title { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
 
-    .chat-input-area { padding: 24px; max-width: 800px; margin: 0 auto; width: 100%; }
-    .input-box { background: #1a1a1e; border: 1px solid #333; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-    .input-box:focus-within { border-color: #555; }
-    .input-box textarea { background: transparent; border: none; color: var(--text-primary); font-family: var(--font-ui); font-size: 0.95rem; resize: none; outline: none; height: 48px; }
-    .input-actions { display: flex; justify-content: space-between; align-items: center; }
-    .demo-buttons { display: flex; gap: 8px; }
-    .demo-btn { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); padding: 6px 12px; border-radius: 4px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; }
+    /* Controls Area */
+    .chat-input-area { padding: 24px; max-width: 800px; margin: 0 auto; width: 100%; border-top: 1px solid var(--border-color); }
+    .demo-buttons { display: flex; gap: 12px; justify-content: center; }
+    .demo-btn { background: #1a1a1e; border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); padding: 10px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;}
     .demo-btn:hover { background: rgba(255,255,255,0.1); color: #fff;}
-    .send-btn { background: #fff; color: #000; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; }
 
     .inspector-view { width: 520px; background-color: var(--bg-inspector); border-left: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0,0,0,0.4); z-index: 10; }
     .inspector-header { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
@@ -173,6 +202,10 @@
     .highlight-removed { background-color: var(--color-malicious-bg-hover); color: #ff8f8f; padding: 0 2px; border-radius: 2px; }
     .highlight-suspicious { background-color: rgba(241, 196, 15, 0.15); color: #fceea7; padding: 0 2px; border-radius: 2px; }
     .highlight-added { background-color: rgba(46, 204, 113, 0.15); color: var(--color-clean); padding: 0 2px; border-radius: 2px; }
+
+    /* Empty state */
+    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.9rem; gap: 16px; }
+    .empty-state svg { opacity: 0.2; }
 
     /* === 3. STATS (REPLAY ENGINE) VIEW === */
     .replay-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
@@ -335,33 +368,26 @@
 
   <!-- VIEW: LIVE PROXY -->
   <div id="view-live" class="view-container active">
-    <!-- CHAT VIEW -->
+    <!-- PROXY DATA FLOW VIEW -->
     <main class="chat-view">
       <div class="chat-header">
-        Agent Session (Claude Code)
+        Middleware Data Interception Flow
       </div>
       
       <div class="chat-history" id="chat-history">
-        <!-- Initial AI Message -->
-        <div class="chat-bubble-container">
-          <div class="chat-avatar avatar-ai">AI</div>
-          <div class="chat-message">
-            Hello! I am connected to the ChainWard Proxy. My interactions with on-chain data and external APIs are monitored and sanitized in real-time. How can I help you today?
-          </div>
+        <div style="text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;">
+          Listening for packets between Claude Code, MCP, and LLM...
         </div>
       </div>
 
       <div class="chat-input-area">
-        <div class="input-box">
-          <textarea id="prompt-input" placeholder="Enter a prompt to simulate..."></textarea>
-          <div class="input-actions">
-            <div class="demo-buttons">
-              <button class="demo-btn" style="color:#2ecc71; border-color:rgba(46,204,113,0.3);" onclick="triggerClean()">Normal Cmd (🟢)</button>
-              <button class="demo-btn" style="color:#f1c40f; border-color:rgba(241,196,15,0.3);" onclick="triggerSuspicious()">Suspicious Cmd (🟡)</button>
-              <button class="demo-btn" style="color:#ff4b4b; border-color:rgba(255,75,75,0.3);" onclick="triggerMalicious()">Malicious Cmd (🔴)</button>
-            </div>
-            <button class="send-btn">Send</button>
-          </div>
+        <div class="demo-buttons">
+          <button class="demo-btn" style="color:#2ecc71; border-color:rgba(46,204,113,0.3);" onclick="triggerCleanFlow()">Simulate Normal Flow (🟢)</button>
+          <button class="demo-btn" style="color:#f1c40f; border-color:rgba(241,196,15,0.3);" onclick="triggerSuspiciousFlow()">Simulate Suspicious Flow (🟡)</button>
+          <button class="demo-btn" style="color:#ff4b4b; border-color:rgba(255,75,75,0.3);" onclick="triggerMaliciousFlow()">Simulate Attack Flow (🔴)</button>
+        </div>
+        <div style="text-align:center; margin-top:16px; font-size:0.75rem; color:var(--text-muted);">
+          * Use buttons above to trigger data flow through the proxy *
         </div>
       </div>
     </main>
@@ -379,7 +405,7 @@
       <div class="inspector-feed" id="inspector-feed">
         <div class="empty-state" id="empty-state">
           <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          Listening for packets...
+          Waiting for events...
         </div>
       </div>
     </aside>
@@ -396,20 +422,15 @@
       </div>
 
       <div class="replay-layout">
-        <!-- Left -->
         <div class="replay-left">
           <div style="display:flex; gap:16px;">
             <div class="form-group" style="flex:1;">
               <label class="form-label">Model</label>
-              <select class="form-select">
-                <option>chainward-v2-turbo</option>
-              </select>
+              <select class="form-select"><option>chainward-v2-turbo</option></select>
             </div>
             <div class="form-group" style="flex:1;">
               <label class="form-label">Field Kind</label>
-              <select class="form-select">
-                <option>user_bio</option>
-              </select>
+              <select class="form-select"><option>user_bio</option></select>
             </div>
           </div>
           <div class="form-group">
@@ -425,27 +446,19 @@
           </div>
         </div>
 
-        <!-- Right -->
         <div class="replay-right">
           <div class="stats-card-grid">
             <div class="stats-card" style="border-color:rgba(252, 129, 129, 0.4);">
               <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                <span class="form-label" style="margin:0;">Severity</span>
-                <span class="form-label" style="margin:0;">Risk Score</span>
+                <span class="form-label" style="margin:0;">Severity</span><span class="form-label" style="margin:0;">Risk Score</span>
               </div>
               <div style="display:flex; justify-content:space-between; align-items:flex-end;">
                 <span style="font-size:1.4rem; font-weight:600; color:var(--color-malicious); display:flex; align-items:center; gap:8px;">⚠️ Malicious</span>
                 <span style="font-family:var(--font-mono); font-weight:600;">92/100</span>
               </div>
             </div>
-            <div class="stats-card">
-              <span class="form-label">Processing Time</span>
-              <span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">124ms</span>
-            </div>
-            <div class="stats-card">
-              <span class="form-label">Tokens</span>
-              <span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">42</span>
-            </div>
+            <div class="stats-card"><span class="form-label">Processing Time</span><span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">124ms</span></div>
+            <div class="stats-card"><span class="form-label">Tokens</span><span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">42</span></div>
           </div>
 
           <div class="signals-box">
@@ -504,21 +517,14 @@
       <table class="history-table">
         <thead>
           <tr>
-            <th style="width:50px;">Status</th>
-            <th>Time</th>
-            <th>Model</th>
-            <th>Source</th>
-            <th>Severity</th>
-            <th>Preview</th>
+            <th style="width:50px;">Status</th><th>Time</th><th>Model</th><th>Source</th><th>Severity</th><th>Preview</th>
           </tr>
         </thead>
         <tbody id="history-tbody">
           <!-- Row 1 (Expanded Demo) -->
           <tr class="history-row" onclick="toggleHistoryRow(this)">
             <td style="text-align:center;"><div style="width:8px;height:8px;background:var(--color-malicious);border-radius:50%;margin:0 auto;"></div></td>
-            <td>2023-10-27 14:32:01</td>
-            <td>CW-Guard-v2</td>
-            <td>0x7a...4f2b</td>
+            <td>2023-10-27 14:32:01</td><td>CW-Guard-v2</td><td>0x7a...4f2b</td>
             <td><div class="badge malicious">MALICIOUS</div></td>
             <td style="color:var(--text-muted);">Unsafe eval detected in incoming payload...</td>
           </tr>
@@ -543,52 +549,19 @@
               </div>
             </td>
           </tr>
-          
-          <!-- Row 2 -->
-          <tr class="history-row" onclick="toggleHistoryRow(this)">
-            <td style="text-align:center;"><div style="width:8px;height:8px;background:var(--color-suspicious);border-radius:50%;margin:0 auto;"></div></td>
-            <td>2023-10-27 14:15:22</td>
-            <td>CW-Guard-v2</td>
-            <td>0x1b...8c9a</td>
-            <td><div class="badge suspicious">SUSPICIOUS</div></td>
-            <td style="color:var(--text-muted);">Unusually high gas estimation requested...</td>
-          </tr>
-          <tr class="history-expanded">
-            <td colspan="6" style="padding:0; border:none;"><div class="history-expanded-content">Expanded detail view (hidden)</div></td>
-          </tr>
-
-          <!-- Row 3 -->
-          <tr class="history-row" onclick="toggleHistoryRow(this)">
-            <td style="text-align:center;"><div style="width:8px;height:8px;background:var(--color-clean);border-radius:50%;margin:0 auto;"></div></td>
-            <td>2023-10-27 13:59:05</td>
-            <td>CW-Scan-Fast</td>
-            <td>api.internal.svc</td>
-            <td><div class="badge clean" style="background:transparent; border-color:transparent;">CLEAN</div></td>
-            <td style="color:var(--text-muted);">Standard heartbeat sync payload.</td>
-          </tr>
-          <tr class="history-expanded">
-            <td colspan="6" style="padding:0; border:none;"><div class="history-expanded-content">Expanded detail view (hidden)</div></td>
-          </tr>
         </tbody>
       </table>
-      
-      <div style="display:flex; justify-content:center; margin-top:32px;">
-        <button class="demo-btn">Load More</button>
-      </div>
     </div>
   </div>
 
   <script>
-    // View Switcher
     function switchView(viewId) {
       document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
       document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-      
       document.getElementById(viewId).classList.add('active');
       document.getElementById('nav-' + viewId).classList.add('active');
     }
 
-    // History Row Toggle
     function toggleHistoryRow(row) {
       const expandedRow = row.nextElementSibling;
       if (expandedRow && expandedRow.classList.contains('history-expanded')) {
@@ -605,33 +578,60 @@
       return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
     }
 
-    function appendUserMessage(text) {
+    function clearChat() {
+      chatHistory.innerHTML = '';
+    }
+
+    function addFlowMessage(source, dest, content) {
       const html = `
-        <div class="chat-bubble-container">
-          <div class="chat-avatar avatar-user">U</div>
-          <div class="chat-message">${text}</div>
+        <div class="flow-message">
+          <div class="flow-header">
+            <span class="flow-source">${source}</span> <span class="flow-arrow">→</span> <span class="flow-dest">${dest}</span>
+          </div>
+          <div class="flow-body" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--text-secondary);">
+            ${content}
+          </div>
         </div>
       `;
       chatHistory.insertAdjacentHTML('beforeend', html);
       chatHistory.scrollTop = chatHistory.scrollHeight;
     }
 
-    function appendAiMessage(text, status = 'clean') {
-      let badge = '';
-      if (status === 'clean') {
-        badge = `<div class="status-badge clean">🟢 CLEAN</div>`;
-      } else if (status === 'suspicious') {
-        badge = `<div class="status-badge suspicious">🟡 SUSPICIOUS WARNING</div>`;
-      } else if (status === 'malicious') {
-        badge = `<div class="status-badge blocked">🔴 BLOCKED (Sanitized)</div>`;
-      }
-
+    function addProxyAction(severity, layerText, beforeContent, afterContent) {
+      const cls = severity === 'malicious' ? 'malicious' : (severity === 'suspicious' ? 'suspicious' : 'clean');
+      const badgeColor = severity === 'malicious' ? 'var(--color-malicious)' : (severity === 'suspicious' ? 'var(--color-suspicious)' : 'var(--color-clean)');
+      const badgeBg = severity === 'malicious' ? 'rgba(255,75,75,0.2)' : (severity === 'suspicious' ? 'rgba(241,196,15,0.2)' : 'rgba(46,204,113,0.2)');
+      
       const html = `
-        <div class="chat-bubble-container">
-          <div class="chat-avatar avatar-ai">AI</div>
-          <div class="chat-message">
-            ${text}
-            <div>${badge}</div>
+        <div class="flow-message flow-proxy-action ${cls}">
+          <div class="flow-header" style="color:${badgeColor}">
+            <span class="flow-source" style="background:${badgeColor}; color:#000;">ChainWard</span> 
+            Intercepted Payload (${layerText})
+          </div>
+          <div class="inline-diff">
+            <div style="border:1px solid rgba(255,255,255,0.1)">
+              <div class="diff-title">BEFORE (Original Data)</div>
+              ${beforeContent}
+            </div>
+            <div style="border:1px solid rgba(46,204,113,0.3)">
+              <div class="diff-title">AFTER (Sanitized)</div>
+              ${afterContent}
+            </div>
+          </div>
+        </div>
+      `;
+      chatHistory.insertAdjacentHTML('beforeend', html);
+      chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    function addLlmResponse(content) {
+      const html = `
+        <div class="flow-message" style="border-left:3px solid var(--accent-brand);">
+          <div class="flow-header">
+            <span class="flow-source">LLM</span> <span class="flow-arrow">→</span> <span class="flow-dest">Claude Code</span>
+          </div>
+          <div class="flow-body">
+            ${content}
           </div>
         </div>
       `;
@@ -641,30 +641,19 @@
 
     function addInspectorCard(time, severity, layerTag, reasonText, original, sanitized) {
       if (emptyState) emptyState.style.display = 'none';
-      
       const isMalicious = severity === 'malicious';
       const badgeText = isMalicious ? '🔴 MALICIOUS' : '🟡 SUSPICIOUS';
       const severityClass = isMalicious ? 'malicious' : 'suspicious';
-      
       const html = `
         <div class="event-card ${severityClass}">
           <div class="event-header">
-            <div class="badge ${severityClass}">
-              ${badgeText}
-            </div>
+            <div class="badge ${severityClass}">${badgeText}</div>
             <div class="timestamp">${time}</div>
           </div>
-          
           <div class="findings-box">
-            <div class="findings-title">
-              <span class="layer-tag">${layerTag}</span>
-              Decision Reason
-            </div>
-            <div class="findings-text">
-              ${reasonText}
-            </div>
+            <div class="findings-title"><span class="layer-tag">${layerTag}</span> Decision Reason</div>
+            <div class="findings-text">${reasonText}</div>
           </div>
-
           <div class="diff-container">
             <div class="diff-row">
               <div class="diff-panel">
@@ -682,57 +671,67 @@
       inspectorFeed.insertAdjacentHTML('afterbegin', html);
     }
 
-    function triggerClean() {
-      const prompt = "Please check my ETH balance on the mainnet.";
-      appendUserMessage(prompt);
+    function triggerCleanFlow() {
+      clearChat();
       
+      // Step 1
+      addFlowMessage('Claude Code', 'ChainWard Middleware', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"target": "Get ETH balance"<br>}`);
+      
+      // Step 2
       setTimeout(() => {
-        appendAiMessage("I have checked your balance. You currently hold 1.5 ETH. No malicious intent was found in the MCP response.", 'clean');
-      }, 600);
+        const original = `"response": "Balance is 1.5 ETH"`;
+        addProxyAction('clean', 'Passed', original, original);
+      }, 800);
+
+      // Step 3
+      setTimeout(() => {
+        addFlowMessage('ChainWard Middleware', 'LLM', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"target": "Get ETH balance"<br>}`);
+      }, 1600);
+
+      // Step 4
+      setTimeout(() => {
+        addLlmResponse("I successfully retrieved the data. The balance is 1.5 ETH.");
+      }, 2400);
     }
 
-    function triggerSuspicious() {
-      const prompt = "Can you query the history of smart contract 0xUnusual...";
-      appendUserMessage(prompt);
+    function triggerSuspiciousFlow() {
+      clearChat();
+      addFlowMessage('Claude Code', 'ChainWard Middleware', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"data_stream": "0xUnusual..."<br>}`);
       
       setTimeout(() => {
-        const time = getCurrentTime();
-        
-        const original = `Data: \n<span class="highlight-suspicious">Obfuscated characters found in log stream.</span>`;
-        const sanitized = `Data: \n<span class="highlight-suspicious">Log stream character encoding normalized.</span>`;
-        addInspectorCard(
-          time, 
-          'suspicious', 
-          'L2 (명령어 의도)', 
-          'Obfuscation Attempt: Unusual character encoding ratio suggestive of payload obfuscation.',
-          original, 
-          sanitized
-        );
-
-        appendAiMessage("I fetched the contract history. A minor anomaly was detected and sanitized during the data retrieval.", 'suspicious');
+        const before = `"data_stream": "<span class='highlight-suspicious'>encoded_chunk_xx</span>"`;
+        const after = `"data_stream": "<span class='highlight-added'>normalized_chunk</span>"`;
+        addProxyAction('suspicious', 'L2 (명령어 의도)', before, after);
+        addInspectorCard(getCurrentTime(), 'suspicious', 'L2 (명령어 의도)', 'Obfuscation Attempt: Unusual character encoding ratio suggestive of payload obfuscation.', '"data_stream": "<span class=\'highlight-suspicious\'>encoded_chunk_xx</span>"', '"data_stream": "<span class=\'highlight-added\'>normalized_chunk</span>"');
       }, 800);
+
+      setTimeout(() => {
+        addFlowMessage('ChainWard Middleware', 'LLM', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"data_stream": "<span style='color:var(--color-clean)'>normalized_chunk</span>"<br>}`);
+      }, 1600);
+
+      setTimeout(() => {
+        addLlmResponse("I fetched the data stream. It was normalized by the proxy and processed safely.");
+      }, 2400);
     }
 
-    function triggerMalicious() {
-      const prompt = "Can you execute the token airdrop contract 0xBad...Def?";
-      appendUserMessage(prompt);
+    function triggerMaliciousFlow() {
+      clearChat();
+      addFlowMessage('Claude Code', 'ChainWard Middleware', `{<br>&nbsp;&nbsp;"action": "mcp_execute",<br>&nbsp;&nbsp;"contract": "0xBadC0de...Def",<br>&nbsp;&nbsp;"mcp_data": "<span style='color:#ff8f8f'>eval('rm -rf /')</span>"<br>}`);
       
       setTimeout(() => {
-        const time = getCurrentTime();
-        
-        const original = `Contract Data: \n<span class="highlight-removed">Address: 0xBadC0de...Def\nPayload: executeAirdrop(admin)</span>`;
-        const sanitized = `Contract Data: \n<span class="highlight-added">[MALICIOUS_PAYLOAD_REDACTED]</span>`;
-        addInspectorCard(
-          time, 
-          'malicious', 
-          'L3 (허니팟 진실 대조)', 
-          'Honeypot Mismatch: Detected attempt to inject a known malicious contract address.',
-          original, 
-          sanitized
-        );
+        const before = `"mcp_data": "<span class='highlight-removed'>eval('rm -rf /')</span>"`;
+        const after = `"mcp_data": "<span class='highlight-added'>[MALICIOUS_PAYLOAD_REDACTED]</span>"`;
+        addProxyAction('malicious', 'L3 (허니팟 진실 대조)', before, after);
+        addInspectorCard(getCurrentTime(), 'malicious', 'L3 (허니팟 진실 대조)', 'Honeypot Mismatch: Detected attempt to inject a known malicious contract address.', '"mcp_data": "<span class=\'highlight-removed\'>eval(\'rm -rf /\')</span>"', '"mcp_data": "<span class=\'highlight-added\'>[MALICIOUS_PAYLOAD_REDACTED]</span>"');
+      }, 1000);
 
-        appendAiMessage("I have processed the request, but the proxy intercepted a malicious payload in the on-chain data. The payload was redacted for your safety.", 'malicious');
-      }, 800);
+      setTimeout(() => {
+        addFlowMessage('ChainWard Middleware', 'LLM', `{<br>&nbsp;&nbsp;"action": "mcp_execute",<br>&nbsp;&nbsp;"contract": "0xBadC0de...Def",<br>&nbsp;&nbsp;"mcp_data": "<span style='color:var(--color-clean)'>[MALICIOUS_PAYLOAD_REDACTED]</span>"<br>}`);
+      }, 2000);
+
+      setTimeout(() => {
+        addLlmResponse("I have processed your request. However, the MCP data contained a redacted payload (<strong>[MALICIOUS_PAYLOAD_REDACTED]</strong>), indicating it was blocked by the security middleware. Thus, the execution cannot proceed.");
+      }, 3500);
     }
   </script>
 </body>
