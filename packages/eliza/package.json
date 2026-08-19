@@ -1,6 +1,6 @@
 {
   "name": "@chainwards/eliza",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "type": "module",
   "license": "MIT",
   "description": "ChainWard plugin for ElizaOS — guards attacker-writable on-chain text before it reaches the model.",
