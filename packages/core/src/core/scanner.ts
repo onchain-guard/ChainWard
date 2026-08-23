@@ -24,6 +24,10 @@ export interface FieldContext {
 
 const SEV_ORDER: Record<Severity, number> = { CLEAN: 0, SUSPICIOUS: 1, MALICIOUS: 2 };
 
+/** Ceiling on signals recorded for one field. Generous — the largest legitimate case in the
+ *  corpus emits five — while bounding what an attacker can make the engine allocate. */
+const MAX_SIGNALS = 64;
+
 /** Our own sanitization output, recognised so a second pass over it is stable.
  *
  *  Re-scanning happens for real: the guard is stateless and a caller that persists the
@@ -56,7 +60,14 @@ export class ChainWardScanner {
     const signals: Signal[] = [];
     for (const d of this.registry.list()) {
       const produced = await d.detect({ raw, normalized, kind, ctx, prior: signals });
-      signals.push(...produced);
+      // Appended one at a time, and capped. `push(...produced)` overflows the argument limit
+      // on a payload crafted to emit enough signals, and the cap keeps the report readable:
+      // past a few dozen findings on one field the verdict is already decided and the rest
+      // is noise a caller has to scroll through.
+      for (const sig of produced) {
+        if (signals.length >= MAX_SIGNALS) break;
+        signals.push(sig);
+      }
     }
     const { severity, score } = fuse(signals);
     const sanitized = renderSafe(kind, normalized, severity);
@@ -77,10 +88,15 @@ export class ChainWardScanner {
   }
 }
 
-/** Verdict fusion. hard signal → MALICIOUS; else soft-OR threshold. (unchanged) */
+/** Verdict fusion. hard signal → MALICIOUS; else soft-OR threshold.
+ *
+ *  Reduced rather than spread. `Math.max(1, ...weights)` passes one argument per signal, and
+ *  a payload that produces enough of them overflows the argument limit — which throws a
+ *  RangeError out of `scanField`, out of `guard()`, and into the proxy's catch, where the
+ *  original unguarded body is forwarded upstream. Crashing is a bypass here, not an outage. */
 export function fuse(signals: Signal[]): { severity: Severity; score: number } {
   if (signals.some((s) => s.hard)) {
-    const score = Math.max(1, ...signals.map((s) => s.weight));
+    const score = signals.reduce((m, s) => (s.weight > m ? s.weight : m), 1);
     return { severity: "MALICIOUS", score: Math.min(1, score) };
   }
   const combined = 1 - signals.reduce((acc, s) => acc * (1 - Math.min(0.99, s.weight)), 1);

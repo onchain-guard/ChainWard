@@ -76,8 +76,16 @@ export function isEmojiJoiner(cps: number[], i: number): boolean {
   if (isVariationSelector(cp)) {
     // a selector modifies the single character before it; a RUN of them is a data channel
     if (isVariationSelector(cps[i - 1]) || isVariationSelector(cps[i + 1])) return false;
-    const prev = cps[i - 1];
-    return prev !== undefined && classifyInvisible(prev) === null;
+    // …and the character it modifies has to be one a selector has business modifying.
+    // Exempting "any visible character" let a selector be woven between ordinary letters —
+    // `I<FE0F>g<FE0F>n<FE0F>o…` — which normalizeText then left in place, so the pattern
+    // layer saw a word broken into single characters and the verdict fell from MALICIOUS to
+    // SUSPICIOUS: redaction downgraded to fencing, with the directive still legible.
+    //
+    // Known cost: ideographic variation sequences (U+FE00–FE0D after a Han character) are
+    // not pictographic and are now flagged. They are soft (weight 0.5), so such a field is
+    // fenced rather than redacted, and the signal says which codepoint did it.
+    return isPictographic(cps[i - 1]);
   }
   return false;
 }
