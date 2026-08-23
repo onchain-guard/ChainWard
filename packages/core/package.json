@@ -3,6 +3,7 @@
   "version": "0.3.1",
   "type": "module",
   "license": "MIT",
+  "author": "fl0wizy <190269791+fl0wizy@users.noreply.github.com> (https://github.com/fl0wizy)",
   "description": "Scan and sanitize attacker-writable on-chain text before it reaches an LLM. Zero-dependency prompt-injection guard for web3 AI agents — library, and a drop-in proxy.",
   "keywords": [
     "agent-security",

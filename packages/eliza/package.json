@@ -3,6 +3,7 @@
   "version": "0.1.1",
   "type": "module",
   "license": "MIT",
+  "author": "fl0wizy <190269791+fl0wizy@users.noreply.github.com> (https://github.com/fl0wizy)",
   "description": "ChainWard plugin for ElizaOS — guards attacker-writable on-chain text before it reaches the model.",
   "keywords": [
     "elizaos",
