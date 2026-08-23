@@ -275,6 +275,105 @@ test("the buffer is bounded", async () => {
   await proxy.close();
 });
 
+// ── POST /scan ────────────────────────────────────────────────────────────────────────
+//
+// A dashboard cannot reach the LLM endpoint: that port answers agents, not browsers, so it
+// has no CORS and no preflight. Replaying text through a real model call just to learn what
+// the guard thinks would also be slow and billable. /scan answers the question directly.
+
+test("/scan returns the verdict, the signals, and what the model would receive", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const res = await fetch(`http://127.0.0.1:${portOf(proxy.events!)}/scan`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text: SMUGGLED }),
+  });
+  const body = (await res.json()) as {
+    severity: string; score: number; sanitized: string;
+    signals: Array<{ layer: string; code: string; weight: number; hard: boolean }>;
+  };
+
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.equal(body.severity, "MALICIOUS");
+  assert.ok(body.signals.some((s) => s.code.startsWith("INVISIBLE_")));
+  assert.ok(!body.sanitized.includes("0xca11ab1e"), "the payload survived into the sanitized value");
+
+  await proxy.close();
+});
+
+test("/scan runs L3 when given a chain and address — the layer text alone cannot reach", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const call = (extra: Record<string, unknown>) =>
+    fetch(`http://127.0.0.1:${portOf(proxy.events!)}/scan`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ text: "USD Coin", kind: "token_name", ...extra }),
+    }).then((r) => r.json() as Promise<{ severity: string; signals: Array<{ code: string }> }>);
+
+  // Identical text. Only the address differs, and only the chain can tell them apart.
+  const fake = await call({ chain: "ethereum", address: "0xdead000e00000000000000000000000000000000" });
+  const real = await call({ chain: "ethereum", address: "0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48" });
+
+  assert.equal(fake.severity, "MALICIOUS");
+  assert.ok(fake.signals.some((s) => s.code === "IDENTITY_IMPERSONATION"));
+  assert.equal(real.severity, "CLEAN", "the genuine token must not be flagged");
+
+  await proxy.close();
+});
+
+test("/scan does not pollute the event buffer — a question is not traffic", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const base = `http://127.0.0.1:${portOf(proxy.events!)}`;
+  await fetch(`${base}/scan`, {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ text: SMUGGLED }),
+  });
+
+  const health = (await (await fetch(`${base}/health`)).json()) as { buffered: number };
+  assert.equal(health.buffered, 0, "a scan was counted as guarded traffic");
+
+  await proxy.close();
+});
+
+test("/scan answers a CORS preflight, so a browser can actually call it", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const res = await fetch(`http://127.0.0.1:${portOf(proxy.events!)}/scan`, { method: "OPTIONS" });
+
+  assert.equal(res.status, 204);
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.match(res.headers.get("access-control-allow-methods") ?? "", /POST/);
+  assert.match(res.headers.get("access-control-allow-headers") ?? "", /content-type/);
+
+  await proxy.close();
+});
+
+test("/scan rejects a missing or non-string text with 400, not a crash", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const base = `http://127.0.0.1:${portOf(proxy.events!)}`;
+  for (const body of ['{"text":123}', "{}", "not json"]) {
+    const res = await fetch(`${base}/scan`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body,
+    });
+    assert.equal(res.status, 400, `body ${body} should be a 400`);
+    assert.ok((await res.json() as { error: string }).error);
+  }
+  // still serving afterwards
+  assert.equal((await fetch(`${base}/health`)).status, 200);
+
+  await proxy.close();
+});
+
+test("/scan refuses GET rather than answering with an empty verdict", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const res = await fetch(`http://127.0.0.1:${portOf(proxy.events!)}/scan`);
+  assert.equal(res.status, 405);
+  await proxy.close();
+});
+
 test("the event API is not started unless asked for", async () => {
   const proxy = createProxy({ port: 0 });
   assert.equal(proxy.events, undefined);

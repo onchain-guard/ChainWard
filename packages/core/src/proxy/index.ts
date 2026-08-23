@@ -13,6 +13,8 @@
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { Readable } from "node:stream";
 import { guard, type ChatMessage } from "../index.ts";
+import { defaultScanner } from "../core/scanner.ts";
+import type { FieldKind } from "../core/types.ts";
 
 export interface GuardEvent {
   /** epoch ms */
@@ -287,6 +289,10 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
 
   if (opts.eventPort === undefined) return { llm, close: shutdown([llm]) };
 
+  // One scanner for the /scan route. The engine is stateless, so a single instance serves
+  // every request; building one per call would rebuild the detector registry each time.
+  const scanner = defaultScanner();
+
   const events = createServer((req, res) => {
     // A front-end served from another origin (a dev server, say) has to be able to read this.
     const cors = { "access-control-allow-origin": "*" };
@@ -317,8 +323,59 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
       return;
     }
 
+    // Scan one string and report the verdict, without routing a model request through the
+    // proxy to do it. A dashboard needs this: the LLM endpoint is for agents and answers no
+    // preflight, so a browser cannot reach it, and replaying text through a real model call
+    // to learn what the guard thinks is both slow and billable.
+    //
+    // Nothing here touches the event buffer — a scan is a question about a string, not
+    // traffic that passed through the guard, and mixing the two would inflate the counts a
+    // dashboard reports.
+    if (req.url === "/scan") {
+      if (req.method === "OPTIONS") {
+        res.writeHead(204, {
+          ...cors,
+          "access-control-allow-methods": "POST, OPTIONS",
+          "access-control-allow-headers": "content-type",
+        });
+        res.end();
+        return;
+      }
+      if (req.method !== "POST") {
+        res.writeHead(405, { ...cors, "content-type": "application/json" });
+        res.end(JSON.stringify({ error: "POST only" }));
+        return;
+      }
+      void readBody(req)
+        .then(async (raw) => {
+          const body = JSON.parse(raw || "{}") as { text?: unknown; kind?: unknown; chain?: unknown; address?: unknown };
+          if (typeof body.text !== "string") throw new Error("body.text must be a string");
+          const scan = await scanner.scanField(
+            (typeof body.kind === "string" ? body.kind : "agent_context") as FieldKind,
+            body.text,
+            {
+              targetContexts: ["llm-chat", "markdown-ui"],
+              chain: typeof body.chain === "string" ? body.chain : undefined,
+              address: typeof body.address === "string" ? body.address : undefined,
+            },
+          );
+          res.writeHead(200, { ...cors, "content-type": "application/json" });
+          res.end(JSON.stringify({
+            severity: scan.severity,
+            score: scan.score,
+            signals: scan.signals.map((s) => ({ layer: s.layer, code: s.code, weight: s.weight, hard: Boolean(s.hard) })),
+            sanitized: scan.sanitized,
+          }));
+        })
+        .catch((e: Error) => {
+          res.writeHead(400, { ...cors, "content-type": "application/json" });
+          res.end(JSON.stringify({ error: e.message }));
+        });
+      return;
+    }
+
     res.writeHead(404, { ...cors, "content-type": "application/json" });
-    res.end(JSON.stringify({ error: "not found", routes: ["/events", "/events/recent", "/health"] }));
+    res.end(JSON.stringify({ error: "not found", routes: ["/events", "/events/recent", "/scan", "/health"] }));
   });
   events.listen(opts.eventPort);
 
