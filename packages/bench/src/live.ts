@@ -52,7 +52,7 @@ async function scanOne(t: OnchainToken): Promise<void> {
   // the mock oracle, which is the thing this demo exists to stop doing.
   const oracle = new GoPlusHoneypotOracle();
   const scanner = new ChainWardScanner({
-    registry: defaultRegistry(new HeuristicClassifier(), oracle),
+    registry: defaultRegistry({ classifier: new HeuristicClassifier(), honeypot: oracle }),
   });
 
   // Print the behavior verdict even when it is clean. A check whose result never surfaces

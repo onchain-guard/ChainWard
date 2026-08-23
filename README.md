@@ -77,7 +77,7 @@ import { guard } from "chainward";
 
 const { messages, findings } = await guard(rawMessages, {
   model,                        // chat-template 특수토큰 탐지에 사용
-  targetContext: ["llm-chat"],  // 소비 환경
+  targetContexts: ["llm-chat"],  // 소비 환경
 });
 const res = await llm.messages.create({ ...req, messages }); // 정화본으로 호출
 ```
@@ -167,7 +167,7 @@ Inspector UI           프록시 이벤트 API 위에 얹는 대시보드
 ```ts
 // 기본 스캐너는 MockHoneypotOracle을 쓴다 — 오프라인·결정적
 const scanner = new ChainWardScanner({
-  registry: defaultRegistry(new HeuristicClassifier(), new GoPlusHoneypotOracle()),
+  registry: defaultRegistry({ classifier: new HeuristicClassifier(), honeypot: new GoPlusHoneypotOracle() }),
 });
 ```
 

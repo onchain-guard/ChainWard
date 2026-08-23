@@ -328,7 +328,7 @@ chainward proxy [--port 8787] [--inspect] [--inspect-port 8788]
 
 ```ts
 import { guard } from "chainward";
-const { messages, findings } = await guard(rawMessages, { model, targetContext:["llm-chat"] });
+const { messages, findings } = await guard(rawMessages, { model, targetContexts:["llm-chat"] });
 const res = await llm.messages.create({ ...req, messages });  // 정화본으로 호출
 ```
 
