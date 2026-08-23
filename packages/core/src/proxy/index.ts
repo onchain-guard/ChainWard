@@ -61,11 +61,18 @@ const FORWARD_HEADERS = [
   "openai-beta",
 ];
 
+/** Collect the body, then decode once.
+ *
+ *  `b += chunk` decodes each chunk independently, and a socket boundary lands wherever the
+ *  network put it — mid-character for anything outside ASCII. A Korean or emoji-bearing
+ *  prompt split across two reads came back with a replacement character where the split
+ *  happened, and that corrupted text is what the proxy forwards upstream. Concatenating the
+ *  buffers first makes the decode see the whole sequence. */
 function readBody(req: IncomingMessage): Promise<string> {
   return new Promise((resolve, reject) => {
-    let b = "";
-    req.on("data", (c) => (b += c));
-    req.on("end", () => resolve(b));
+    const chunks: Buffer[] = [];
+    req.on("data", (c: Buffer) => chunks.push(c));
+    req.on("end", () => resolve(Buffer.concat(chunks).toString("utf8")));
     req.on("error", reject);
   });
 }
