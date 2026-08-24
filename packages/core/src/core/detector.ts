@@ -21,7 +21,17 @@ export interface Detector {
   detect(input: DetectInput): Signal[] | Promise<Signal[]>;
 }
 
-export class DetectorRegistry {
+/** What the scanner needs from a registry: an ordered list of detectors, and a way to add
+ *  one. Exported separately from the class because the class has a private field, and a
+ *  private field makes TypeScript compare it nominally — so a plain object with the same two
+ *  methods, or a test double, was rejected even though it behaves identically. The registry
+ *  is the documented extension point; it should be implementable, not just instantiable. */
+export interface DetectorRegistryLike {
+  use(d: Detector): this;
+  list(): readonly Detector[];
+}
+
+export class DetectorRegistry implements DetectorRegistryLike {
   private detectors: Detector[] = [];
   use(d: Detector): this {
     this.detectors.push(d);

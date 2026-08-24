@@ -1,5 +1,12 @@
 // L4 interpreter — markdown / browser-render differential.
 //
+// Every quantifier here is bounded and every class excludes newline. The unbounded
+// originals (`[^\]]*`, `[^>]*?`) backtrack quadratically on text an attacker writes: 78KB
+// of repeated `"!["` held the event loop for 5.4 seconds. Node runs one thread, so inside
+// the proxy that is every other request stalled behind it — and a guard that stalls gets
+// removed. 512 bounds a label or an attribute run; URLs keep 2048 so a long data: URI
+// still gets read rather than silently skipped.
+//
 // Stored text is inert. But when a chat UI renders it as markdown, some constructs become
 // ACTIVE: images auto-fetch (data-exfil), javascript:/data: URIs execute, raw <script>
 // runs. Same bytes, but the RENDERING environment turns them into control. We flag the
@@ -16,13 +23,13 @@
 import type { Signal } from "../types.ts";
 
 /** Inline markdown: `![alt](url` or `[text](url`. */
-const INLINE_RE = /(!?)\[[^\]]*\]\(([^)\s]+)/g;
+const INLINE_RE = /(!?)\[[^\]\n]{0,512}\]\(([^)\s]{1,2048})/g;
 /** Reference usage: `![alt][label]` or `[text][label]`. */
-const REF_USE_RE = /(!?)\[[^\]]*\]\[([^\]]+)\]/g;
+const REF_USE_RE = /(!?)\[[^\]\n]{0,512}\]\[([^\]\n]{1,512})\]/g;
 /** Reference definition: a line of `[label]: url`. */
-const REF_DEF_RE = /^[ \t]{0,3}\[([^\]]+)\]:[ \t]*(\S+)/gm;
+const REF_DEF_RE = /^[ \t]{0,3}\[([^\]\n]{1,512})\]:[ \t]*(\S{1,2048})/gm;
 /** Raw HTML attributes that fetch or navigate. `srcset` takes a candidate list. */
-const HTML_ATTR_RE = /<\s*(img|a|image)\b[^>]*?\b(src|srcset|href)\s*=\s*["']?([^"'>\s]+)/gi;
+const HTML_ATTR_RE = /<\s*(img|a|image)\b[^>\n]{0,512}?\b(src|srcset|href)\s*=\s*["']?([^"'>\s]{1,2048})/gi;
 
 /**
  * Canonicalise a URL enough to test its scheme the way a browser would.
