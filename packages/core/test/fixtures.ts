@@ -6,6 +6,8 @@
 // Invisible characters are written with explicit \u / \u{...} escapes so the payloads
 // are byte-exact and the engine genuinely detects them.
 
+import { MOCK_HONEYPOT_ADDRESS } from "../src/core/honeypot.ts";
+
 export interface TokenSample { address: string; name: string; symbol: string; note: string }
 export interface NftSample { address: string; tokenId: string; name: string; description: string; note: string }
 export interface TxSample { txHash: string; memo: string; note: string }
@@ -20,9 +22,10 @@ export const MALICIOUS_TOKEN: TokenSample = {
 };
 
 // 2) Honeypot token that ADVERTISES safety in text while its contract can't be sold.
-//    address matches MockHoneypotOracle's honeypot fixture -> claim/behavior mismatch.
+//    Imported, not copied: the verdict depends on the oracle recognising this exact
+//    address, and a copy lets the two drift apart without any test noticing.
 export const HONEYPOT_TOKEN: TokenSample = {
-  address: "0xhoneypot000000000000000000000000000000dead",
+  address: MOCK_HONEYPOT_ADDRESS,
   name: "SafeMoon Reflect — 100% safe, audited, liquidity locked",
   symbol: "SAFE",
   note: "Safety claims in text; contract is a real honeypot (cannot_sell). Deception mismatch.",
@@ -32,7 +35,7 @@ export const HONEYPOT_TOKEN: TokenSample = {
 //    (U+E0001) + an invisible separator hide a fake [SYSTEM] instruction. Name also uses
 //    a Cyrillic homoglyph ('А') to impersonate a blue-chip collection.
 export const MALICIOUS_NFT: NftSample = {
-  address: "0xnft22222222222222222222222222222222c0de",
+  address: "0xc0de22222222222222222222222222222222c0de",
   tokenId: "1",
   name: "Bored Аpe #1", // Cyrillic А (U+0410) instead of Latin A
   description:

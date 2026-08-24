@@ -1,0 +1,7 @@
+{
+  // Runtime config — tsx reads this, so it must stay free of `paths`. A path mapping that
+  // points at a .d.ts fixes the typecheck and then breaks `node`, which tries to import the
+  // declaration file. Type-only overrides live in tsconfig.typecheck.json.
+  "extends": "../../tsconfig.base.json",
+  "include": ["agent.ts", "elizaos-plugin-sql.d.ts"]
+}
