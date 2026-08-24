@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,11 +14,11 @@
       --bg-chat: #09090b;
       --bg-inspector: #121214;
       --bg-panel: #1A1A1E;
-      
+
       --text-primary: #f8fafc;
       --text-secondary: #94a3b8;
       --text-muted: #64748b;
-      
+
       --border-color: rgba(255, 255, 255, 0.08);
 
       /* Accents (Pink) */
@@ -27,10 +28,10 @@
       /* Severity Colors */
       --color-clean: #2ecc71;
       --color-clean-bg: rgba(46, 204, 113, 0.1);
-      
+
       --color-malicious: #ff4b4b;
       --color-malicious-bg: rgba(255, 75, 75, 0.1);
-      
+
       --color-suspicious: #f1c40f;
       --color-suspicious-bg: rgba(241, 196, 15, 0.1);
 
@@ -38,95 +39,347 @@
       --font-mono: 'JetBrains Mono', monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: var(--font-ui); background-color: var(--bg-chat); color: var(--text-primary);
-      height: 100vh; width: 100vw; overflow: hidden; display: flex;
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    ::-webkit-scrollbar { width: 8px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #333; border-radius: 4px; }
+    body {
+      font-family: var(--font-ui);
+      background-color: var(--bg-chat);
+      color: var(--text-primary);
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      display: flex;
+    }
+
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: #333;
+      border-radius: 4px;
+    }
 
     /* SIDEBAR */
     .sidebar {
-      width: 240px; flex-shrink: 0; background-color: var(--bg-sidebar); border-right: 1px solid var(--border-color);
-      display: flex; flex-direction: column; z-index: 20;
+      width: 240px;
+      flex-shrink: 0;
+      background-color: var(--bg-sidebar);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      z-index: 20;
     }
+
     .brand {
-      padding: 24px; display: flex; align-items: center; gap: 12px; font-weight: 700; font-size: 1.1rem; letter-spacing: -0.02em;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.02em;
     }
+
     .brand-icon {
-      width: 24px; height: 24px; background: var(--accent-brand-bg); color: var(--accent-brand); border-radius: 6px;
-      display: flex; align-items: center; justify-content: center;
+      width: 24px;
+      height: 24px;
+      background: var(--accent-brand-bg);
+      color: var(--accent-brand);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
-    .nav-menu { list-style: none; padding: 0 12px; flex: 1; }
+
+    .nav-menu {
+      list-style: none;
+      padding: 0 12px;
+      flex: 1;
+    }
+
     .nav-item {
-      padding: 10px 12px; margin-bottom: 4px; border-radius: 6px; color: var(--text-secondary); font-size: 0.9rem; font-weight: 500;
-      cursor: pointer; display: flex; align-items: center; gap: 12px; transition: all 0.2s;
+      padding: 10px 12px;
+      margin-bottom: 4px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s;
     }
-    .nav-item:hover { background: rgba(255,255,255,0.03); color: var(--text-primary); }
-    .nav-item.active { background: var(--accent-brand-bg); color: var(--accent-brand); }
+
+    .nav-item:hover {
+      background: rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+    }
+
+    .nav-item.active {
+      background: var(--accent-brand-bg);
+      color: var(--accent-brand);
+    }
 
     /* VIEWS */
-    .view-container { display: none; flex: 1; height: 100%; }
-    .view-container.active { display: flex; flex-direction: column; }
-    #view-live.active { flex-direction: row; }
-    .page-content { padding: 40px; width: 100%; height: 100%; overflow-y: auto; background-color: var(--bg-chat); }
-    
-    .page-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
-    .page-title { font-size: 1.4rem; font-weight: 600; color: var(--text-primary); }
-    .page-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+    .view-container {
+      display: none;
+      flex: 1;
+      height: 100%;
+    }
+
+    .view-container.active {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #view-live.active {
+      flex-direction: row;
+    }
+
+    .page-content {
+      padding: 40px;
+      width: 100%;
+      height: 100%;
+      overflow-y: auto;
+      background-color: var(--bg-chat);
+    }
+
+    .page-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+    }
+
+    .page-title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .page-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
 
     /* COMMON UI ELEMENTS */
     .badge {
-      display: inline-flex; align-items: center; gap: 6px; padding: 4px 8px; border-radius: 4px;
-      font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
-    .badge.malicious { background-color: var(--color-malicious-bg); color: var(--color-malicious); border: 1px solid rgba(252, 129, 129, 0.3); }
-    .badge.suspicious { background-color: var(--color-suspicious-bg); color: var(--color-suspicious); border: 1px solid rgba(241, 196, 15, 0.3); }
-    .badge.clean { background-color: var(--color-clean-bg); color: var(--color-clean); border: 1px solid rgba(46, 204, 113, 0.3); }
+
+    .badge.malicious {
+      background-color: var(--color-malicious-bg);
+      color: var(--color-malicious);
+      border: 1px solid rgba(252, 129, 129, 0.3);
+    }
+
+    .badge.suspicious {
+      background-color: var(--color-suspicious-bg);
+      color: var(--color-suspicious);
+      border: 1px solid rgba(241, 196, 15, 0.3);
+    }
+
+    .badge.clean {
+      background-color: var(--color-clean-bg);
+      color: var(--color-clean);
+      border: 1px solid rgba(46, 204, 113, 0.3);
+    }
 
     /* === 1. DASHBOARD VIEW (STATS OVERVIEW) === */
-    .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; margin-bottom: 24px; }
-    .metric-card {
-      background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 20px; display: flex; flex-direction: column; gap: 8px;
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      margin-bottom: 24px;
     }
-    .metric-card.malicious { border-color: rgba(252, 129, 129, 0.3); }
-    .metric-card.suspicious { border-color: rgba(241, 196, 15, 0.3); }
-    .metric-title { font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
-    .metric-value { font-size: 2rem; font-weight: 700; color: var(--text-primary); }
-    .metric-sub { font-size: 0.8rem; color: var(--text-secondary); display: flex; align-items: center; gap: 6px;}
 
-    .dashboard-split { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
-    .dash-panel { background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; }
-    .dash-panel h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 24px; }
-    
-    .bar-group { margin-bottom: 20px; }
-    .bar-label { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-primary); font-family: var(--font-mono); margin-bottom: 8px; }
-    .bar-label span { color: var(--text-muted); }
-    .bar-track { height: 8px; background: rgba(255,255,255,0.05); border-radius: 4px; display: flex; overflow: hidden; }
-    .bar-fill.clean { background: var(--color-clean); }
-    .bar-fill.suspicious { background: var(--color-suspicious); }
-    .bar-fill.malicious { background: var(--color-malicious); }
+    .metric-card {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
 
-    .rule-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border-color); font-size: 0.85rem; font-family: var(--font-mono); }
-    .rule-row:last-child { border-bottom: none; }
-    .rule-name { display: flex; align-items: center; gap: 8px; color: var(--text-primary); }
-    .rule-dot { width: 6px; height: 6px; border-radius: 50%; }
-    .rule-dot.red { background: var(--color-malicious); box-shadow: 0 0 6px var(--color-malicious); }
-    .rule-dot.yellow { background: var(--color-suspicious); box-shadow: 0 0 6px var(--color-suspicious); }
-    .rule-hits { color: var(--text-secondary); }
+    .metric-card.malicious {
+      border-color: rgba(252, 129, 129, 0.3);
+    }
+
+    .metric-card.suspicious {
+      border-color: rgba(241, 196, 15, 0.3);
+    }
+
+    .metric-title {
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .metric-value {
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .metric-sub {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .dashboard-split {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 20px;
+    }
+
+    .dash-panel {
+      background: var(--bg-panel);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    .dash-panel h3 {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+
+    .bar-group {
+      margin-bottom: 20px;
+    }
+
+    .bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      margin-bottom: 8px;
+    }
+
+    .bar-label span {
+      color: var(--text-muted);
+    }
+
+    .bar-track {
+      height: 8px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 4px;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .bar-fill.clean {
+      background: var(--color-clean);
+    }
+
+    .bar-fill.suspicious {
+      background: var(--color-suspicious);
+    }
+
+    .bar-fill.malicious {
+      background: var(--color-malicious);
+    }
+
+    .rule-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-color);
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+
+    .rule-row:last-child {
+      border-bottom: none;
+    }
+
+    .rule-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-primary);
+    }
+
+    .rule-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .rule-dot.red {
+      background: var(--color-malicious);
+      box-shadow: 0 0 6px var(--color-malicious);
+    }
+
+    .rule-dot.yellow {
+      background: var(--color-suspicious);
+      box-shadow: 0 0 6px var(--color-suspicious);
+    }
+
+    .rule-hits {
+      color: var(--text-secondary);
+    }
 
     /* === 2. LIVE PROXY VIEW (DATA FLOW) === */
-    .chat-view { flex: 1; display: flex; flex-direction: column; background-color: var(--bg-chat); position: relative; }
-    .chat-header { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; padding: 0 24px; font-weight: 600; color: var(--text-secondary); }
-    .chat-history { flex: 1; overflow-y: auto; padding: 32px 24px; display: flex; flex-direction: column; gap: 16px; }
-    
+    .chat-view {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--bg-chat);
+      position: relative;
+    }
+
+    .chat-header {
+      height: 60px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      padding: 0 24px;
+      font-weight: 600;
+      color: var(--text-secondary);
+    }
+
+    .chat-history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
     /* Flow Message Blocks */
     .flow-message {
-      background: rgba(255,255,255,0.02);
+      background: rgba(255, 255, 255, 0.02);
       border: 1px solid var(--border-color);
       border-radius: 8px;
       padding: 16px;
@@ -135,10 +388,19 @@
       margin: 0 auto;
       animation: fadeIn 0.3s ease-out;
     }
+
     @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
+      from {
+        opacity: 0;
+        transform: translateY(5px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
     }
+
     .flow-header {
       font-family: var(--font-mono);
       font-size: 0.75rem;
@@ -148,116 +410,538 @@
       align-items: center;
       gap: 8px;
     }
-    .flow-source, .flow-dest {
-      background: rgba(255,255,255,0.05);
+
+    .flow-source,
+    .flow-dest {
+      background: rgba(255, 255, 255, 0.05);
       padding: 4px 8px;
       border-radius: 4px;
       color: var(--text-primary);
       font-weight: 600;
     }
-    .flow-arrow { color: var(--accent-brand); font-weight: bold; }
-    .flow-body { font-size: 0.9rem; color: var(--text-primary); line-height: 1.6; }
-    
+
+    .flow-arrow {
+      color: var(--accent-brand);
+      font-weight: bold;
+    }
+
+    .flow-body {
+      font-size: 0.9rem;
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
     /* Proxy Action Blocks */
-    .flow-proxy-action.malicious { border-left: 3px solid var(--color-malicious); background: var(--color-malicious-bg); }
-    .flow-proxy-action.suspicious { border-left: 3px solid var(--color-suspicious); background: var(--color-suspicious-bg); }
-    .flow-proxy-action.clean { border-left: 3px solid var(--color-clean); background: var(--color-clean-bg); }
-    
-    .inline-diff { display: flex; gap: 16px; margin-top: 12px; }
-    .inline-diff > div { flex: 1; background: #111; padding: 12px; border-radius: 6px; font-family: var(--font-mono); font-size: 0.8rem; word-break: break-all; }
-    .diff-title { font-size: 0.65rem; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; letter-spacing: 0.05em; }
+    .flow-proxy-action.malicious {
+      border-left: 3px solid var(--color-malicious);
+      background: var(--color-malicious-bg);
+    }
+
+    .flow-proxy-action.suspicious {
+      border-left: 3px solid var(--color-suspicious);
+      background: var(--color-suspicious-bg);
+    }
+
+    .flow-proxy-action.clean {
+      border-left: 3px solid var(--color-clean);
+      background: var(--color-clean-bg);
+    }
+
+    .inline-diff {
+      display: flex;
+      gap: 16px;
+      margin-top: 12px;
+    }
+
+    .inline-diff>div {
+      flex: 1;
+      background: #111;
+      padding: 12px;
+      border-radius: 6px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      word-break: break-all;
+    }
+
+    .diff-title {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
 
     /* Controls Area */
-    .chat-input-area { padding: 24px; max-width: 800px; margin: 0 auto; width: 100%; border-top: 1px solid var(--border-color); }
-    .demo-buttons { display: flex; gap: 12px; justify-content: center; }
-    .demo-btn { background: #1a1a1e; border: 1px solid rgba(255,255,255,0.1); color: var(--text-secondary); padding: 10px 16px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px;}
-    .demo-btn:hover { background: rgba(255,255,255,0.1); color: #fff;}
+    .chat-input-area {
+      padding: 24px;
+      max-width: 800px;
+      margin: 0 auto;
+      width: 100%;
+      border-top: 1px solid var(--border-color);
+    }
 
-    .inspector-view { width: 520px; background-color: var(--bg-inspector); border-left: 1px solid var(--border-color); display: flex; flex-direction: column; box-shadow: -4px 0 24px rgba(0,0,0,0.4); z-index: 10; }
-    .inspector-header { height: 60px; border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-    .inspector-title { font-weight: 600; font-size: 0.95rem; display: flex; align-items: center; gap: 8px; }
-    .live-indicator { width: 8px; height: 8px; background: var(--color-clean); border-radius: 50%; box-shadow: 0 0 8px var(--color-clean); }
-    .inspector-feed { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .event-card { background-color: #141417; border-radius: 8px; padding: 16px; border: 1px solid var(--border-color); display: flex; flex-direction: column; gap: 12px; animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-    .event-card.malicious { border-color: rgba(252, 129, 129, 0.4); box-shadow: 0 4px 20px rgba(252, 129, 129, 0.05); }
-    .event-card.suspicious { border-color: rgba(241, 196, 15, 0.4); box-shadow: 0 4px 20px rgba(241, 196, 15, 0.05); }
-    .event-header { display: flex; align-items: center; justify-content: space-between; }
-    .timestamp { color: var(--text-muted); font-family: var(--font-mono); font-size: 0.75rem; }
+    .demo-buttons {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+    }
 
-    .findings-box { border-radius: 6px; padding: 12px; }
-    .event-card.malicious .findings-box { background-color: rgba(252, 129, 129, 0.05); border-left: 2px solid var(--color-malicious); }
-    .event-card.suspicious .findings-box { background-color: rgba(241, 196, 15, 0.05); border-left: 2px solid var(--color-suspicious); }
-    .findings-title { font-weight: 600; font-size: 0.75rem; color: var(--text-primary); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-    .layer-tag { background: rgba(255,255,255,0.1); padding: 2px 6px; border-radius: 4px; font-size: 0.65rem; color: #e2e8f0; font-family: var(--font-mono); }
-    .event-card.malicious .findings-text { color: var(--color-malicious); }
-    .event-card.suspicious .findings-text { color: var(--color-suspicious); }
-    .findings-text { font-size: 0.85rem; font-weight: 500; }
+    .demo-btn {
+      background: #1a1a1e;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--text-secondary);
+      padding: 10px 16px;
+      border-radius: 6px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-    .diff-container { display: flex; flex-direction: column; gap: 8px; }
-    .diff-row { display: flex; gap: 8px; }
-    .diff-panel { flex: 1; background: #1a1a1e; border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; display: flex; flex-direction: column; }
-    .diff-header { background: rgba(255,255,255,0.02); padding: 6px 10px; font-size: 0.65rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; border-bottom: 1px solid var(--border-color); }
-    .diff-content { padding: 10px; font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-primary); white-space: pre-wrap; word-break: break-all; line-height: 1.5; }
-    .highlight-removed { background-color: var(--color-malicious-bg-hover); color: #ff8f8f; padding: 0 2px; border-radius: 2px; }
-    .highlight-suspicious { background-color: rgba(241, 196, 15, 0.15); color: #fceea7; padding: 0 2px; border-radius: 2px; }
-    .highlight-added { background-color: rgba(46, 204, 113, 0.15); color: var(--color-clean); padding: 0 2px; border-radius: 2px; }
+    .demo-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .inspector-view {
+      width: 520px;
+      background-color: var(--bg-inspector);
+      border-left: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      box-shadow: -4px 0 24px rgba(0, 0, 0, 0.4);
+      z-index: 10;
+    }
+
+    .inspector-header {
+      height: 60px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 20px;
+    }
+
+    .inspector-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .live-indicator {
+      width: 8px;
+      height: 8px;
+      background: var(--color-clean);
+      border-radius: 50%;
+      box-shadow: 0 0 8px var(--color-clean);
+    }
+
+    .inspector-feed {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .event-card {
+      background-color: #141417;
+      border-radius: 8px;
+      padding: 16px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      animation: slideIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .event-card.malicious {
+      border-color: rgba(252, 129, 129, 0.4);
+      box-shadow: 0 4px 20px rgba(252, 129, 129, 0.05);
+    }
+
+    .event-card.suspicious {
+      border-color: rgba(241, 196, 15, 0.4);
+      box-shadow: 0 4px 20px rgba(241, 196, 15, 0.05);
+    }
+
+    .event-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .timestamp {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+    }
+
+    .findings-box {
+      border-radius: 6px;
+      padding: 12px;
+    }
+
+    .event-card.malicious .findings-box {
+      background-color: rgba(252, 129, 129, 0.05);
+      border-left: 2px solid var(--color-malicious);
+    }
+
+    .event-card.suspicious .findings-box {
+      background-color: rgba(241, 196, 15, 0.05);
+      border-left: 2px solid var(--color-suspicious);
+    }
+
+    .findings-title {
+      font-weight: 600;
+      font-size: 0.75rem;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .layer-tag {
+      background: rgba(255, 255, 255, 0.1);
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 0.65rem;
+      color: #e2e8f0;
+      font-family: var(--font-mono);
+    }
+
+    .event-card.malicious .findings-text {
+      color: var(--color-malicious);
+    }
+
+    .event-card.suspicious .findings-text {
+      color: var(--color-suspicious);
+    }
+
+    .findings-text {
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .diff-container {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .diff-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .diff-panel {
+      flex: 1;
+      background: #1a1a1e;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .diff-header {
+      background: rgba(255, 255, 255, 0.02);
+      padding: 6px 10px;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .diff-content {
+      padding: 10px;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-primary);
+      white-space: pre-wrap;
+      word-break: break-all;
+      line-height: 1.5;
+    }
+
+    .highlight-removed {
+      background-color: var(--color-malicious-bg-hover);
+      color: #ff8f8f;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    .highlight-suspicious {
+      background-color: rgba(241, 196, 15, 0.15);
+      color: #fceea7;
+      padding: 0 2px;
+      border-radius: 2px;
+    }
+
+    .highlight-added {
+      background-color: rgba(46, 204, 113, 0.15);
+      color: var(--color-clean);
+      padding: 0 2px;
+      border-radius: 2px;
+    }
 
     /* Empty state */
-    .empty-state { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; color: var(--text-muted); font-size: 0.9rem; gap: 16px; }
-    .empty-state svg { opacity: 0.2; }
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      gap: 16px;
+    }
+
+    .empty-state svg {
+      opacity: 0.2;
+    }
 
     /* === 3. STATS (REPLAY ENGINE) VIEW === */
-    .replay-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-    .form-group { margin-bottom: 16px; }
-    .form-label { display: block; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; margin-bottom: 8px; }
-    .form-input, .form-select { width: 100%; background: #1a1a1e; border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; color: var(--text-primary); font-family: var(--font-mono); font-size: 0.85rem; outline: none; }
-    .form-input:focus, .form-select:focus { border-color: #555; }
-    .textarea-box { width: 100%; height: 200px; background: #1a1a1e; border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; color: var(--text-secondary); font-family: var(--font-mono); font-size: 0.85rem; resize: none; outline: none; margin-bottom: 16px;}
-    
-    .stats-card-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 16px; margin-bottom: 24px;}
-    .stats-card { background: transparent; border: 1px solid var(--border-color); border-radius: 6px; padding: 16px; }
-    
-    .signals-box { border: 1px solid var(--border-color); border-radius: 6px; overflow: hidden; margin-bottom: 24px; }
-    .signals-header { padding: 12px 16px; font-size: 0.75rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; border-bottom: 1px solid var(--border-color); }
-    .signal-item { padding: 16px; border-bottom: 1px solid var(--border-color); display: flex; gap: 12px; align-items: flex-start; }
-    .signal-item:last-child { border-bottom: none; }
-    .signal-icon { margin-top: 2px; }
-    .signal-icon.red { color: var(--color-malicious); }
-    .signal-icon.yellow { color: var(--color-suspicious); }
+    .replay-layout {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .form-input,
+    .form-select {
+      width: 100%;
+      background: #1a1a1e;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 10px;
+      color: var(--text-primary);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .form-input:focus,
+    .form-select:focus {
+      border-color: #555;
+    }
+
+    .textarea-box {
+      width: 100%;
+      height: 200px;
+      background: #1a1a1e;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+      color: var(--text-secondary);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      resize: none;
+      outline: none;
+      margin-bottom: 16px;
+    }
+
+    .stats-card-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .stats-card {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .signals-box {
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      overflow: hidden;
+      margin-bottom: 24px;
+    }
+
+    .signals-header {
+      padding: 12px 16px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .signal-item {
+      padding: 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      gap: 12px;
+      align-items: flex-start;
+    }
+
+    .signal-item:last-child {
+      border-bottom: none;
+    }
+
+    .signal-icon {
+      margin-top: 2px;
+    }
+
+    .signal-icon.red {
+      color: var(--color-malicious);
+    }
+
+    .signal-icon.yellow {
+      color: var(--color-suspicious);
+    }
 
     /* === 4. HISTORY VIEW === */
-    .history-controls { display: flex; gap: 12px; margin-bottom: 24px; }
-    .history-controls select, .history-controls input { background: transparent; border: 1px solid var(--border-color); border-radius: 4px; padding: 8px 12px; color: var(--text-primary); font-size: 0.85rem; outline: none; }
-    .history-controls input { flex: 1; max-width: 300px; }
-    
-    .history-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; font-family: var(--font-mono); }
-    .history-table th { text-align: left; padding: 12px 16px; color: var(--text-muted); font-weight: 600; border-bottom: 1px solid var(--border-color); }
-    .history-table td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.03); color: var(--text-primary); }
-    .history-row { cursor: pointer; transition: background 0.2s; }
-    .history-row:hover { background: rgba(255,255,255,0.02); }
-    
-    .history-expanded { display: none; background: rgba(255,255,255,0.01); border-bottom: 1px solid var(--border-color); }
-    .history-expanded.active { display: table-row; }
-    .history-expanded-content { padding: 24px; border-left: 2px solid var(--color-malicious); }
+    .history-controls {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
 
+    .history-controls select,
+    .history-controls input {
+      background: transparent;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      padding: 8px 12px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      outline: none;
+    }
+
+    .history-controls input {
+      flex: 1;
+      max-width: 300px;
+    }
+
+    .history-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      font-family: var(--font-mono);
+    }
+
+    .history-table th {
+      text-align: left;
+      padding: 12px 16px;
+      color: var(--text-muted);
+      font-weight: 600;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .history-table td {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--text-primary);
+    }
+
+    .history-row {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .history-row:hover {
+      background: rgba(255, 255, 255, 0.02);
+    }
+
+    .history-expanded {
+      display: none;
+      background: rgba(255, 255, 255, 0.01);
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .history-expanded.active {
+      display: table-row;
+    }
+
+    .history-expanded-content {
+      padding: 24px;
+      border-left: 2px solid var(--color-malicious);
+    }
   </style>
 </head>
+
 <body>
 
   <!-- 1. SIDEBAR -->
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-icon">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+        </svg>
       </div>
       ChainWard
     </div>
-    <ul class="nav-menu">
-      <li class="nav-item" id="nav-view-dashboard" onclick="switchView('view-dashboard')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg> Dashboard</li>
-      <li class="nav-item active" id="nav-view-live" onclick="switchView('view-live')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> Live Proxy</li>
-      <li class="nav-item" id="nav-view-stats" onclick="switchView('view-stats')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg> Stats</li>
-      <li class="nav-item" id="nav-view-history" onclick="switchView('view-history')"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12h4l2-9 5 18 3-10h4"></path></svg> History</li>
+    <div style="padding: 16px 24px; border-bottom: 1px solid var(--border-color);">
+      <div style="font-size: 0.75rem; color: var(--text-muted); margin-bottom: 8px;">CORE ENGINE CONNECTION</div>
+      <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.8rem; font-family: var(--font-mono);">
+        <div id="conn-dot" style="width: 8px; height: 8px; border-radius: 50%; background: var(--text-muted);"></div>
+        <div id="conn-line" style="flex: 1; color: var(--text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="Disconnected">Disconnected</div>
+      </div>
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <input type="text" id="events-url" value="http://localhost:8788" style="width: 100%; box-sizing: border-box; background: rgba(0,0,0,0.2); border: 1px solid rgba(255,255,255,0.1); border-radius: 4px; padding: 6px; color: var(--text-primary); font-size: 0.75rem; font-family: var(--font-mono); outline: none;">
+        <button onclick="connect()" style="width: 100%; background: var(--accent-brand); color: #000; border: none; border-radius: 4px; padding: 8px 12px; font-size: 0.75rem; font-weight: 600; cursor: pointer; text-transform: uppercase; letter-spacing: 0.05em;">Connect</button>
+      </div>
+    </div>
+    <ul class="nav-menu" style="margin-top: 16px;">
+      <li class="nav-item" id="nav-view-dashboard" onclick="switchView('view-dashboard')"><svg width="16" height="16"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+          <line x1="3" y1="9" x2="21" y2="9"></line>
+          <line x1="9" y1="21" x2="9" y2="9"></line>
+        </svg> Dashboard</li>
+      <li class="nav-item active" id="nav-view-live" onclick="switchView('view-live')"><svg width="16" height="16"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <polyline points="12 6 12 12 16 14"></polyline>
+        </svg> Live Proxy</li>
+
+      <li class="nav-item" id="nav-view-history" onclick="switchView('view-history')"><svg width="16" height="16"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M2 12h4l2-9 5 18 3-10h4"></path>
+        </svg> History</li>
+      <li class="nav-item" id="nav-view-stats" onclick="switchView('view-stats')"><svg width="16" height="16"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+        </svg> Replay</li>
     </ul>
   </aside>
 
@@ -266,99 +950,76 @@
     <div class="page-content">
       <div class="page-header">
         <div>
-          <div class="page-title">Inspector Console</div>
+          <div class="page-title">AI Activity Dashboard</div>
+          <div class="page-subtitle">Real-time monitoring of Claude Code activities and security interventions.</div>
         </div>
         <div style="display:flex; gap:16px;">
-          <div style="border:1px solid var(--border-color); border-radius:6px; display:flex; font-size:0.8rem; overflow:hidden;">
-            <div style="padding:6px 12px; border-right:1px solid var(--border-color); color:var(--text-muted)">5m</div>
+          <div
+            style="border:1px solid var(--border-color); border-radius:6px; display:flex; font-size:0.8rem; overflow:hidden;">
             <div style="padding:6px 12px; border-right:1px solid var(--border-color); color:var(--text-muted)">1h</div>
             <div style="padding:6px 12px; background:rgba(255,255,255,0.05); color:var(--text-primary)">24h</div>
+            <div style="padding:6px 12px; color:var(--text-muted)">7d</div>
           </div>
         </div>
       </div>
 
       <div class="metrics-grid">
-        <div class="metric-card">
-          <div class="metric-title">TOTAL EVENTS</div>
-          <div class="metric-value">1.24M</div>
-          <div class="metric-sub"><span style="color:var(--color-clean)">↑ 12%</span> vs last 24h</div>
+        <div class="metric-card" style="border-left: 4px solid var(--accent-brand);">
+          <div class="metric-title">TOTAL PROMPTS INSPECTED</div>
+          <div class="metric-value" id="m-total">—</div>
+          <div class="metric-sub"><span style="color:var(--color-clean)">↑ AI Interactions processed</span></div>
         </div>
-        <div class="metric-card malicious">
-          <div class="metric-title">MALICIOUS</div>
-          <div class="metric-value" style="color:var(--color-malicious)">4,892</div>
-          <div class="metric-sub">Action Required</div>
+        <div class="metric-card malicious" style="border-left: 4px solid var(--color-malicious);">
+          <div class="metric-title">THREATS NEUTRALIZED</div>
+          <div class="metric-value" id="m-malicious" style="color:var(--color-malicious)">—</div>
+          <div class="metric-sub">Attacks stripped, safe intents executed</div>
         </div>
-        <div class="metric-card suspicious">
-          <div class="metric-title">SUSPICIOUS</div>
-          <div class="metric-value" style="color:var(--color-suspicious)">12,045</div>
-          <div class="metric-sub">Monitoring</div>
+        <div class="metric-card suspicious" style="border-left: 4px solid var(--color-suspicious);">
+          <div class="metric-title">MCP TOOLS INTERCEPTED</div>
+          <div class="metric-value" id="m-suspicious" style="color:var(--color-suspicious)">—</div>
+          <div class="metric-sub">Total tool calls monitored via middleware</div>
         </div>
-        <div class="metric-card" style="border-color:rgba(46,204,113,0.3)">
-          <div class="metric-title">CLEANUP RATE</div>
-          <div class="metric-value" style="color:var(--color-clean)">99.8%</div>
-          <div class="metric-sub">Automated mitigation</div>
+        <div class="metric-card" style="border-color:rgba(46,204,113,0.3); border-left: 4px solid var(--color-clean);">
+          <div class="metric-title">AUTO-SANITIZATION RATE</div>
+          <div class="metric-value" id="m-clean" style="color:var(--color-clean)">—</div>
+          <div class="metric-sub">Payloads safely modified and forwarded</div>
         </div>
       </div>
 
       <div class="dashboard-split">
         <div class="dash-panel">
-          <h3>Events by Analysis Layer</h3>
-          <div class="bar-group">
-            <div class="bar-label">Structural Analysis <span>45% (558k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 70%"></div><div class="bar-fill suspicious" style="width: 20%"></div><div class="bar-fill malicious" style="width: 10%"></div>
-            </div>
+          <h3>AI Action Types (Intercepted)</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px;">Distribution of operations attempted by Claude Code through MCP.</p>
+          <div id="layer-empty" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 40px 0;">No data yet</div>
+          <div id="layer-bars">
+            <!-- JS will populate bar charts here -->
           </div>
-          <div class="bar-group">
-            <div class="bar-label">Pattern Matching <span>30% (372k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 60%"></div><div class="bar-fill suspicious" style="width: 30%"></div><div class="bar-fill malicious" style="width: 10%"></div>
+          <div
+            style="display:flex; gap:16px; margin-top:32px; font-size:0.75rem; font-weight:600; font-family:var(--font-mono)">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="width:8px; height:8px; border-radius:50%; background:var(--color-clean)"></div> ALLOWED
             </div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Heuristic Engine <span>15% (186k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 40%"></div><div class="bar-fill suspicious" style="width: 40%"></div><div class="bar-fill malicious" style="width: 20%"></div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="width:8px; height:8px; border-radius:50%; background:var(--color-suspicious)"></div>
+              SANITIZED
             </div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">AI Sandbox <span>10% (124k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 30%"></div><div class="bar-fill suspicious" style="width: 30%"></div><div class="bar-fill malicious" style="width: 40%"></div>
+            <div style="display:flex; align-items:center; gap:6px;">
+              <div style="width:8px; height:8px; border-radius:50%; background:var(--color-malicious)"></div> BLOCKED
             </div>
-          </div>
-          <div style="display:flex; gap:16px; margin-top:32px; font-size:0.75rem; font-weight:600; font-family:var(--font-mono)">
-            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--color-clean)"></div> CLEAN</div>
-            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--color-suspicious)"></div> SUSPICIOUS</div>
-            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--color-malicious)"></div> MALICIOUS</div>
           </div>
         </div>
 
         <div class="dash-panel">
-          <h3>Top Triggered Rules</h3>
+          <h3>Top Neutralized Rules (Last 24h)</h3>
           <div>
-            <div class="rule-row" style="color:var(--text-muted); text-transform:uppercase; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
-              <div>RULE CODE</div><div>HITS</div>
+            <div class="rule-row"
+              style="color:var(--text-muted); text-transform:uppercase; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
+              <div>CHAINWARD RULE</div>
+              <div>NEUTRALIZED HITS</div>
             </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot red"></div> SQLi-Pattern-Deep</div>
-              <div class="rule-hits">2,145</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot red"></div> Secret-Leak-API</div>
-              <div class="rule-hits">1,890</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot yellow"></div> Anomalous-Payload-Size</div>
-              <div class="rule-hits">4,521</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot yellow"></div> Rate-Limit-Preflight</div>
-              <div class="rule-hits">3,877</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot red"></div> Header-Injection-Attempt</div>
-              <div class="rule-hits">2,104</div>
+            <div id="signal-empty" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 40px 0;">No rules triggered</div>
+            <div id="signal-rows">
+              <!-- JS will populate rules here -->
             </div>
           </div>
         </div>
@@ -367,192 +1028,128 @@
   </div>
 
   <!-- VIEW: LIVE PROXY -->
-  <div id="view-live" class="view-container active">
-    <!-- PROXY DATA FLOW VIEW -->
-    <main class="chat-view">
-      <div class="chat-header">
-        Middleware Data Interception Flow
-      </div>
-      
-      <div class="chat-history" id="chat-history">
-        <div style="text-align:center; color:var(--text-muted); font-size:0.85rem; margin-bottom:16px;">
-          Listening for packets between Claude Code, MCP, and LLM...
+  <div id="view-live" class="view-container active" style="flex-direction: column;">
+    <div style="display: flex; flex: 1; overflow: hidden;">
+      <!-- LEFT PANEL: AI Interaction -->
+      <main class="chat-view" style="flex: 1; border-right: 1px solid var(--border-color);">
+        <div class="chat-header" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.05em;">AGENT:</span>
+            <span style="font-weight: 700;">CLAUDE CODE</span>
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
+            STATE: <span style="color: var(--text-primary);">IDLE</span>
+          </div>
+        </div>
+        <div class="chat-history" id="chat-history" style="font-family: var(--font-mono); font-size: 0.85rem; padding: 24px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="color: var(--text-secondary); margin-bottom: 8px;">
+            <span style="color: var(--text-muted);">[21:59:14.739]</span> Terminal cleared. Waiting for events...
+          </div>
+        </div>
+      </main>
+
+      <!-- RIGHT PANEL: Security Engine -->
+      <aside class="inspector-view" style="flex: 1; width: auto; border-left: none; box-shadow: none;">
+        <div class="inspector-header" style="justify-content: space-between;">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.05em;">MIDDLEWARE:</span>
+            <span style="font-weight: 700; color: var(--accent-brand);">CHAINWARD SECURITY ENGINE</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted);">
+            <div class="live-indicator"></div>
+            LISTENING ON PORT 4040
+          </div>
+        </div>
+        <div class="inspector-feed" id="inspector-feed" style="font-family: var(--font-mono); font-size: 0.85rem; padding: 24px; background: #121214;">
+          <div id="empty-state" class="empty-state" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px;">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+            </svg>
+            Waiting for events...
+          </div>
+        </div>
+      </aside>
+    </div>
+
+    </div>
+
+  <!-- VIEW: HISTORY -->
+  <div id="view-history" class="view-container">
+    <div class="page-content" style="max-width: 1200px; margin: 0 auto;">
+      <div class="page-header" style="margin-bottom: 24px;">
+        <div>
+          <div class="page-title">Action Audit Log</div>
+          <div class="page-subtitle">Detailed history of all MCP tool executions intercepted by ChainWard, including payload sanitization diffs.</div>
         </div>
       </div>
 
-      <div class="chat-input-area">
-        <div class="demo-buttons">
-          <button class="demo-btn" style="color:#2ecc71; border-color:rgba(46,204,113,0.3);" onclick="triggerCleanFlow()">Simulate Normal Flow (🟢)</button>
-          <button class="demo-btn" style="color:#f1c40f; border-color:rgba(241,196,15,0.3);" onclick="triggerSuspiciousFlow()">Simulate Suspicious Flow (🟡)</button>
-          <button class="demo-btn" style="color:#ff4b4b; border-color:rgba(255,75,75,0.3);" onclick="triggerMaliciousFlow()">Simulate Attack Flow (🔴)</button>
-        </div>
-        <div style="text-align:center; margin-top:16px; font-size:0.75rem; color:var(--text-muted);">
-          * Use buttons above to trigger data flow through the proxy *
-        </div>
+      <div class="history-controls">
+        <select>
+          <option>All Actions</option>
+        </select>
+        <select>
+          <option>All Tools</option>
+        </select>
+        <input type="text" placeholder="Search prompts or payloads..." style="flex: 1; max-width: 400px;">
       </div>
-    </main>
 
-    <!-- INSPECTOR CONSOLE -->
-    <aside class="inspector-view">
-      <div class="inspector-header">
-        <div class="inspector-title">
-          <div class="live-indicator"></div>
-          Live Inspector Console
-        </div>
-        <div style="font-size: 0.8rem; color: var(--text-muted); font-family: var(--font-mono);">Intercepting via MCP...</div>
+      <div id="history-tbody" style="display: flex; flex-direction: column; gap: 16px;">
+        <div id="history-empty" style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 40px 0;">No history events found.</div>
       </div>
-      
-      <div class="inspector-feed" id="inspector-feed">
-        <div class="empty-state" id="empty-state">
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
-          Waiting for events...
-        </div>
-      </div>
-    </aside>
+    </div>
   </div>
 
-  <!-- VIEW: STATS (Replay Engine Layout) -->
+  <!-- VIEW: REPLAY -->
   <div id="view-stats" class="view-container">
     <div class="page-content" style="max-width: 1200px; margin: 0 auto;">
       <div class="page-header">
         <div>
           <div class="page-title">Replay Engine</div>
-          <div class="page-subtitle">Simulate SDK payload sanitization and scoring offline.</div>
+          <div class="page-subtitle">Test custom prompts through the active security middleware.</div>
         </div>
       </div>
-
+      
       <div class="replay-layout">
-        <div class="replay-left">
-          <div style="display:flex; gap:16px;">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label">Model</label>
-              <select class="form-select"><option>chainward-v2-turbo</option></select>
+        <div>
+          <div class="form-group">
+            <label class="form-label">Payload Context</label>
+            <select id="replay-kind" class="form-select">
+              <option value="agent_context">agent_context</option>
+              <option value="token_name">token_name</option>
+              <option value="token_symbol">token_symbol</option>
+              <option value="nft_name">nft_name</option>
+              <option value="nft_description">nft_description</option>
+              <option value="tx_memo">tx_memo</option>
+              <option value="contract_comment">contract_comment</option>
+              <option value="ens_text">ens_text</option>
+            </select>
+          </div>
+          <div class="form-group" style="display:flex; gap:16px;">
+            <div style="flex:1;">
+              <label class="form-label">Target Chain</label>
+              <input type="text" id="replay-chain" class="form-input" placeholder="e.g. ethereum">
             </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label">Field Kind</label>
-              <select class="form-select"><option>user_bio</option></select>
+            <div style="flex:2;">
+              <label class="form-label">Target Address</label>
+              <input type="text" id="replay-address" class="form-input" placeholder="0x...">
             </div>
           </div>
           <div class="form-group">
-            <label class="form-label">Context Override (JSON)</label>
-            <input type="text" class="form-input" value='{"user_tier": "premium"}'>
+            <label class="form-label">Text to Analyze</label>
+            <textarea id="replay-input" class="textarea-box" placeholder="Enter payload text here..."></textarea>
           </div>
-          <div class="form-group" style="margin-top:32px;">
-            <label class="form-label">Raw Text Input</label>
-            <textarea class="textarea-box">Enter payload to simulate...</textarea>
-            <div style="display:flex; justify-content:flex-end;">
-              <button class="send-btn" style="background:var(--accent-brand); color:#000;">Scan Text</button>
-            </div>
-          </div>
+          <button class="demo-btn" style="background: var(--accent-brand); color: #000; border: none; width: 100%; justify-content: center;" onclick="replay()">Run Analysis</button>
         </div>
-
-        <div class="replay-right">
-          <div class="stats-card-grid">
-            <div class="stats-card" style="border-color:rgba(252, 129, 129, 0.4);">
-              <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                <span class="form-label" style="margin:0;">Severity</span><span class="form-label" style="margin:0;">Risk Score</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                <span style="font-size:1.4rem; font-weight:600; color:var(--color-malicious); display:flex; align-items:center; gap:8px;">⚠️ Malicious</span>
-                <span style="font-family:var(--font-mono); font-weight:600;">92/100</span>
-              </div>
-            </div>
-            <div class="stats-card"><span class="form-label">Processing Time</span><span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">124ms</span></div>
-            <div class="stats-card"><span class="form-label">Tokens</span><span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">42</span></div>
-          </div>
-
-          <div class="signals-box">
-            <div class="signals-header">Signals Detected</div>
-            <div class="signal-item">
-              <div class="signal-icon red">🕷️</div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                  <span style="font-family:var(--font-mono); font-weight:600; font-size:0.85rem;">SIG_PHISHING_URL</span>
-                  <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">Layer 7</span>
-                </div>
-                <div style="font-size:0.85rem; color:var(--text-secondary);">Detected known malicious domain signature attempting credential harvesting.</div>
-              </div>
-            </div>
-            <div class="signal-item">
-              <div class="signal-icon yellow">⚠️</div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                  <span style="font-family:var(--font-mono); font-weight:600; font-size:0.85rem;">ANM_OBFUSCATION_ATTEMPT</span>
-                  <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">Heuristic</span>
-                </div>
-                <div style="font-size:0.85rem; color:var(--text-secondary);">Unusual character encoding ratio suggestive of payload obfuscation.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="signals-box" style="margin-bottom:0;">
-            <div class="signals-header" style="color:var(--color-clean);">Sanitized Output</div>
-            <div style="padding:16px; font-family:var(--font-mono); font-size:0.85rem; line-height:1.6;">
-              Hello! Check out this totally safe link: <span class="highlight-added">[REDACTED_URL]</span> and let me know what you think.
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- VIEW: HISTORY -->
-  <div id="view-history" class="view-container">
-    <div class="page-content" style="max-width: 1200px; margin: 0 auto;">
-      <div class="page-header">
         <div>
-          <div class="page-title">Event History</div>
-          <div class="page-subtitle">Review historical analysis logs and security events.</div>
+          <div class="form-label">Analysis Result</div>
+          <div id="replay-out" style="background: #121214; border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; min-height: 400px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">
+            Ready for input.
+          </div>
         </div>
       </div>
-
-      <div class="history-controls">
-        <select><option>All Severities</option></select>
-        <select><option>All Layers</option></select>
-        <select><option>All Models</option></select>
-        <div style="flex:1;"></div>
-        <input type="text" placeholder="Filter content...">
-      </div>
-
-      <table class="history-table">
-        <thead>
-          <tr>
-            <th style="width:50px;">Status</th><th>Time</th><th>Model</th><th>Source</th><th>Severity</th><th>Preview</th>
-          </tr>
-        </thead>
-        <tbody id="history-tbody">
-          <!-- Row 1 (Expanded Demo) -->
-          <tr class="history-row" onclick="toggleHistoryRow(this)">
-            <td style="text-align:center;"><div style="width:8px;height:8px;background:var(--color-malicious);border-radius:50%;margin:0 auto;"></div></td>
-            <td>2023-10-27 14:32:01</td><td>CW-Guard-v2</td><td>0x7a...4f2b</td>
-            <td><div class="badge malicious">MALICIOUS</div></td>
-            <td style="color:var(--text-muted);">Unsafe eval detected in incoming payload...</td>
-          </tr>
-          <tr class="history-expanded active">
-            <td colspan="6" style="padding:0; border:none;">
-              <div class="history-expanded-content">
-                <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:6px; margin-bottom:16px;">
-                  <div style="font-weight:600; font-size:0.75rem; margin-bottom:8px;">Findings Details</div>
-                  <div style="font-size:0.85rem; color:var(--text-secondary);">"Analysis indicates an attempt to inject executable code via the 'params' object. Pattern matches known exploit signature CVE-2023-XXXX."</div>
-                </div>
-                <div style="font-weight:600; font-size:0.75rem; margin-bottom:8px;">Payload Diff</div>
-                <div class="diff-container" style="flex-direction:row;">
-                  <div class="diff-panel">
-                    <div class="diff-header">Incoming</div>
-                    <div class="diff-content" style="color:var(--text-secondary)">{<br>&nbsp;&nbsp;"action": "execute",<br>&nbsp;&nbsp;"params": <span class="highlight-removed">"eval('rm -rf /')"</span><br>}</div>
-                  </div>
-                  <div class="diff-panel">
-                    <div class="diff-header" style="color:var(--color-clean)">Sanitized (Proposed)</div>
-                    <div class="diff-content" style="color:var(--text-secondary)">{<br>&nbsp;&nbsp;"action": "execute",<br>&nbsp;&nbsp;"params": <span class="highlight-added">"BLOCKED_PAYLOAD"</span><br>}</div>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
     </div>
   </div>
+
 
   <script>
     function switchView(viewId) {
@@ -562,177 +1159,245 @@
       document.getElementById('nav-' + viewId).classList.add('active');
     }
 
-    function toggleHistoryRow(row) {
-      const expandedRow = row.nextElementSibling;
-      if (expandedRow && expandedRow.classList.contains('history-expanded')) {
-        expandedRow.classList.toggle('active');
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
+    }
+
+    const LAYER_OF = [
+      [/^(INVISIBLE_|MIXED_SCRIPT|CONFUSABLE_|FULLWIDTH_|ENCODED_)/, 'L1 구조'],
+      [/^(INSTRUCTION_OVERRIDE|ROLE_HIJACK|FAKE_AUTHORITY|CRYPTO_ACTION_DIRECTIVE|RESOLUTION_TEMPLATE|SAFETY_CLAIM_IMPERATIVE|APPROVAL_LURE|ADDRESS_PRESENT)$/, 'L2a 패턴'],
+      [/^INJECTION_INTENT$/, 'L2b 분류기'],
+      [/^(IDENTITY_IMPERSONATION|CLAIM_BEHAVIOR_MISMATCH)$/, 'L3 온체인 대조'],
+      [/^(IMAGE_EXFIL|ACTIVE_URI|RAW_HTML_EXEC|CHAT_TEMPLATE_TOKEN|ROLE_HEADER_INJECT|AUTO_FETCH_IMAGE)$/, 'L4 해석기 차이'],
+    ];
+    function layerFor(codes) {
+      for (const code of codes || []) {
+        for (const [re, label] of LAYER_OF) if (re.test(code)) return label;
+      }
+      return '판정';
+    }
+
+    const stats = { total: 0, malicious: 0, suspicious: 0, guarded: 0 };
+    const seen = new Set();
+    const layerCounts = new Map();
+    const signalCounts = new Map();
+
+    function renderStats() {
+      document.getElementById('m-total').textContent = stats.total.toLocaleString();
+      document.getElementById('m-malicious').textContent = stats.malicious.toLocaleString();
+      document.getElementById('m-suspicious').textContent = stats.suspicious.toLocaleString();
+      document.getElementById('m-clean').textContent =
+        stats.total === 0 ? '—' : `${Math.round(((stats.total - stats.guarded) / stats.total) * 1000) / 10}%`;
+    }
+
+    function timeOf(ms) {
+      const d = new Date(ms);
+      const p = (n, w = 2) => n.toString().padStart(w, '0');
+      return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`;
+    }
+
+    function addHistoryRow(ev, f) {
+      const tbody = document.getElementById('history-tbody');
+      const empty = document.getElementById('history-empty');
+      if (empty) empty.style.display = 'none';
+      const sev = f.severity === 'MALICIOUS' ? 'malicious' : 'suspicious';
+      
+      const badgeText = f.severity === 'MALICIOUS' ? 'NEUTRALIZED' : 'SANITIZED';
+      const timeStr = esc(new Date(ev.t).toISOString().replace('T', ' ').slice(0, 19));
+      
+      const reasonHtml = f.severity === 'ERROR' ? esc(f.before) : `Rule Triggered: ${esc((f.codes || []).join(', '))}`;
+      
+      const html = `
+        <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+          <div style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; border-bottom: 1px solid var(--border-color);" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+            <div class="badge ${sev}">${badgeText}</div>
+            <div style="color: var(--text-muted); font-size: 0.85rem; width: 120px;">${timeStr}</div>
+            <div style="font-family: var(--font-mono); font-size: 0.85rem; color: #61afef; font-weight: 600; width: 150px;">tool: ${esc(ev.model)}</div>
+            <div style="flex: 1; font-size: 0.9rem;">${esc(f.role)}[${esc(f.index)}]</div>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+          <div style="padding: 20px; background: rgba(0,0,0,0.2); display: none;">
+            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+              <strong style="color: var(--text-primary);">Reason:</strong> ${reasonHtml}
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <div style="background: rgba(255,75,75,0.05); border: 1px solid rgba(255,75,75,0.1); border-radius: 6px; padding: 16px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #ff6b6b; margin-bottom: 12px; font-family: var(--font-mono);">
+                  <span>BEFORE (Raw Payload Preview)</span>
+                </div>
+                <pre style="font-family: var(--font-mono); font-size: 0.85rem; color: #e2e8f0; margin: 0; white-space: pre-wrap;">${esc(f.before)}</pre>
+              </div>
+              <div style="background: rgba(46,204,113,0.05); border: 1px solid rgba(46,204,113,0.1); border-radius: 6px; padding: 16px;">
+                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #4ade80; margin-bottom: 12px; font-family: var(--font-mono);">
+                  <span>AFTER (Sanitized Preview)</span>
+                </div>
+                <pre style="font-family: var(--font-mono); font-size: 0.85rem; color: #e2e8f0; margin: 0; white-space: pre-wrap;">${esc(f.after)}</pre>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      tbody.insertAdjacentHTML('afterbegin', html);
+    }
+
+    function addInspectorCard(ev, f) {
+      const aiTerm = document.getElementById('chat-history');
+      const secTerm = document.getElementById('inspector-feed');
+      const empty = document.getElementById('empty-state');
+      if (empty) empty.style.display = 'none';
+
+      const time = timeOf(ev.t);
+      const isMalicious = f.severity === 'MALICIOUS';
+      const color = isMalicious ? 'var(--color-malicious)' : 'var(--color-suspicious)';
+      const actionText = isMalicious ? 'NEUTRALIZED' : 'SANITIZED';
+
+      // 1. AI Side (Left)
+      aiTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <span style="color:#fff">User/Agent Interaction (Model: ${esc(ev.model)})</span></div>`);
+      aiTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Sending Payload:</div>`);
+      aiTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 16px;"><pre style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap;">${esc(f.before)}</pre></div>`);
+      aiTerm.scrollTop = aiTerm.scrollHeight;
+
+      // 2. Security Side (Right)
+      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <span style="color: ${color}; font-weight: bold;">INTERCEPTED:</span> Event #${esc(f.index)} [${esc(f.role)}]</div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <div style="background: rgba(255,75,75,0.1); border-left: 2px solid ${color}; padding: 8px 12px; color: #ff8f8f; margin-top: 4px;"><strong>[ALERT]</strong> ${esc((f.codes || []).join(', '))}</div></div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Action: <span style="color: var(--color-clean); font-weight: bold;">${actionText} ALLOW</span>. Forwarding sanitized command...</div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 16px;"><pre style="background: rgba(46,204,113,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(46,204,113,0.2); color: #e2e8f0; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap;">${esc(f.after)}</pre></div>`);
+      secTerm.scrollTop = secTerm.scrollHeight;
+    }
+
+    function handleEvent(ev) {
+      const key = `${ev.t}:${ev.model}:${(ev.findings || []).length}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      stats.total += 1;
+      const findings = ev.findings || [];
+      if (findings.length) stats.guarded += 1;
+      for (const f of findings) {
+        if (f.severity === 'MALICIOUS') stats.malicious += 1;
+        else stats.suspicious += 1;
+        
+        addInspectorCard(ev, f);
+        addHistoryRow(ev, f);
+        
+        const layer = layerFor(f.codes);
+        layerCounts.set(layer, (layerCounts.get(layer) ?? 0) + 1);
+        for (const code of f.codes || []) signalCounts.set(code, (signalCounts.get(code) ?? 0) + 1);
+      }
+      renderStats();
+      renderAggregates();
+    }
+
+    let source = null;
+    function setConn(state, text) {
+      const dot = document.getElementById('conn-dot');
+      const line = document.getElementById('conn-line');
+      const colour = { on: 'var(--color-clean)', off: 'var(--color-malicious)', wait: 'var(--text-muted)' }[state];
+      if (dot) dot.style.background = colour;
+      if (line) {
+        line.textContent = text;
+        line.title = text;
       }
     }
 
-    const chatHistory = document.getElementById('chat-history');
-    const inspectorFeed = document.getElementById('inspector-feed');
-    const emptyState = document.getElementById('empty-state');
-    
-    function getCurrentTime() {
-      const now = new Date();
-      return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}:${now.getSeconds().toString().padStart(2, '0')}.${now.getMilliseconds().toString().padStart(3, '0')}`;
+    function connect() {
+      const base = (document.getElementById('events-url').value || '').replace(/\/+$/, '');
+      if (source) source.close();
+      setConn('wait', `Connecting to ${base}...`);
+      try {
+        source = new EventSource(`${base}/events`);
+      } catch (e) {
+        setConn('off', `Connection failed: ${e.message}`);
+        return;
+      }
+      source.onopen = () => setConn('on', `Connected — ${base}`);
+      source.onmessage = (m) => {
+        try { handleEvent(JSON.parse(m.data)); } catch { /* keep the stream alive on one bad frame */ }
+      };
+      source.onerror = () => setConn('off', `Disconnected — ${base}. Is proxy running?`);
     }
 
-    function clearChat() {
-      chatHistory.innerHTML = '';
+    function renderAggregates() {
+      const bars = document.getElementById('layer-bars');
+      const barsEmpty = document.getElementById('layer-empty');
+      const rows = document.getElementById('signal-rows');
+      const rowsEmpty = document.getElementById('signal-empty');
+      if (!bars || !rows) return;
+
+      const layerTotal = [...layerCounts.values()].reduce((a, b) => a + b, 0);
+      if (barsEmpty) barsEmpty.style.display = layerTotal ? 'none' : '';
+      bars.innerHTML = [...layerCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, n]) => {
+          const pct = Math.round((n / layerTotal) * 1000) / 10;
+          return `
+            <div class="bar-group">
+              <div class="bar-label">${esc(label)} <span>${pct}% (${n})</span></div>
+              <div class="bar-track"><div class="bar-fill malicious" style="width:${pct}%"></div></div>
+            </div>`;
+        })
+        .join('');
+
+      if (rowsEmpty) rowsEmpty.style.display = signalCounts.size ? 'none' : '';
+      rows.innerHTML = [...signalCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([code, n]) => `
+          <div class="rule-row">
+            <div class="rule-name"><div class="rule-dot red"></div> ${esc(code)}</div>
+            <div class="rule-hits">${n}</div>
+          </div>`)
+        .join('');
     }
 
-    function addFlowMessage(source, dest, content) {
-      const html = `
-        <div class="flow-message">
-          <div class="flow-header">
-            <span class="flow-source">${source}</span> <span class="flow-arrow">→</span> <span class="flow-dest">${dest}</span>
-          </div>
-          <div class="flow-body" style="font-family:var(--font-mono); font-size:0.85rem; color:var(--text-secondary);">
-            ${content}
-          </div>
-        </div>
-      `;
-      chatHistory.insertAdjacentHTML('beforeend', html);
-      chatHistory.scrollTop = chatHistory.scrollHeight;
+    async function replay() {
+      const text = document.getElementById('replay-input').value;
+      const out = document.getElementById('replay-out');
+      if (!text.trim()) { out.textContent = 'Please enter payload text.'; return; }
+
+      const base = (document.getElementById('events-url').value || '').replace(/\/+$/, '');
+      const body = {
+        text,
+        kind: document.getElementById('replay-kind').value,
+        chain: document.getElementById('replay-chain').value.trim() || undefined,
+        address: document.getElementById('replay-address').value.trim() || undefined,
+      };
+      out.textContent = 'Analyzing...';
+      try {
+        const r = await fetch(`${base}/scan`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const v = await r.json();
+        if (!r.ok) { out.textContent = `Rejected: ${v.error}`; return; }
+
+        const colour = v.severity === 'MALICIOUS' ? 'var(--color-malicious)'
+          : v.severity === 'SUSPICIOUS' ? 'var(--color-suspicious)' : 'var(--color-clean)';
+        const rows = (v.signals || []).map((sig) => `
+          <div class="rule-row">
+            <div class="rule-name"><div class="rule-dot ${sig.hard ? 'red' : 'yellow'}"></div> ${esc(sig.code)}</div>
+            <div class="rule-hits">${esc(sig.weight)}${sig.hard ? ' HARD' : ''}</div>
+          </div>`).join('') || '<div style="color:var(--text-muted); font-size:0.85rem; padding:8px 0;">No signals</div>';
+
+        out.innerHTML = `
+          <div style="color:${colour}; font-weight:700; font-size:1.2rem;">${esc(v.severity)}</div>
+          <div style="color:var(--text-muted); font-size:0.8rem; margin-top:2px;">score ${esc(v.score)}</div>
+          <div style="margin-top:16px; font-size:0.8rem; color:var(--text-muted);">Signals & Weights</div>
+          ${rows}
+          <div style="margin-top:16px; font-size:0.8rem; color:var(--text-muted);">Sanitized Result</div>
+          <div class="diff-content" style="margin-top:4px;">${esc(v.sanitized)}</div>`;
+      } catch (e) {
+        out.textContent = `Failed to reach proxy: ${e.message}. Check the Events API URL.`;
+      }
     }
 
-    function addProxyAction(severity, layerText, beforeContent, afterContent) {
-      const cls = severity === 'malicious' ? 'malicious' : (severity === 'suspicious' ? 'suspicious' : 'clean');
-      const badgeColor = severity === 'malicious' ? 'var(--color-malicious)' : (severity === 'suspicious' ? 'var(--color-suspicious)' : 'var(--color-clean)');
-      const badgeBg = severity === 'malicious' ? 'rgba(255,75,75,0.2)' : (severity === 'suspicious' ? 'rgba(241,196,15,0.2)' : 'rgba(46,204,113,0.2)');
-      
-      const html = `
-        <div class="flow-message flow-proxy-action ${cls}">
-          <div class="flow-header" style="color:${badgeColor}">
-            <span class="flow-source" style="background:${badgeColor}; color:#000;">ChainWard</span> 
-            Intercepted Payload (${layerText})
-          </div>
-          <div class="inline-diff">
-            <div style="border:1px solid rgba(255,255,255,0.1)">
-              <div class="diff-title">BEFORE (Original Data)</div>
-              ${beforeContent}
-            </div>
-            <div style="border:1px solid rgba(46,204,113,0.3)">
-              <div class="diff-title">AFTER (Sanitized)</div>
-              ${afterContent}
-            </div>
-          </div>
-        </div>
-      `;
-      chatHistory.insertAdjacentHTML('beforeend', html);
-      chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
-
-    function addLlmResponse(content) {
-      const html = `
-        <div class="flow-message" style="border-left:3px solid var(--accent-brand);">
-          <div class="flow-header">
-            <span class="flow-source">LLM</span> <span class="flow-arrow">→</span> <span class="flow-dest">Claude Code</span>
-          </div>
-          <div class="flow-body">
-            ${content}
-          </div>
-        </div>
-      `;
-      chatHistory.insertAdjacentHTML('beforeend', html);
-      chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
-
-    function addInspectorCard(time, severity, layerTag, reasonText, original, sanitized) {
-      if (emptyState) emptyState.style.display = 'none';
-      const isMalicious = severity === 'malicious';
-      const badgeText = isMalicious ? '🔴 MALICIOUS' : '🟡 SUSPICIOUS';
-      const severityClass = isMalicious ? 'malicious' : 'suspicious';
-      const html = `
-        <div class="event-card ${severityClass}">
-          <div class="event-header">
-            <div class="badge ${severityClass}">${badgeText}</div>
-            <div class="timestamp">${time}</div>
-          </div>
-          <div class="findings-box">
-            <div class="findings-title"><span class="layer-tag">${layerTag}</span> Decision Reason</div>
-            <div class="findings-text">${reasonText}</div>
-          </div>
-          <div class="diff-container">
-            <div class="diff-row">
-              <div class="diff-panel">
-                <div class="diff-header">Before (Original On-chain Data)</div>
-                <div class="diff-content">${original}</div>
-              </div>
-              <div class="diff-panel">
-                <div class="diff-header">After (Sanitized)</div>
-                <div class="diff-content">${sanitized}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      inspectorFeed.insertAdjacentHTML('afterbegin', html);
-    }
-
-    function triggerCleanFlow() {
-      clearChat();
-      
-      // Step 1
-      addFlowMessage('Claude Code', 'ChainWard Middleware', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"target": "Get ETH balance"<br>}`);
-      
-      // Step 2
-      setTimeout(() => {
-        const original = `"response": "Balance is 1.5 ETH"`;
-        addProxyAction('clean', 'Passed', original, original);
-      }, 800);
-
-      // Step 3
-      setTimeout(() => {
-        addFlowMessage('ChainWard Middleware', 'LLM', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"target": "Get ETH balance"<br>}`);
-      }, 1600);
-
-      // Step 4
-      setTimeout(() => {
-        addLlmResponse("I successfully retrieved the data. The balance is 1.5 ETH.");
-      }, 2400);
-    }
-
-    function triggerSuspiciousFlow() {
-      clearChat();
-      addFlowMessage('Claude Code', 'ChainWard Middleware', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"data_stream": "0xUnusual..."<br>}`);
-      
-      setTimeout(() => {
-        const before = `"data_stream": "<span class='highlight-suspicious'>encoded_chunk_xx</span>"`;
-        const after = `"data_stream": "<span class='highlight-added'>normalized_chunk</span>"`;
-        addProxyAction('suspicious', 'L2 (명령어 의도)', before, after);
-        addInspectorCard(getCurrentTime(), 'suspicious', 'L2 (명령어 의도)', 'Obfuscation Attempt: Unusual character encoding ratio suggestive of payload obfuscation.', '"data_stream": "<span class=\'highlight-suspicious\'>encoded_chunk_xx</span>"', '"data_stream": "<span class=\'highlight-added\'>normalized_chunk</span>"');
-      }, 800);
-
-      setTimeout(() => {
-        addFlowMessage('ChainWard Middleware', 'LLM', `{<br>&nbsp;&nbsp;"action": "read_mcp",<br>&nbsp;&nbsp;"data_stream": "<span style='color:var(--color-clean)'>normalized_chunk</span>"<br>}`);
-      }, 1600);
-
-      setTimeout(() => {
-        addLlmResponse("I fetched the data stream. It was normalized by the proxy and processed safely.");
-      }, 2400);
-    }
-
-    function triggerMaliciousFlow() {
-      clearChat();
-      addFlowMessage('Claude Code', 'ChainWard Middleware', `{<br>&nbsp;&nbsp;"action": "mcp_execute",<br>&nbsp;&nbsp;"contract": "0xBadC0de...Def",<br>&nbsp;&nbsp;"mcp_data": "<span style='color:#ff8f8f'>eval('rm -rf /')</span>"<br>}`);
-      
-      setTimeout(() => {
-        const before = `"mcp_data": "<span class='highlight-removed'>eval('rm -rf /')</span>"`;
-        const after = `"mcp_data": "<span class='highlight-added'>[MALICIOUS_PAYLOAD_REDACTED]</span>"`;
-        addProxyAction('malicious', 'L3 (허니팟 진실 대조)', before, after);
-        addInspectorCard(getCurrentTime(), 'malicious', 'L3 (허니팟 진실 대조)', 'Honeypot Mismatch: Detected attempt to inject a known malicious contract address.', '"mcp_data": "<span class=\'highlight-removed\'>eval(\'rm -rf /\')</span>"', '"mcp_data": "<span class=\'highlight-added\'>[MALICIOUS_PAYLOAD_REDACTED]</span>"');
-      }, 1000);
-
-      setTimeout(() => {
-        addFlowMessage('ChainWard Middleware', 'LLM', `{<br>&nbsp;&nbsp;"action": "mcp_execute",<br>&nbsp;&nbsp;"contract": "0xBadC0de...Def",<br>&nbsp;&nbsp;"mcp_data": "<span style='color:var(--color-clean)'>[MALICIOUS_PAYLOAD_REDACTED]</span>"<br>}`);
-      }, 2000);
-
-      setTimeout(() => {
-        addLlmResponse("I have processed your request. However, the MCP data contained a redacted payload (<strong>[MALICIOUS_PAYLOAD_REDACTED]</strong>), indicating it was blocked by the security middleware. Thus, the execution cannot proceed.");
-      }, 3500);
-    }
+    renderStats();
+    renderAggregates();
+    connect();
   </script>
 </body>
+
 </html>
