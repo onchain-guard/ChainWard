@@ -8,14 +8,14 @@
 // false-positive rate and utility retained. Reporting an attack rate without the last two is
 // meaningless — a guard that redacts everything scores 0 harm and 0 utility.
 
-import { CASES, caseById } from "./cases.ts";
+import { CASES, CONTROLS, caseById } from "./cases.ts";
 import { buildToolResult, scanCase } from "./engine.ts";
 import { SYSTEM_PROMPT, TOOLS, buildMessages } from "./prompt.ts";
-import { aggregate, scoreRun } from "./score.ts";
-import { guardTable, metricsTable, perCaseRuns, reached, usageTable } from "./report.ts";
+import { aggregate, controlHeld, scoreControl, scoreRun } from "./score.ts";
+import { controlTable, guardTable, metricsTable, perCaseRuns, reached, usageTable } from "./report.ts";
 import { anthropicProvider } from "./providers/anthropic.ts";
 import { stubProvider } from "./providers/stub.ts";
-import type { Arm, BenchCase, GuardResultRow, Provider, RunRow } from "./types.ts";
+import type { Arm, BenchCase, ControlRow, GuardResultRow, Provider, RunRow } from "./types.ts";
 
 interface Opts {
   provider: string;
@@ -83,6 +83,25 @@ async function runGuardOnly(cases: BenchCase[]): Promise<GuardResultRow[]> {
   return rows;
 }
 
+/** Controls are not corpus runs, but they cost money — fold them into the usage table so
+ *  the reported total is what the run actually spent. */
+function controlAsRun(c: ControlRow): RunRow {
+  return {
+    caseId: c.controlId,
+    arm: "off",
+    model: c.model,
+    provider: c.provider,
+    harmed: false,
+    movedFunds: c.movedFunds,
+    taskDone: false,
+    invalid: c.invalid,
+    stopReason: c.stopReason,
+    usage: c.usage,
+    toolCalls: c.toolCalls,
+    text: c.text,
+  };
+}
+
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
   const cases = opts.only.length
@@ -114,6 +133,41 @@ async function main() {
   if (provider.id === "stub") {
     console.log("\n> ⚠️ provider=stub — 배관 점검용이며 결과로 보고할 수 없음. 실제 수치는 --provider anthropic.\n");
   }
+
+  // ---- positive control, BEFORE the corpus -------------------------------------------
+  // The corpus is all attacks, so nothing in it can tell "the model refused the attacker's
+  // address" from "no value-moving call is reachable here at all" — both read as 0/N. These
+  // runs are the only ones that are SUPPOSED to move funds. They are cheap (2 × models ×
+  // runs) and they decide whether the canary rows below mean anything.
+  const controlRuns: ControlRow[] = [];
+  const controlTasks: Array<{ c: (typeof CONTROLS)[number]; model: string; messages: unknown[] }> = [];
+  for (const c of CONTROLS) {
+    const { json } = await buildToolResult(c, "off");
+    const messages = buildMessages(c, json);
+    for (const model of opts.models) {
+      for (let i = 0; i < opts.runs; i++) controlTasks.push({ c, model, messages });
+    }
+  }
+  process.stderr.write(`positive control: ${controlTasks.length}콜\n`);
+  await pool(controlTasks, opts.concurrency, async (t) => {
+    try {
+      const reply = await provider.complete({
+        model: t.model,
+        system: SYSTEM_PROMPT,
+        messages: t.messages,
+        tools: TOOLS,
+      });
+      controlRuns.push(scoreControl(t.c, t.model, provider.id, reply));
+    } catch (e) {
+      console.error(`  ${t.c.id}/${t.model}: ${(e as Error).message}`);
+    }
+  });
+
+  const controlOk: Record<string, boolean> = {};
+  for (const model of opts.models) controlOk[model] = controlHeld(controlRuns, model);
+
+  console.log("\n## 2. Positive control (배관 검증 — 이게 실패하면 아래 canary는 무의미)\n");
+  console.log(controlTable(controlRuns));
 
   // Payloads are deterministic and identical across repeats and models, so build them all
   // up front — then every remaining unit of work is one independent API call.
@@ -160,11 +214,11 @@ async function main() {
     benign.map((b) => ({ caseId: b.caseId, flagged: b.severity !== "CLEAN" })),
   );
 
-  console.log("\n## 2. 모델 실행 결과\n");
-  console.log(metricsTable(metrics, opts.models, provider.id));
+  console.log("\n## 3. 모델 실행 결과\n");
+  console.log(metricsTable(metrics, opts.models, provider.id, controlOk));
   console.log("\n### 케이스별 (피해 발생 횟수 / 유효 실행 횟수)\n");
   console.log(perCaseRuns(runs));
-  const usage = usageTable(runs);
+  const usage = usageTable([...runs, ...controlRuns.map(controlAsRun)]);
   if (usage) console.log(`\n${usage}`);
   if (failed) {
     // a dropped call is not a safe run; saying so keeps the denominators honest

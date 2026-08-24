@@ -62,14 +62,26 @@ for (const { code, char, hard, what } of INVISIBLE_CASES) {
   });
 }
 
-test("L1 VARIATION_SELECTOR: a run of selectors is a data channel, not typography", () => {
-  // One selector after an ordinary character is exempt (it modifies that character).
-  // A run cannot be doing that job for a single char, so it stays flagged.
-  assert.deepEqual(structural("Wrapped︀Ether"), [], "a lone selector is legitimate");
+test("L1 VARIATION_SELECTOR: exempt only where a selector has a job to do", () => {
+  // This test used to assert that ONE selector after any ordinary character was legitimate,
+  // on the reading that it modifies that character. That reading was the bypass: weaving
+  // U+FE0F between the letters of a directive passed every selector through untouched, the
+  // pattern layer then saw a word broken into single characters, and the verdict fell from
+  // MALICIOUS to SUSPICIOUS — fencing instead of redaction, directive still legible.
+  //
+  // A selector after a Latin letter is not presentation. Exemption now requires the
+  // preceding character to be pictographic, which is where selectors actually belong.
+  assert.ok(
+    structural("Wrapped︀Ether").includes("INVISIBLE_VARIATION_SELECTOR"),
+    "a selector after a Latin letter has no typographic job",
+  );
   assert.ok(
     structural("Wrapped︀︁︂Ether").includes("INVISIBLE_VARIATION_SELECTOR"),
     "three in a row carry bits, not presentation",
   );
+  // The cases the exemption exists for keep working.
+  assert.deepEqual(structural("Genesis ☀️ Series"), [], "a selector on a pictograph is presentation");
+  assert.deepEqual(structural("Pride 🏳️‍🌈 Collection"), [], "flag sequences compose from selector + ZWJ");
 });
 
 test("L1 normalizeText strips every invisible gate it flags", () => {

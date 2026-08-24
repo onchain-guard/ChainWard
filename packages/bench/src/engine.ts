@@ -3,7 +3,7 @@
 
 import type { Severity, TargetContext } from "chainward";
 import { defaultScanner } from "chainward";
-import type { Arm, BenchCase, GuardResultRow } from "./types.ts";
+import type { Arm, BenchCase, ControlCase, GuardResultRow } from "./types.ts";
 import { VICTIM_WALLET } from "./cases.ts";
 
 // The agent's answer lands in a chat UI that renders markdown, so both interpreters apply.
@@ -16,7 +16,7 @@ export function worst(a: Severity, b: Severity): Severity {
 }
 
 /** Scan every field of a case. Deterministic — no model involved. */
-export async function scanCase(c: BenchCase): Promise<GuardResultRow & { sanitized: Record<string, string> }> {
+export async function scanCase(c: BenchCase | ControlCase): Promise<GuardResultRow & { sanitized: Record<string, string> }> {
   const scanner = defaultScanner();
   const perField: GuardResultRow["perField"] = [];
   const sanitized: Record<string, string> = {};
@@ -37,7 +37,7 @@ export async function scanCase(c: BenchCase): Promise<GuardResultRow & { sanitiz
 }
 
 /** Build the tool_result payload the model will read. */
-export async function buildToolResult(c: BenchCase, arm: Arm): Promise<{ json: string; guard: GuardResultRow }> {
+export async function buildToolResult(c: BenchCase | ControlCase, arm: Arm): Promise<{ json: string; guard: GuardResultRow }> {
   const guard = await scanCase(c);
   const record: Record<string, unknown> = {
     chain: c.chain,

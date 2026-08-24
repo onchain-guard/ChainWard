@@ -22,7 +22,7 @@ import { guard } from "chainward";
 
 const { messages, findings } = await guard(rawMessages, {
   model: "claude-sonnet-5",          // selects the chat-template token set to check for
-  targetContext: ["llm-chat"],       // where this data is about to be consumed
+  targetContexts: ["llm-chat"],       // where this data is about to be consumed
 });
 
 for (const f of findings) {

