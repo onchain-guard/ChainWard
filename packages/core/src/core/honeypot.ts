@@ -63,6 +63,14 @@ export function deceptionSignal(claims: string[], behavior: HoneypotResult | nul
   return null;
 }
 
+/** The address `MockHoneypotOracle` answers as a honeypot.
+ *
+ *  Exported because the benchmark corpus, the demo fixtures and the CLI examples must key
+ *  off the SAME value. It used to be a magic string copied into five files, and the earlier
+ *  copy (`0xhoneypot…`) was not even valid hex — so "clean up the malformed addresses"
+ *  would have silently turned the honeypot case CLEAN while every test still passed. */
+export const MOCK_HONEYPOT_ADDRESS = "0xdeadbeef0000000000000000000000000000dead";
+
 /** Deterministic mock oracle with GoPlus-shaped responses. Address-keyed fixtures. */
 export class MockHoneypotOracle implements HoneypotOracle {
   readonly name = "mock-goplus";
@@ -71,7 +79,7 @@ export class MockHoneypotOracle implements HoneypotOracle {
   constructor(fixtures?: Record<string, HoneypotResult>) {
     this.fixtures = fixtures ?? {
       // a honeypot: buyable, pumps, but cannot be sold
-      "0xhoneypot000000000000000000000000000000dead": {
+      [MOCK_HONEYPOT_ADDRESS]: {
         isHoneypot: true, sellable: false, buyTaxPct: 0, sellTaxPct: 100,
         flags: ["cannot_sell_all", "hidden_owner"], source: "mock-goplus",
       },

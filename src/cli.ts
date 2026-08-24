@@ -1,13 +1,20 @@
 #!/usr/bin/env -S npx tsx
-// ChainWard CLI — real, wired to the real engine (mock data source + mock oracle).
+// Repo-local CLI over the engine, against the fixture data source.
 //
 //   npx tsx src/cli.ts scan token <chain> <address>
 //   npx tsx src/cli.ts scan nft   <chain> <address> <tokenId>
 //   npx tsx src/cli.ts scan tx    <chain> <txHash>
 //   npx tsx src/cli.ts text <fieldKind> "<arbitrary text>"
+//   npx tsx src/cli.ts mcp
 //
-// To run against real chains: swap MockOnchainDataSource -> RpcOnchainDataSource in the
-// factory below (see src/adapters/onchain.ts).
+// This is the fixture-backed CLI. The SHIPPED one is `chainward` (packages/core), and the
+// proxy lives there too — `npx chainward proxy --upstream …`. A `proxy` subcommand used to
+// sit here and imported ./proxy/server.ts, which moved into packages/core in 06ff829; the
+// import was left behind and broke at runtime. It is removed rather than repointed, because
+// two entry points to the same server is one more than anyone needs.
+//
+// To read real chains instead of fixtures, see packages/bench/src/onchain-rpc.ts (a
+// dependency-free ERC-20 reader) or swap in RpcOnchainDataSource per src/adapters/onchain.ts.
 
 import type { FieldKind, ScanTarget } from "../packages/core/src/core/types.ts";
 import { defaultScanner } from "../packages/core/src/core/scanner.ts";
@@ -17,9 +24,15 @@ import { renderReport, renderField } from "../packages/core/src/render.ts";
 async function main() {
   const [cmd, ...rest] = process.argv.slice(2);
 
-  // subcommands that hand off to a long-running server (they read process.argv themselves)
-  if (cmd === "proxy") { await import("./proxy/server.ts"); return; }
+  // hands off to a long-running server, which reads process.argv itself
   if (cmd === "mcp") { await import("./mcp/server.ts"); return; }
+  if (cmd === "proxy") {
+    console.error(
+      "the proxy ships in the `chainward` package, not here:\n" +
+        "  npx chainward proxy --upstream https://api.anthropic.com",
+    );
+    process.exit(2);
+  }
 
   const scanner = defaultScanner();
   const source = new MockOnchainDataSource(); // REAL IMPL: new RpcOnchainDataSource()
@@ -62,9 +75,9 @@ function usage(err?: string) {
       "",
       "demo addresses (mock source):",
       "  token 0xdead1111111111111111111111111111beef0001   (injection in name)",
-      "  token 0xhoneypot000000000000000000000000000000dead (honeypot + safety claim)",
+      "  token 0xdeadbeef0000000000000000000000000000dead (honeypot + safety claim)",
       "  token 0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48   (USDC, clean)",
-      "  nft   0xnft22222222222222222222222222222222c0de 1  (metadata injection)",
+      "  nft   0xc0de22222222222222222222222222222222c0de 1  (metadata injection)",
       "  tx    0xabc...0001                                 (memo injection)",
     ].join("\n"),
   );
