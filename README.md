@@ -303,6 +303,30 @@ const scanner = new ChainWardScanner({
 npx tsx src/demo/run-demo.ts
 ```
 
+## 콘솔을 손보려면
+
+콘솔은 레포 루트의 `dashboard.html` 한 파일이다. 빌드가 이것을 패키지 안으로 복사하고,
+프록시가 그 복사본을 서빙한다.
+
+```bash
+pnpm install && pnpm -r build
+pnpm demo                      # http://localhost:8788/
+```
+
+고친 뒤에는 **`pnpm demo`를 다시 띄우면 된다** — 시작할 때마다 복사본을 갱신하므로 전체
+빌드를 다시 돌릴 필요가 없다. 브라우저 새로고침만으로는 안 바뀐다: 서버가 시작 시점에
+페이지를 읽는다.
+
+`pnpm demo`가 하는 일은 그 복사 하나뿐이고, 나머지는 `chainward proxy`에 그대로 넘긴다
+(`--live`는 `--upstream https://api.anthropic.com`의 준말). 플래그도 그대로 전달된다:
+
+```bash
+pnpm demo --events 9999
+```
+
+**npm에 배포된 패키지를 쓰면 안 된다.** 패키지 안의 콘솔은 배포 시점에 고정된 사본이라,
+레포에서 무엇을 고치든 화면에 나타나지 않는다.
+
 ## 개발
 
 ```bash
