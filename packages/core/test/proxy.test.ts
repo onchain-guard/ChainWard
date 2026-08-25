@@ -256,10 +256,41 @@ test("/events streams, and a late subscriber still receives what it missed", asy
   const chunk = await reader.read();
   const text = new TextDecoder().decode(chunk.value);
 
-  assert.match(text, /^data: /);
+  // The stream now opens with an SSE comment so the client settles even on an empty buffer;
+  // the replayed event follows it.
+  assert.match(text, /^: /);
+  assert.match(text, /data: /);
   assert.match(text, /MALICIOUS/);
 
   await reader.cancel();
+  await proxy.close();
+});
+
+/** Read the first chunk of an SSE stream. Mirrors the reader handling above: getReader()
+ *  locks the stream, so it has to be cancelled through the reader rather than the body. */
+async function firstFrame(url: string): Promise<{ text: string; done: () => Promise<void> }> {
+  const res = await fetch(url);
+  const reader = res.body!.getReader();
+  const { value } = await reader.read();
+  return {
+    text: new TextDecoder().decode(value ?? new Uint8Array()),
+    done: () => reader.cancel(),
+  };
+}
+
+test("/events opens the stream body before any event exists", async () => {
+  // A browser leaves EventSource at readyState CONNECTING until the first byte of the body
+  // arrives — headers alone are not enough. On a freshly started proxy the buffer is empty,
+  // so without an immediate write nothing is sent, `onopen` never fires, and a dashboard
+  // shows "Connecting…" indefinitely while the server has already counted it as connected.
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const { text, done } = await firstFrame(`http://127.0.0.1:${portOf(proxy.events!)}/events`);
+
+  assert.ok(text.length > 0, "nothing was written, so the client never opens");
+  assert.match(text, /^:/, `the opening frame must be an SSE comment — got ${JSON.stringify(text)}`);
+  assert.ok(!text.startsWith("data:"), "an opening comment must not look like an event");
+
+  await done();
   await proxy.close();
 });
 

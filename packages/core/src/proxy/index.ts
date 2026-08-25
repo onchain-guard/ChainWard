@@ -311,6 +311,13 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
         "cache-control": "no-cache",
         connection: "keep-alive",
       });
+      // Open the stream body immediately. Headers alone do not settle an EventSource: the
+      // browser leaves readyState at CONNECTING until the first byte of the body arrives, so
+      // on a proxy that has not guarded anything yet — the buffer is empty and nothing is
+      // written below — `onopen` never fires and a dashboard sits on "Connecting…" forever
+      // while the server has already counted it as a subscriber. An SSE comment costs one
+      // line, is ignored by every client, and settles the connection.
+      res.write(": connected\n\n");
       // Replay the buffer so a client that connects mid-session is not staring at nothing.
       for (const e of buffer) res.write(`data: ${JSON.stringify(e)}\n\n`);
       subscribers.add(res);
