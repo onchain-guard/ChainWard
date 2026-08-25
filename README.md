@@ -93,6 +93,50 @@ const res = await llm.messages.create({ ...req, messages }); // 정화본으로 
 런타임 의존성 0개, ESM+CJS 듀얼, 타입 정의 포함. 자세한 API는
 [packages/core/README.md](packages/core/README.md).
 
+### ElizaOS 에이전트
+
+```bash
+npm install @chainwards/eliza
+```
+
+`@elizaos/core`는 peer라 **이미 깔려 있는 것을 쓴다.** `chainward`(엔진)는 자동으로 딸려온다.
+`ANTHROPIC_BASE_URL` 같은 환경변수는 **필요 없다** — 프록시가 아니라 런타임 안에 꽂히기 때문이다.
+
+**① 모델 seam — 캐릭터에 한 줄** (탐지·경고)
+
+```ts
+import { createChainwardPlugin } from "@chainwards/eliza";
+
+export const character = {
+  name: "wallet-agent",
+  plugins: ["@elizaos/plugin-openai", createChainwardPlugin()],
+};
+```
+
+조립된 프롬프트를 검사해 경고를 붙인다. **본문은 건드리지 않는다** — 프롬프트는 필드가 아니라서
+지워버리면 에이전트 자신의 지시까지 함께 사라진다. 여기서는 L1·L4만 돈다(형태로만 판단하는 계층).
+나머지 계층은 "읽는 것이 전부 공격자가 쓴 것"을 전제하는데, 정상 지갑 에이전트의 시스템 프롬프트가
+바로 그 규칙들이 찾는 문장이라 첫 턴부터 자기 자신을 잡는다.
+
+**② provider seam — 정화가 실제로 일어나는 곳**
+
+온체인 텍스트를 내놓는 provider를 감싼다.
+
+```ts
+import { guardProvider } from "@chainwards/eliza";
+
+plugins: [
+  createChainwardPlugin(),
+  { ...evmPlugin,
+    providers: evmPlugin.providers.map((p) =>
+      guardProvider(p, { chain: "base", valueKinds: { name: "token_name", symbol: "token_symbol" } }),
+    ) },
+];
+```
+
+필드 종류를 알고 있으므로 **L3(온체인 진위 확인)까지 돈다** — 프록시로는 불가능한 계층이다.
+자세한 옵션은 [packages/eliza/README.md](packages/eliza/README.md).
+
 ### 프록시 (Claude Code 앞에 꽂기)
 
 ```bash
