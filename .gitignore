@@ -21,3 +21,4 @@ coverage/
 
 # pglite writes the example agent database here
 .eliza-db/
+packages/core/console.html

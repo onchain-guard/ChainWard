@@ -45,7 +45,27 @@ export interface ProxyOptions {
   bufferSize?: number;
   /** called for every request, guarded or not */
   onEvent?: (e: GuardEvent) => void;
+  /** HTML for the console, served at `/` on the event port. Omitted → `/` is a 404.
+   *
+   *  The page is passed in rather than read from disk here so this module keeps its only
+   *  filesystem dependency at zero — a library embedding the proxy supplies its own page,
+   *  and the bin supplies the one that ships with the package. */
+  consoleHtml?: string;
 }
+
+/** Injected into the console just before `</body>`, so the page points at the origin it was
+ *  served from instead of a hard-coded port.
+ *
+ *  Doing it here rather than in the page keeps the console a plain file that anyone can
+ *  restyle without knowing how it gets deployed, and it is what makes the default correct
+ *  under `--events <other port>`. Same-origin is the real prize: the console's own requests
+ *  stop being cross-origin, which is the failure mode that makes a dashboard sit on
+ *  "Connecting…" with no error anyone can see.
+ *
+ *  It no-ops if the input is absent, so a redesigned page is never broken by it. */
+const CONSOLE_ORIGIN_BOOTSTRAP =
+  '<script>(function(){var e=document.getElementById("events-url");' +
+  'if(e)e.value=location.origin;})();</script>';
 
 /** Request paths we treat as an LLM call. Both vendor shapes carry `messages`. */
 const LLM_PATHS = ["/chat/completions", "/messages", "/responses"];
@@ -304,6 +324,18 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
     // A front-end served from another origin (a dev server, say) has to be able to read this.
     const cors = { "access-control-allow-origin": "*" };
 
+    // The console, served from the same origin as the API it reads. A user who installed
+    // the package has no copy of this page on disk otherwise — it would only exist for
+    // someone who cloned the repository, which is not who the bin is for.
+    if (opts.consoleHtml && (req.url === "/" || req.url === "/index.html")) {
+      const page = opts.consoleHtml.includes("</body>")
+        ? opts.consoleHtml.replace("</body>", `${CONSOLE_ORIGIN_BOOTSTRAP}</body>`)
+        : opts.consoleHtml + CONSOLE_ORIGIN_BOOTSTRAP;
+      res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
+      res.end(page);
+      return;
+    }
+
     if (req.url === "/events") {
       res.writeHead(200, {
         ...cors,
@@ -389,7 +421,12 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
     }
 
     res.writeHead(404, { ...cors, "content-type": "application/json" });
-    res.end(JSON.stringify({ error: "not found", routes: ["/events", "/events/recent", "/scan", "/health"] }));
+    res.end(
+      JSON.stringify({
+        error: "not found",
+        routes: [...(opts.consoleHtml ? ["/"] : []), "/events", "/events/recent", "/scan", "/health"],
+      }),
+    );
   });
   events.listen(opts.eventPort);
 
