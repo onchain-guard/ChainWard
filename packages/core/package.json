@@ -56,6 +56,7 @@
   },
   "files": [
     "dist",
+    "console.html",
     "README.md",
     "PROXY.md",
     "LICENSE"
@@ -68,7 +69,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "node scripts/copy-console.mjs && tsup",
     "test": "npx tsx --test test/*.test.ts",
     "typecheck": "npx tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build && npm test"

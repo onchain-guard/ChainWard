@@ -49,6 +49,13 @@ npx chainward proxy --upstream https://api.anthropic.com
 export ANTHROPIC_BASE_URL=http://localhost:8787
 ```
 
+How you set that variable decides how long it lasts — an inline prefix covers one command,
+an `export` covers one terminal, and an `env` block in `~/.claude/settings.json` covers
+every session including the desktop app, which never sees your shell's exports. Setting it
+is deliberately your job: a package that rerouted another program's LLM traffic on install
+would be the supply-chain attack this library exists to catch. Scopes, the app, and how to
+undo each are in [PROXY.md](./PROXY.md).
+
 That is the whole integration. Requests are guarded in flight, streamed responses are piped
 through, and everything else is relayed untouched. See [PROXY.md](./PROXY.md).
 

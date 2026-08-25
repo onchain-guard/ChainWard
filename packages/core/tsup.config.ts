@@ -17,5 +17,8 @@ export default defineConfig({
   // keeps the `node:` prefix on builtins; without it esbuild emits bare "http", which a
   // package of that name in node_modules could shadow.
   platform: "node",
+  // The bin resolves its console page from `import.meta.url`; without this the CJS build
+  // has no such binding and the page is never found.
+  shims: true,
   treeshake: true,
 });
