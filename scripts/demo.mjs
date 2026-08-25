@@ -9,7 +9,7 @@
 // events it reads, so that whole half is gone. What is left is the part a demo still wants:
 // check the things that fail confusingly before starting, and take the tree down on exit.
 
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { createServer } from "node:http";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
@@ -36,8 +36,19 @@ if (!existsSync(cli)) {
   console.error(c.red("✖ 코어가 빌드되지 않았다.") + "  먼저: " + c.bold("pnpm -r build"));
   process.exit(1);
 }
-if (!existsSync(join(root, "packages/core/console.html"))) {
-  console.error(c.red("✖ 콘솔이 패키지에 복사되지 않았다.") + "  먼저: " + c.bold("pnpm -r build"));
+// Refresh the packaged copy of the console from the file people actually edit.
+//
+// The console is worked on at the repository root and copied into the package at build
+// time. Without this line, editing it and running the demo serves the copy from the last
+// build — the change is simply absent, with nothing on screen to suggest a stale file
+// rather than a broken edit. Whoever is restyling the console would burn an afternoon on
+// that before thinking to rebuild. It is one file copy; do it every start.
+const copy = spawnSync(process.execPath, [join(root, "packages/core/scripts/copy-console.mjs")], {
+  stdio: ["ignore", "ignore", "pipe"],
+});
+if (copy.status !== 0) {
+  console.error(c.red("✖ 콘솔 페이지를 패키지로 복사하지 못했다."));
+  console.error(c.dim(String(copy.stderr ?? "")));
   process.exit(1);
 }
 
