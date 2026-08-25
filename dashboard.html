@@ -1043,7 +1043,7 @@
         </div>
         <div class="chat-history" id="chat-history" style="font-family: var(--font-mono); font-size: 0.85rem; padding: 24px; display: flex; flex-direction: column; gap: 8px;">
           <div style="color: var(--text-secondary); margin-bottom: 8px;">
-            <span style="color: var(--text-muted);">[21:59:14.739]</span> Terminal cleared. Waiting for events...
+            <span id="initial-time" style="color: var(--text-muted);"></span> Terminal cleared. Waiting for events...
           </div>
         </div>
       </main>
@@ -1057,7 +1057,7 @@
           </div>
           <div style="display: flex; align-items: center; gap: 8px; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted);">
             <div class="live-indicator"></div>
-            LISTENING ON PORT 4040
+            <span id="listening-port">CONNECTING...</span>
           </div>
         </div>
         <div class="inspector-feed" id="inspector-feed" style="font-family: var(--font-mono); font-size: 0.85rem; padding: 24px; background: #121214;">
@@ -1294,11 +1294,26 @@
     function setConn(state, text) {
       const dot = document.getElementById('conn-dot');
       const line = document.getElementById('conn-line');
+      const portSpan = document.getElementById('listening-port');
       const colour = { on: 'var(--color-clean)', off: 'var(--color-malicious)', wait: 'var(--text-muted)' }[state];
       if (dot) dot.style.background = colour;
       if (line) {
         line.textContent = text;
         line.title = text;
+      }
+      if (portSpan) {
+        if (state === 'on') {
+          try {
+            const url = new URL(document.getElementById('events-url').value || 'http://localhost:8788');
+            portSpan.textContent = `LISTENING ON PORT ${url.port || (url.protocol === 'https:' ? '443' : '80')}`;
+          } catch (e) {
+            portSpan.textContent = 'CONNECTED';
+          }
+        } else if (state === 'wait') {
+          portSpan.textContent = 'CONNECTING...';
+        } else {
+          portSpan.textContent = 'DISCONNECTED';
+        }
       }
     }
 
@@ -1396,6 +1411,7 @@
 
     renderStats();
     renderAggregates();
+    document.getElementById('initial-time').textContent = `[${timeOf(Date.now())}]`;
     connect();
   </script>
 </body>
