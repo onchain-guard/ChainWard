@@ -16,6 +16,77 @@ export ANTHROPIC_BASE_URL=http://localhost:8787
 
 That's the whole integration. No code change.
 
+## Pointing a client at the proxy
+
+The proxy only ever sees traffic a client was configured to send it, and making that
+configuration is deliberately your job. A package that rerouted another program's LLM
+traffic on install would be the supply-chain attack this project exists to catch.
+
+How you set it decides how long it lasts:
+
+| scope | how | ends when |
+|---|---|---|
+| one command | `ANTHROPIC_BASE_URL=http://localhost:8787 claude` | that command exits |
+| this terminal | `export ANTHROPIC_BASE_URL=http://localhost:8787` | you close the window |
+| every session, GUI included | an `env` block in `~/.claude/settings.json` | you delete it |
+
+### One command
+
+```bash
+ANTHROPIC_BASE_URL=http://localhost:8787 claude
+```
+
+Nothing to undo afterwards. Best for a first try.
+
+### One terminal session
+
+```bash
+export ANTHROPIC_BASE_URL=http://localhost:8787
+claude
+```
+
+Applies to that window only, and to processes started from it. A client already running
+elsewhere keeps its old endpoint until restarted.
+
+### Permanently, including the desktop app
+
+A GUI app is not launched from your shell, so it never sees an `export`. Put the variable
+in settings instead:
+
+```jsonc
+// ~/.claude/settings.json
+{ "env": { "ANTHROPIC_BASE_URL": "http://localhost:8787" } }
+```
+
+Restart the app. This covers the CLI too.
+
+To scope it to one project, use that project's `.claude/settings.local.json` — and keep it
+out of git. A committed endpoint points every collaborator's client at a port that is not
+listening on their machine.
+
+### Turning it off
+
+| set with | undo |
+|---|---|
+| inline | nothing to undo |
+| `export` | `unset ANTHROPIC_BASE_URL`, or close the terminal |
+| settings file | delete the `env` entry, restart the client |
+
+The settings form is the one that catches people out. Unlike an export it survives
+reboots, so from then on the proxy has to be running whenever the client is — otherwise
+every request fails at a closed port.
+
+### Before pointing a real client at it
+
+- **Start it with `--upstream`.** Without one the proxy is in dry-run and answers with a
+  stub instead of a model. That is useful for watching the guard work and useless as a
+  client's endpoint.
+- **Keep the address on your own machine.** Clients send credentials with every request —
+  `authorization` for a subscription login, `x-api-key` for an API key. This proxy relays
+  them to the upstream unchanged, which is what makes it transparent to the client, and
+  also why the address you configure should be a local port rather than someone else's
+  server.
+
 ## What it does
 
 Every request is parsed, its untrusted messages are scanned and sanitized by
@@ -60,12 +131,23 @@ Ports also read `CHAINWARD_PORT` and `CHAINWARD_EVENTS_PORT`.
 
 `CHAINWARD_UPSTREAM` works in place of `--upstream`.
 
+## The console
+
+`chainward proxy` serves a console at the event port — open `http://localhost:8788/` and
+watch verdicts arrive. Nothing to install, nothing to configure: the page ships inside the
+package, and it is served from the same origin as the API it reads, so its default endpoint
+is always right and none of its requests are cross-origin.
+
+`--no-console` turns it off. Embedding the proxy as a library, pass your own page as
+`consoleHtml` — the module reads no files of its own.
+
 ## Event API
 
-Read-only, CORS-open, and deliberately UI-free — build whatever front-end you like on top.
+Read-only and CORS-open, so the console is one front-end rather than the only one.
 
 | Route | Returns |
 | --- | --- |
+| `GET /` | the console (omitted with `--no-console`) |
 | `GET /events` | `text/event-stream`. Replays the recent buffer on connect, then streams live |
 | `GET /events/recent` | the buffer as a JSON array |
 | `GET /health` | `{ ok, buffered, subscribers }` |

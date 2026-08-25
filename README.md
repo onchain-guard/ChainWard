@@ -93,19 +93,115 @@ const res = await llm.messages.create({ ...req, messages }); // 정화본으로 
 런타임 의존성 0개, ESM+CJS 듀얼, 타입 정의 포함. 자세한 API는
 [packages/core/README.md](packages/core/README.md).
 
+### ElizaOS 에이전트
+
+```bash
+npm install @chainwards/eliza
+```
+
+`@elizaos/core`는 peer라 **이미 깔려 있는 것을 쓴다.** `chainward`(엔진)는 자동으로 딸려온다.
+`ANTHROPIC_BASE_URL` 같은 환경변수는 **필요 없다** — 프록시가 아니라 런타임 안에 꽂히기 때문이다.
+
+**① 모델 seam — 캐릭터에 한 줄** (탐지·경고)
+
+```ts
+import { createChainwardPlugin } from "@chainwards/eliza";
+
+export const character = {
+  name: "wallet-agent",
+  plugins: ["@elizaos/plugin-openai", createChainwardPlugin()],
+};
+```
+
+조립된 프롬프트를 검사해 경고를 붙인다. **본문은 건드리지 않는다** — 프롬프트는 필드가 아니라서
+지워버리면 에이전트 자신의 지시까지 함께 사라진다. 여기서는 L1·L4만 돈다(형태로만 판단하는 계층).
+나머지 계층은 "읽는 것이 전부 공격자가 쓴 것"을 전제하는데, 정상 지갑 에이전트의 시스템 프롬프트가
+바로 그 규칙들이 찾는 문장이라 첫 턴부터 자기 자신을 잡는다.
+
+**② provider seam — 정화가 실제로 일어나는 곳**
+
+온체인 텍스트를 내놓는 provider를 감싼다.
+
+```ts
+import { guardProvider } from "@chainwards/eliza";
+
+plugins: [
+  createChainwardPlugin(),
+  { ...evmPlugin,
+    providers: evmPlugin.providers.map((p) =>
+      guardProvider(p, { chain: "base", valueKinds: { name: "token_name", symbol: "token_symbol" } }),
+    ) },
+];
+```
+
+필드 종류를 알고 있으므로 **L3(온체인 진위 확인)까지 돈다** — 프록시로는 불가능한 계층이다.
+자세한 옵션은 [packages/eliza/README.md](packages/eliza/README.md).
+
 ### 프록시 (Claude Code 앞에 꽂기)
 
 ```bash
 npx chainward proxy --upstream https://api.anthropic.com
 ```
 
+그리고 클라이언트가 이 주소를 보게 만든다. **어느 방법을 쓰느냐가 얼마나 오래 가느냐를 정한다.**
+
+| 범위 | 방법 | 언제 풀리나 |
+|---|---|---|
+| 명령 하나 | `ANTHROPIC_BASE_URL=http://localhost:8787 claude` | 그 명령이 끝나면 |
+| 이 터미널 | `export ANTHROPIC_BASE_URL=http://localhost:8787` | 창을 닫으면 |
+| 영구 (**데스크톱 앱 포함**) | `~/.claude/settings.json`의 `env` 블록 | 지울 때까지 |
+
+**한 번만 써볼 때** — 뒤처리가 필요 없다.
 ```bash
-export ANTHROPIC_BASE_URL=http://localhost:8787
+ANTHROPIC_BASE_URL=http://localhost:8787 claude
 ```
 
+**이 터미널에서 계속 쓸 때** — 그 창에서 띄운 프로세스에만 적용된다.
+```bash
+export ANTHROPIC_BASE_URL=http://localhost:8787
+claude
+```
+
+**앱에서 쓸 때** — GUI 앱은 셸에서 실행되지 않으므로 `export`를 **못 본다.** 설정 파일에 넣는다.
+```jsonc
+// ~/.claude/settings.json
+{ "env": { "ANTHROPIC_BASE_URL": "http://localhost:8787" } }
+```
+앱을 재시작하면 적용된다. CLI에도 같이 걸린다. 특정 프로젝트에만 걸려면 그 프로젝트의
+`.claude/settings.local.json`을 쓰되 **git에 올리지 마라** — 협업자 쪽에선 열려 있지도 않은
+포트로 요청이 나간다.
+
+**끄는 법**
+
+| 켠 방법 | 끄는 법 |
+|---|---|
+| 인라인 | 할 것 없음 |
+| `export` | `unset ANTHROPIC_BASE_URL` 또는 창 닫기 |
+| 설정 파일 | `env` 항목을 지우고 클라이언트 재시작 |
+
+> ⚠️ 설정 파일 방식은 **재부팅해도 안 풀린다.** 그 뒤로는 클라이언트를 쓸 때마다 프록시가 떠
+> 있어야 한다 — 아니면 닫힌 포트에서 요청이 전부 실패한다.
+>
+> ⚠️ 실제 클라이언트를 물릴 땐 **반드시 `--upstream`**을 준다. 없으면 dry-run이라 모델 대신
+> 스텁을 돌려준다. 가드 동작을 구경할 땐 유용하지만 클라이언트 엔드포인트로는 못 쓴다.
+>
+> 이 설정은 **사용자가 직접 하는 게 맞다.** 설치만으로 남의 LLM 트래픽을 가로채는 패키지는
+> 그 자체가 이 프로젝트가 잡으려는 공급망 공격이다. 주소도 **내 컴퓨터의 포트**여야 한다 —
+> 클라이언트는 요청마다 자격증명(`authorization`·`x-api-key`)을 함께 보내고, 프록시는 그걸
+> 그대로 상류에 넘긴다.
+
 이제 Claude Code의 모든 요청이 정화를 거쳐 Anthropic으로 간다. 요청 안의 `tool_result`(온체인
-데이터)가 모델에 닿기 전 스캔·정화되고, 응답 SSE는 그대로 스트리밍된다. Inspector에서 무엇이
-걸렸는지 볼 수 있다 — 이벤트 API(`:8788/events`)가 SSE로 흘려준다.
+데이터)가 모델에 닿기 전 스캔·정화되고, 응답 SSE는 그대로 스트리밍된다.
+
+무엇이 걸렸는지는 **콘솔**에서 실시간으로 본다 — 프록시가 직접 서빙하므로 설치도 설정도 없다.
+
+```
+http://localhost:8788/
+```
+
+패키지 안에 페이지가 들어 있고, 자기가 읽을 이벤트 API와 **같은 오리진에서** 나온다. 그래서
+기본 주소가 항상 맞고 요청이 크로스오리진이 되지 않는다. 끄려면 `--no-console`. 직접 만든
+페이지를 쓰려면 라이브러리로 임베드해 `consoleHtml`로 넘긴다.
 
 ### CLI (즉석 스캔)
 

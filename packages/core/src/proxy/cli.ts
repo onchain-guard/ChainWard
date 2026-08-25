@@ -1,6 +1,9 @@
 #!/usr/bin/env node
 // `chainward` — the bin.
 
+import { existsSync, readFileSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { createProxy } from "./index.ts";
 import { defaultScanner } from "../core/scanner.ts";
 import { FIELD_SHAPE, type FieldKind } from "../core/types.ts";
@@ -22,12 +25,14 @@ Proxy options
   --events <n>       event API              (default 8788, env CHAINWARD_EVENTS_PORT,
                                              "off" to disable)
   --quiet            do not log findings to stderr
+  --no-console       do not serve the console page
 
 Point an agent you cannot modify at the proxy and change nothing else:
   chainward proxy --upstream https://api.anthropic.com
   export ANTHROPIC_BASE_URL=http://localhost:8787
 
-Event API, for a dashboard or your own tooling
+Event API — and the console, on the same port
+  GET  /               the console: live verdicts in a browser, no setup
   GET  /events         server-sent events; replays the recent buffer on connect
   GET  /events/recent  the buffer as JSON
   POST /scan           scan one string without routing a model call through the proxy.
@@ -46,6 +51,25 @@ Library use lives in code, not here:
   import { guard } from "chainward"
 `;
 
+
+/** The console page that ships with the package.
+ *
+ *  Walked up rather than reached for at a fixed depth, because this file runs from two
+ *  places: `dist/cli.js` in an installed package, and `src/proxy/cli.ts` under a dev
+ *  runner. Both find `console.html` at the package root; neither is at the same depth
+ *  below it. Missing is not an error — the build copies it in, so a source checkout that
+ *  has not been built simply runs without a console rather than refusing to start. */
+function loadConsole(): string | undefined {
+  let dir = dirname(fileURLToPath(import.meta.url));
+  for (let i = 0; i < 4; i++) {
+    const candidate = join(dir, "console.html");
+    if (existsSync(candidate)) return readFileSync(candidate, "utf8");
+    const up = dirname(dir);
+    if (up === dir) break;
+    dir = up;
+  }
+  return undefined;
+}
 
 function flag(argv: string[], name: string): string | undefined {
   const i = argv.indexOf(name);
@@ -73,11 +97,13 @@ function runProxy(argv: string[]): void {
   const eventPort =
     rawEvents === "off" ? undefined : port(argv, "--events", "CHAINWARD_EVENTS_PORT", 8788);
   const quiet = argv.includes("--quiet");
+  const consoleHtml = argv.includes("--no-console") ? undefined : loadConsole();
 
   const proxy = createProxy({
     port: llmPort,
     upstream,
     eventPort,
+    consoleHtml,
     onEvent: quiet
       ? undefined
       : (e) => {
@@ -110,6 +136,9 @@ function runProxy(argv: string[]): void {
   );
   if (eventPort !== undefined) {
     process.stderr.write(`chainward events  :${eventPort}   /events · /events/recent · /health\n`);
+    if (consoleHtml) {
+      process.stderr.write(`chainward console http://localhost:${eventPort}/\n`);
+    }
   }
 }
 

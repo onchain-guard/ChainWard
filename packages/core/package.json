@@ -1,6 +1,6 @@
 {
   "name": "chainward",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "type": "module",
   "license": "MIT",
   "author": "fl0wizy <190269791+fl0wizy@users.noreply.github.com> (https://github.com/fl0wizy)",
@@ -56,6 +56,7 @@
   },
   "files": [
     "dist",
+    "console.html",
     "README.md",
     "PROXY.md",
     "LICENSE"
@@ -68,7 +69,7 @@
     "access": "public"
   },
   "scripts": {
-    "build": "tsup",
+    "build": "node scripts/copy-console.mjs && tsup",
     "test": "npx tsx --test test/*.test.ts",
     "typecheck": "npx tsc --noEmit -p tsconfig.json",
     "prepublishOnly": "npm run build && npm test"
