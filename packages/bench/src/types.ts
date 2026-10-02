@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Benchmark case contracts. See docs/BENCH-CASES.md for the case table and the
 // rationale behind every guardrail these cases exercise.
 

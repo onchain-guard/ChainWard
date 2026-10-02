@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Real unit tests over the engine. Run: npx tsx --test test/scanner.test.ts
 
 import { test } from "node:test";

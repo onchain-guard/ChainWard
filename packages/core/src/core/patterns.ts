@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // LAYER 2a — Injection-intent pattern pack (fast, explainable, low-FP on obvious cases).
 //
 // Run AGAINST THE NORMALIZED TEXT (after Layer 1 folds homoglyphs / strips invisibles),

@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // ⚠️ NOT A MEASUREMENT. This provider is a deterministic stand-in used only to smoke-test
 // the harness plumbing (arms, canary scoring, reporting) without network access.
 //

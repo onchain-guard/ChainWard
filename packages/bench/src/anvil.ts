@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Deploy the attack for real — onto a local anvil fork, never onto a public chain.
 //
 // WHY DEPLOY AT ALL. Every other measurement here reads text from a fixture. A fixture is

@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // ChainWard LLM proxy — the guard for harnesses whose code you do not own.
 //
 // The library form (`guard()`) needs you to hold the code that calls the model. When you

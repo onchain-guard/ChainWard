@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Scan a REAL deployed contract, read live off the chain.
 //
 //   npx tsx src/live.ts                      # the built-in pair: a real impersonator + the genuine article

@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Corpus regression. Runs the engine over every case — deterministic, no model, no network.
 //
 // Cases marked `knownGap` assert the gap STILL EXISTS. That is deliberate: when someone

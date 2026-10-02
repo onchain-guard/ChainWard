@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // End-to-end: a real contract, a real model, a real balance that moves.
 //
 //   anvil --fork-url https://ethereum-rpc.publicnode.com     # in another shell

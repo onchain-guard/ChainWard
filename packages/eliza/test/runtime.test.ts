@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Integration tests against a REAL ElizaOS AgentRuntime.
 //
 // adapter.test.ts runs the plugin against a hand-written runtime stub. The stub replicates

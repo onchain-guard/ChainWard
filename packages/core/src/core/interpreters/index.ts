@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // L4 dispatch — run the parser-differential interpreters for the declared consuming
 // environment(s). "plaintext" is the inert baseline (no interpreter → no control found),
 // so a signal here means: this data is inert as text but becomes control in env B.

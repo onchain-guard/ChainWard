@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // What the package promises to keep working.
 //
 // These are not behaviour tests — the engine is covered elsewhere. They pin the SHAPE of the
