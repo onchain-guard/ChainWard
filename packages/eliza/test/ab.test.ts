@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Tests for the A/B demo harness (demo/ab.ts).
 //
 // The harness has two halves and only one of them can run in CI. The hijack half needs a

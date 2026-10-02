@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // A real HoneypotOracle backed by the GoPlus Token Security API.
 //
 // L3 fuses a text claim ("100% safe, audited") with what the contract actually does. Until

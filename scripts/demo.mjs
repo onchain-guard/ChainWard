@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // `pnpm demo` — run the console against the copy of it in this repository.
 //
 // The product is `chainward proxy`, and it needs no wrapper: it binds its own default

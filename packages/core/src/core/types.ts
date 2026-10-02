@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Core type contracts for ChainWard.
 // These are the stable interfaces every layer and adapter speaks. Swapping a mock
 // adapter for a real one (RPC / GoPlus / Prompt Guard) never touches these.

@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // L3 extension — on-chain truth verifier.
 //
 // The web3 superpower: a marker-less semantic lie ("this is the official USDC", "audited",

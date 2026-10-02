@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // A real ERC-20 reader over JSON-RPC. No dependencies — `fetch` and two selectors.
 //
 // Why this exists: L3 is the layer a general-purpose injection filter cannot replicate,

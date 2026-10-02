@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Live MCP handshake test: spawns the real server, performs initialize → tools/list →
 // tools/call over stdio JSON-RPC, and asserts the responses. Proves the server speaks
 // real MCP (a real client — Claude Desktop, ElizaOS MCP plugin — can connect).

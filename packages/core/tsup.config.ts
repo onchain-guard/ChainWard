@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 import { defineConfig } from "tsup";
 
 // Three entries, one package. The subpath split is what keeps `import { guard } from

@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // LAYER 4 — Orchestration, verdict fusion, and sanitization.
 // Runs a DetectorRegistry (design §5.3) over each field, fuses signals into a verdict,
 // and emits a model-safe sanitized rendering.

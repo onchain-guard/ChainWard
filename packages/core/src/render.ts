@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Terminal rendering for scan results (ANSI, zero deps). Shared by CLI and demo.
 
 import type { FieldScan, ScanReport, Severity } from "./core/types.ts";

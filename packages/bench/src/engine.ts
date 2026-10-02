@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // The guard seam under test: turn a case's on-chain fields into the JSON an agent tool
 // would hand back, either raw (arm "off") or ChainWard-sanitized (arm "on").
 

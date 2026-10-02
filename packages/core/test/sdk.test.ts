@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Tests for L4 (differential interpreters), L3 (truth verifier) and the guard() library.
 
 import { test } from "node:test";
