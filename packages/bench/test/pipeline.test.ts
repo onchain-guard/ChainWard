@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Tests for the backend-labeller scorer.
 //
 // The experiment reported no harm on every axis across two models. A null result is only

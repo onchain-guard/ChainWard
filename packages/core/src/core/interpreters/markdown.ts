@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // L4 interpreter — markdown / browser-render differential.
 //
 // Every quantifier here is bounded and every class excludes newline. The unbounded

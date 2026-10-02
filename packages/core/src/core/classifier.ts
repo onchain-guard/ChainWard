@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // LAYER 2b — Injection-intent classifier.
 //
 // This is the "does this read like instructions to an AI, not like a name?" fuzzy layer.

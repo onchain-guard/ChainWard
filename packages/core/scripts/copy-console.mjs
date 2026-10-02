@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Put the console page inside the package so it ships to npm.
 //
 // The file lives at the repository root because that is where it is worked on — the design

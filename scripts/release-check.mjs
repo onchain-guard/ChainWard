@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Pack both packages the way `pnpm publish` will, and refuse the release if a tarball would
 // break on install.
 //

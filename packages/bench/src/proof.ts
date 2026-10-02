@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // The three arguments, run against the real engine. Free, offline, deterministic.
 //
 //   pnpm --filter @onchain-guard/bench proof

@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Tests for the usage/cost table.
 //
 // The cost figure exists to catch a budget surprise before the invoice does, which only

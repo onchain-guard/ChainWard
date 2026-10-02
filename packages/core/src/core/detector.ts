@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Detector plugin contract + registry (design §5.3).
 // A detector implements one detection concern and returns Signals. The scanner runs all
 // registered detectors in registration order, threading accumulated `prior` signals so a

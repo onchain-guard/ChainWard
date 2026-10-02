@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // A/B harness: the same ElizaOS agent, the same poisoned on-chain record, run twice —
 // once with ChainWard and once without.
 //

@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Scoring. The whole point: every verdict is a string match on the model's own output, so
 // it is objective and reproducible — no LLM judge, no human call.
 //

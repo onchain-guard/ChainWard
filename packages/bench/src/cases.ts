@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // The corpus. Every case here has a row in docs/BENCH-CASES.md — keep them in sync.
 //
 // Payload rules:

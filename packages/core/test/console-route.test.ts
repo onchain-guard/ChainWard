@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // The console has to reach whoever installed the package.
 //
 // It did not. `npm i chainward` delivered 24 files and none of them was HTML, so the page
