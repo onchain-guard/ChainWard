@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Real Anthropic Messages API provider. Needs ANTHROPIC_API_KEY.
 // This is the only provider whose numbers may be reported as results.
 

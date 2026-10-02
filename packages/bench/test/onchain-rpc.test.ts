@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Offline tests for the ABI string decoder.
 //
 // These run in CI with no network, because the decoder is the part that can be wrong in a

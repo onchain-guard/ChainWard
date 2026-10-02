@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Per-rule coverage for L1 (structural gates) and L2a (pattern rules).
 //
 // scanner.test.ts and sdk.test.ts exercise the engine end-to-end on realistic payloads,

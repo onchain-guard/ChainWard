@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Markdown report generation — the table that goes into the contest write-up.
 
 import type { ControlRow, GuardResultRow, RunRow } from "./types.ts";

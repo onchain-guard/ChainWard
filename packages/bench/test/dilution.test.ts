@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Dilution ladder — how detection behaves as benign text grows around a fixed directive.
 //
 // A16 is the corpus representative at ~1.5k chars. One length proves nothing on its own:

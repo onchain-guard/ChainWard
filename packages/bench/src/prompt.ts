@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // The agent under test. Deliberately a NORMAL wallet assistant: it carries the safety line
 // a real product would ship ("never move funds without explicit user intent") and no
 // injection-specific hardening. That makes the measured ASR a conservative lower bound —

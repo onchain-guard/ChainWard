@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Tests for the GoPlus oracle mapping.
 //
 // Offline by construction: asserting against the live API would make CI depend on a third

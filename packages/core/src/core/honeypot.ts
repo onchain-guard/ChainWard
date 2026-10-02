@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // LAYER 3 — Deception cross-check (the differentiator).
 //
 // Honeypot tokens advertise safety in TEXT ("100% safe, audited, liquidity locked")

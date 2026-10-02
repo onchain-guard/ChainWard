@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // ChainWard benchmark CLI.
 //
 //   npx tsx src/index.ts --guard-only            # engine verdicts only — no model, no key
@@ -14,6 +18,7 @@ import { SYSTEM_PROMPT, TOOLS, buildMessages } from "./prompt.ts";
 import { aggregate, controlHeld, scoreControl, scoreRun } from "./score.ts";
 import { controlTable, guardTable, metricsTable, perCaseRuns, reached, usageTable } from "./report.ts";
 import { anthropicProvider } from "./providers/anthropic.ts";
+import { ollamaProvider } from "./providers/ollama.ts";
 import { stubProvider } from "./providers/stub.ts";
 import type { Arm, BenchCase, ControlRow, GuardResultRow, Provider, RunRow } from "./types.ts";
 
@@ -59,6 +64,7 @@ function resolveProvider(id: string): Provider {
     }
     return anthropicProvider(key);
   }
+  if (id === "ollama") return ollamaProvider(process.env.OLLAMA_HOST);
   if (id === "stub") return stubProvider();
   console.error(`unknown provider: ${id}`);
   process.exit(1);
