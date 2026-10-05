@@ -14,6 +14,12 @@ export default defineConfig({
     cli: "src/proxy/cli.ts",
   },
   format: ["esm", "cjs"],
+  // esbuild drops source comments, so the per-file notices never reach the tarball and the
+  // published artifact arrives anonymous. LICENSE alone satisfies MIT; this makes each
+  // emitted file say whose it is, which is what a reader of one file actually has in hand.
+  banner: {
+    js: "/* Copyright 2026 0xShield. All Rights Reserved. Licensed under the MIT License. */",
+  },
   dts: { entry: { index: "src/index.ts", proxy: "src/proxy/index.ts" } },
   clean: true,
   sourcemap: true,
