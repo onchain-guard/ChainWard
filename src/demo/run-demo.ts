@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // End-to-end demo. Runs the REAL engine over the realistic fixtures and shows, for the
 // headline case, exactly what an agent's LLM would receive WITHOUT vs WITH ChainWard.
 //

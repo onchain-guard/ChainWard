@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Agent simulation harness — mirrors an ElizaOS wallet-assistant agent's real loop:
 //
 //   user msg → PROVIDER(read on-chain data) → [ChainWard guard] → PROMPT → LLM → ACTION(wallet)
