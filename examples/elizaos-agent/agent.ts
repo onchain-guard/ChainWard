@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // A real ElizaOS agent with ChainWard wired in — the integration path end to end.
 //
 //   pnpm --filter chainward-example-elizaos start
