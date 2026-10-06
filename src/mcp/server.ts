@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // MCP server exposing ChainWard as a tool ANY MCP client can call (Claude Desktop,
 // ElizaOS's MCP plugin, etc.). This is the "framework integration for free" path:
 // ElizaOS consumes MCP servers, so this single file wires ChainWard into ElizaOS with

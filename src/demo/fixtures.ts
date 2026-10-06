@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Realistic attack + benign samples. These are constructed from PROVEN adjacent
 // techniques (Zscaler JSON-LD live campaigns, the Bunq memo attack, the boannews
 // "agentjacking" resolution-template, CSA/Embrace-the-Red invisible-Unicode smuggling,

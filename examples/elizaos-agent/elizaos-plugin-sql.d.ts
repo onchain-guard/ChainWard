@@ -1,3 +1,7 @@
+/* Copyright 2026 0xShield. All Rights Reserved.
+ *
+ * Licensed under the MIT License. See LICENSE in the project root.
+ */
 // Ambient declarations for `@elizaos/plugin-sql@1.7.2`.
 //
 // The package ships no usable types for its node entry. The chain dangles: `dist/index.d.ts`
