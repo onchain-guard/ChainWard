@@ -21,6 +21,7 @@ const USAGE = `chainward — guard the on-chain text an LLM reads
 
   chainward proxy [options]     run the guarding proxy
   chainward text <kind> <text>  scan one string and print what was found
+  chainward --version           print the installed version
 
 Proxy options
   --upstream <url>   forward guarded requests here (e.g. https://api.anthropic.com)
@@ -168,10 +169,40 @@ async function runText(argv: string[]): Promise<void> {
   process.exit(scan.severity === "MALICIOUS" ? 2 : scan.severity === "SUSPICIOUS" ? 1 : 0);
 }
 
+/** Read from the shipped manifest rather than a constant, so the number printed here cannot
+ *  drift from the one npm installed — a hardcoded string is one edit away from lying about
+ *  which build a reader is holding, which is the opposite of what asking for a version is
+ *  for. Same upward walk as `loadConsole`: `dist/cli.js` and `src/proxy/cli.ts` sit at
+ *  different depths below the package root. */
+function packageVersion(): string {
+  let dir = dirname(fileURLToPath(import.meta.url));
+  for (let i = 0; i < 4; i++) {
+    const candidate = join(dir, "package.json");
+    if (existsSync(candidate)) {
+      try {
+        const { version } = JSON.parse(readFileSync(candidate, "utf8")) as { version?: string };
+        if (version) return version;
+      } catch {
+        break; // unreadable or not JSON — fall through to the honest answer below
+      }
+    }
+    const up = dirname(dir);
+    if (up === dir) break;
+    dir = up;
+  }
+  // Never guess. A wrong version is worse than no version when the point is to tell two
+  // builds apart.
+  return "unknown";
+}
+
 function main() {
   const argv = process.argv.slice(2);
   const command = argv[0];
 
+  if (command === "-v" || command === "--version" || command === "version") {
+    process.stdout.write(`chainward ${packageVersion()}\n`);
+    return;
+  }
   if (!command || command === "-h" || command === "--help" || command === "help") {
     process.stdout.write(USAGE);
     return;
