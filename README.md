@@ -7,7 +7,7 @@
 ChainWard는 그 데이터가 모델에 닿기 전에 검사하고 정화한다.
 
 [![npm](https://img.shields.io/npm/v/chainward)](https://www.npmjs.com/package/chainward)
-런타임 의존성 0개 · 테스트 312개 · MIT
+런타임 의존성 0개 · 테스트 318개 · MIT
 
 ---
 
@@ -287,7 +287,7 @@ ChainWard의 값은 다층 방어에 있다 — 실측 기법에는 거의 완�
 ```bash
 pnpm install
 pnpm -r build
-pnpm test          # 312개, 오프라인
+pnpm test          # 318개, 오프라인
 ```
 
 콘솔(`dashboard.html`)을 손보려면 `pnpm demo` 로 띄운다. 시작할 때마다 패키지 안의
