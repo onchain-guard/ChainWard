@@ -1,5 +1,5 @@
 #!/usr/bin/env -S npx tsx
-/* Copyright 2026 0xShield.
+/* Copyright 2026 0xShield. All Rights Reserved.
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
