@@ -11,6 +11,7 @@ ChainWard는 AI 에이전트가 읽는 온체인 텍스트를 검사하는 라�
 git clone https://github.com/onchain-guard/ChainWard
 cd ChainWard
 pnpm install
+pnpm -r build       # core 를 dist 로 빌드한다. bench·eliza 가 이것을 가져다 쓴다
 
 pnpm typecheck      # 타입 검사
 pnpm test           # core 137 · bench 137 · eliza 43 · 루트 1 = 318건
@@ -84,7 +85,8 @@ dashboard.html   콘솔 원본. 빌드가 core 로 복사한다
 ## PR 을 보낼 때
 
 1. 브랜치를 따로 판다. `main` 에 직접 커밋하지 않는다.
-2. `pnpm typecheck && pnpm test && pnpm release:check` 가 전부 통과해야 한다.
+2. `pnpm -r build && pnpm typecheck && pnpm test && pnpm release:check` 가 전부 통과해야 한다.
+   core 를 고쳤다면 build 를 다시 해야 bench·eliza 가 고친 core 를 본다.
 3. 커밋 메시지는 **무엇을 고쳤는지가 아니라 왜 고쳤는지**를 적는다.
    이 저장소의 커밋 로그가 그 예시다.
 4. 배포는 `pnpm publish` 로만 한다. `npm publish` 는 `workspace:*` 를 치환하지 않아
