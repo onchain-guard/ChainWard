@@ -1,4 +1,4 @@
-/* Copyright 2026 0xShield. All Rights Reserved.
+/* Copyright 2026 0xShield.
  *
  * Licensed under the MIT License. See LICENSE in the project root.
  */
@@ -18,7 +18,7 @@ export default defineConfig({
   // published artifact arrives anonymous. LICENSE alone satisfies MIT; this makes each
   // emitted file say whose it is, which is what a reader of one file actually has in hand.
   banner: {
-    js: "/* Copyright 2026 0xShield. All Rights Reserved. Licensed under the MIT License. */",
+    js: "/* Copyright 2026 0xShield. Licensed under the MIT License. */",
   },
   dts: { entry: { index: "src/index.ts", proxy: "src/proxy/index.ts" } },
   clean: true,
