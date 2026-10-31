@@ -64,11 +64,10 @@
           <div class="page-subtitle">Real-time monitoring of Claude Code activities and security interventions.</div>
         </div>
         <div style="display:flex; gap:16px;">
-          <div
-            style="border:1px solid var(--border-color); border-radius:6px; display:flex; font-size:0.8rem; overflow:hidden;">
-            <div style="padding:6px 12px; border-right:1px solid var(--border-color); color:var(--text-muted)">1h</div>
-            <div style="padding:6px 12px; background:rgba(255,255,255,0.05); color:var(--text-primary)">24h</div>
-            <div style="padding:6px 12px; color:var(--text-muted)">7d</div>
+          <div class="range-toggle">
+            <button class="range-btn" data-range="1h" onclick="setRange('1h')">1h</button>
+            <button class="range-btn active" data-range="24h" onclick="setRange('24h')">24h</button>
+            <button class="range-btn" data-range="7d" onclick="setRange('7d')">7d</button>
           </div>
         </div>
       </div>
@@ -120,7 +119,7 @@
         </div>
 
         <div class="dash-panel">
-          <h3>Top Neutralized Rules (Last 24h)</h3>
+          <h3>Top Neutralized Rules (Last <span id="signal-range">24h</span>)</h3>
           <div>
             <div class="rule-row"
               style="color:var(--text-muted); text-transform:uppercase; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
@@ -194,11 +193,13 @@
       </div>
 
       <div class="history-controls">
-        <select>
-          <option>All Actions</option>
+        <select id="history-action" onchange="filterHistory()">
+          <option value="">All Actions</option>
+          <option value="malicious">Neutralized</option>
+          <option value="suspicious">Sanitized</option>
         </select>
-        <select>
-          <option>All Tools</option>
+        <select id="history-model" onchange="filterHistory()">
+          <option value="">All Models</option>
         </select>
         <input type="text" id="history-search" placeholder="Search prompts or payloads..." style="flex: 1; max-width: 400px;" oninput="filterHistory()" onkeypress="if(event.key === 'Enter') filterHistory()">
         <button onclick="filterHistory()" style="background:var(--accent-brand); color:#000; font-weight:600; border:none; border-radius:4px; padding:0 16px; cursor:pointer; font-size:0.85rem; font-family:var(--font-ui); transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Search</button>
@@ -290,12 +291,34 @@
       return '판정';
     }
 
-    const stats = { total: 0, malicious: 0, suspicious: 0, guarded: 0 };
+    const RANGE_MS = { '1h': 60 * 60 * 1000, '24h': 24 * 60 * 60 * 1000, '7d': 7 * 24 * 60 * 60 * 1000 };
+    let range = '24h';
     const seen = new Set();
-    const layerCounts = new Map();
-    const signalCounts = new Map();
+    const events = [];
+
+    function inRange() {
+      const since = Date.now() - RANGE_MS[range];
+      return events.filter((e) => e.t >= since);
+    }
+
+    function setRange(next) {
+      range = next;
+      document.querySelectorAll('.range-btn').forEach((b) => b.classList.toggle('active', b.dataset.range === next));
+      document.getElementById('signal-range').textContent = next;
+      renderStats();
+      renderAggregates();
+    }
 
     function renderStats() {
+      const stats = { total: 0, malicious: 0, suspicious: 0, guarded: 0 };
+      for (const e of inRange()) {
+        stats.total += 1;
+        if (e.findings.length) stats.guarded += 1;
+        for (const f of e.findings) {
+          if (f.severity === 'MALICIOUS') stats.malicious += 1;
+          else stats.suspicious += 1;
+        }
+      }
       document.getElementById('m-total').textContent = stats.total.toLocaleString();
       document.getElementById('m-malicious').textContent = stats.malicious.toLocaleString();
       document.getElementById('m-suspicious').textContent = stats.suspicious.toLocaleString();
@@ -309,27 +332,37 @@
       return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`;
     }
 
-    function filterHistory() {
+    function historyRowVisible(row) {
       const query = document.getElementById('history-search').value.toLowerCase();
+      const action = document.getElementById('history-action').value;
+      const model = document.getElementById('history-model').value;
+      return (!action || row.dataset.action === action)
+        && (!model || row.dataset.model === model)
+        && row.textContent.toLowerCase().includes(query);
+    }
+
+    function filterHistory() {
       const container = document.getElementById('history-tbody');
       if (!container) return;
-      
-      const rows = Array.from(container.children);
-      rows.forEach(row => {
-        if (row.id === 'history-empty') return;
-        const text = row.textContent.toLowerCase();
-        if (text.includes(query)) {
-          row.style.display = '';
-        } else {
-          row.style.display = 'none';
-        }
-      });
+      let shown = 0;
+      for (const row of container.children) {
+        if (row.id === 'history-empty') continue;
+        const visible = historyRowVisible(row);
+        row.style.display = visible ? '' : 'none';
+        if (visible) shown += 1;
+      }
+      document.getElementById('history-empty').style.display = shown ? 'none' : '';
+    }
+
+    function addModelOption(model) {
+      const select = document.getElementById('history-model');
+      if (!model || [...select.options].some((o) => o.value === model)) return;
+      select.add(new Option(model, model));
     }
 
     function addHistoryRow(ev, f) {
       const tbody = document.getElementById('history-tbody');
       const empty = document.getElementById('history-empty');
-      if (empty) empty.style.display = 'none';
       const sev = f.severity === 'MALICIOUS' ? 'malicious' : 'suspicious';
       
       const badgeText = f.severity === 'MALICIOUS' ? 'NEUTRALIZED' : 'SANITIZED';
@@ -338,7 +371,7 @@
       const reasonHtml = f.severity === 'ERROR' ? esc(f.before) : `Rule Triggered: ${esc((f.codes || []).join(', '))}`;
       
       const html = `
-        <div style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+        <div data-action="${sev}" data-model="${esc(ev.model)}" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
           <div style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; border-bottom: 1px solid var(--border-color);" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
             <div class="badge ${sev}">${badgeText}</div>
             <div style="color: var(--text-muted); font-size: 0.85rem; width: 120px;">${timeStr}</div>
@@ -368,6 +401,11 @@
         </div>
       `;
       tbody.insertAdjacentHTML('afterbegin', html);
+      addModelOption(String(ev.model ?? ''));
+      const row = tbody.firstElementChild;
+      const visible = historyRowVisible(row);
+      row.style.display = visible ? '' : 'none';
+      if (visible && empty) empty.style.display = 'none';
     }
 
     function addInspectorCard(ev, f) {
@@ -400,19 +438,11 @@
       if (seen.has(key)) return;
       seen.add(key);
 
-      stats.total += 1;
       const findings = ev.findings || [];
-      if (findings.length) stats.guarded += 1;
+      events.push({ t: ev.t, findings: findings.map((f) => ({ severity: f.severity, codes: f.codes || [] })) });
       for (const f of findings) {
-        if (f.severity === 'MALICIOUS') stats.malicious += 1;
-        else stats.suspicious += 1;
-        
         addInspectorCard(ev, f);
         addHistoryRow(ev, f);
-        
-        const layer = layerFor(f.codes);
-        layerCounts.set(layer, (layerCounts.get(layer) ?? 0) + 1);
-        for (const code of f.codes || []) signalCounts.set(code, (signalCounts.get(code) ?? 0) + 1);
       }
       renderStats();
       renderAggregates();
@@ -468,6 +498,16 @@
       const rows = document.getElementById('signal-rows');
       const rowsEmpty = document.getElementById('signal-empty');
       if (!bars || !rows) return;
+
+      const layerCounts = new Map();
+      const signalCounts = new Map();
+      for (const e of inRange()) {
+        for (const f of e.findings) {
+          const layer = layerFor(f.codes);
+          layerCounts.set(layer, (layerCounts.get(layer) ?? 0) + 1);
+          for (const code of f.codes) signalCounts.set(code, (signalCounts.get(code) ?? 0) + 1);
+        }
+      }
 
       const layerTotal = [...layerCounts.values()].reduce((a, b) => a + b, 0);
       if (barsEmpty) barsEmpty.style.display = layerTotal ? 'none' : '';
@@ -540,6 +580,7 @@
     renderStats();
     renderAggregates();
     document.getElementById('initial-time').textContent = `[${timeOf(Date.now())}]`;
+    setInterval(() => { renderStats(); renderAggregates(); }, 60 * 1000);
     document.addEventListener('DOMContentLoaded', connect);
   </script>
 </body>

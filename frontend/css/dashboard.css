@@ -821,6 +821,36 @@ body {
 }
 
 /* === 4. HISTORY VIEW === */
+.range-toggle {
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  display: flex;
+  font-size: 0.8rem;
+  overflow: hidden;
+}
+
+.range-btn {
+  padding: 6px 12px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.range-btn + .range-btn {
+  border-left: 1px solid var(--border-color);
+}
+
+.range-btn:hover {
+  color: var(--text-primary);
+}
+
+.range-btn.active {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+}
+
 .history-controls {
   display: flex;
   gap: 12px;
