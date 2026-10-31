@@ -189,19 +189,32 @@
         </div>
       </div>
 
-      <div class="history-controls">
-        <select id="history-action" onchange="filterHistory()">
-          <option value="">All Actions</option>
-          <option value="malicious">Neutralized</option>
-          <option value="suspicious">Sanitized</option>
+      <div class="history-controls history-filters">
+        <div class="range-toggle" id="history-severity">
+          <button class="range-btn active" data-severity="" onclick="setHistorySeverity('')">All</button>
+          <button class="range-btn" data-severity="malicious" onclick="setHistorySeverity('malicious')">Malicious</button>
+          <button class="range-btn" data-severity="suspicious" onclick="setHistorySeverity('suspicious')">Suspicious</button>
+        </div>
+        <div class="date-range">
+          <input type="date" id="history-from" onchange="filterHistory()">
+          <span>~</span>
+          <input type="date" id="history-to" onchange="filterHistory()">
+        </div>
+        <select id="history-sort" onchange="sortHistory()">
+          <option value="newest">Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="severity">Severity</option>
         </select>
+      </div>
+      <div class="history-controls">
         <select id="history-model" onchange="filterHistory()">
           <option value="">All Models</option>
         </select>
-        <input type="text" id="history-search" placeholder="Search prompts or payloads..." style="flex: 1; max-width: 400px;" oninput="filterHistory()" onkeypress="if(event.key === 'Enter') filterHistory()">
+        <input type="text" id="history-search" placeholder="Search rule, model, severity, or payload..." style="flex: 1; max-width: 400px;" oninput="filterHistory()" onkeypress="if(event.key === 'Enter') filterHistory()">
         <button onclick="filterHistory()" style="background:var(--accent-brand); color:#000; font-weight:600; border:none; border-radius:4px; padding:0 16px; cursor:pointer; font-size:0.85rem; font-family:var(--font-ui); transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Search</button>
         <button class="remove-all-btn" onclick="clearAll()">Remove All</button>
       </div>
+      <div class="history-count" id="history-count"></div>
 
       <div id="history-tbody" style="display: flex; flex-direction: column; gap: 16px;">
         <div id="history-empty" style="text-align: center; color: var(--text-muted); font-size: 0.9rem; padding: 40px 0;">No history events found.</div>
@@ -302,7 +315,7 @@
 
     function setRange(next) {
       range = next;
-      document.querySelectorAll('.range-btn').forEach((b) => b.classList.toggle('active', b.dataset.range === next));
+      document.querySelectorAll('#view-dashboard .range-btn').forEach((b) => b.classList.toggle('active', b.dataset.range === next));
       document.getElementById('signal-range').textContent = next;
       renderStats();
       renderAggregates();
@@ -329,26 +342,66 @@
       return `${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}.${p(d.getMilliseconds(), 3)}`;
     }
 
+    let historySeverity = '';
+
+    function localDate(ms) {
+      const d = new Date(ms);
+      const p = (n) => n.toString().padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+
+    function setHistorySeverity(next) {
+      historySeverity = next;
+      document.querySelectorAll('#history-severity .range-btn').forEach((b) => b.classList.toggle('active', b.dataset.severity === next));
+      filterHistory();
+    }
+
     function historyRowVisible(row) {
-      const query = document.getElementById('history-search').value.toLowerCase();
-      const action = document.getElementById('history-action').value;
+      const m = row._meta;
+      const terms = document.getElementById('history-search').value.toLowerCase().split(/\s+/).filter(Boolean);
       const model = document.getElementById('history-model').value;
-      return (!action || row.dataset.action === action)
-        && (!model || row.dataset.model === model)
-        && row.textContent.toLowerCase().includes(query);
+      const from = document.getElementById('history-from').value;
+      const to = document.getElementById('history-to').value;
+      const day = localDate(m.t);
+      return (!historySeverity || m.severity === historySeverity)
+        && (!model || m.model === model)
+        && (!from || day >= from)
+        && (!to || day <= to)
+        && terms.every((w) => m.text.includes(w));
     }
 
     function filterHistory() {
       const container = document.getElementById('history-tbody');
       if (!container) return;
+      let total = 0;
       let shown = 0;
       for (const row of container.children) {
         if (row.id === 'history-empty') continue;
+        total += 1;
         const visible = historyRowVisible(row);
         row.style.display = visible ? '' : 'none';
         if (visible) shown += 1;
       }
-      document.getElementById('history-empty').style.display = shown ? 'none' : '';
+      const empty = document.getElementById('history-empty');
+      empty.textContent = total ? 'No events match the filters.' : 'No history events found.';
+      empty.style.display = shown ? 'none' : '';
+      document.getElementById('history-count').textContent = total ? `Showing ${shown} of ${total} events` : '';
+    }
+
+    function sortHistory() {
+      const tbody = document.getElementById('history-tbody');
+      const mode = document.getElementById('history-sort').value;
+      const rank = (m) => (m.severity === 'malicious' ? 0 : 1);
+      const newest = (a, b) => b.t - a.t || (b.id ?? 0) - (a.id ?? 0);
+      const order = {
+        newest,
+        oldest: (a, b) => -newest(a, b),
+        severity: (a, b) => rank(a) - rank(b) || newest(a, b),
+      }[mode];
+      [...tbody.children]
+        .filter((row) => row.id !== 'history-empty')
+        .sort((a, b) => order(a._meta, b._meta))
+        .forEach((row) => tbody.appendChild(row));
     }
 
     async function clearAll() {
@@ -363,7 +416,7 @@
       const tbody = document.getElementById('history-tbody');
       for (const row of [...tbody.children]) if (row.id !== 'history-empty') row.remove();
       document.getElementById('history-model').length = 1;
-      document.getElementById('history-empty').style.display = '';
+      filterHistory();
 
       const aiTerm = document.getElementById('chat-history');
       while (aiTerm.children.length > 1) aiTerm.lastElementChild.remove();
@@ -404,11 +457,10 @@
 
     function addHistoryRow(ev, findings) {
       const tbody = document.getElementById('history-tbody');
-      const empty = document.getElementById('history-empty');
       const malicious = findings.some((f) => f.severity === 'MALICIOUS');
       const sev = malicious ? 'malicious' : 'suspicious';
       const badgeText = malicious ? 'NEUTRALIZED' : 'SANITIZED';
-      const timeStr = esc(new Date(ev.t).toISOString().replace('T', ' ').slice(0, 19));
+      const timeStr = `${localDate(ev.t)} ${timeOf(ev.t).slice(0, 8)}`;
       const labels = findings.map((f) => `${esc(f.role)}[${esc(f.index)}]`).join(', ');
 
       const details = findings.map((f) => {
@@ -439,7 +491,7 @@
       }).join('<div style="border-top: 1px solid var(--border-color);"></div>');
 
       const html = `
-        <div data-event-id="${esc(ev.id ?? '')}" data-action="${sev}" data-model="${esc(ev.model)}" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+        <div data-event-id="${esc(ev.id ?? '')}" data-model="${esc(ev.model)}" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
           <div style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; border-bottom: 1px solid var(--border-color);" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'flex' : 'none'">
             <div class="badge ${sev}">${badgeText}</div>
             <div style="color: var(--text-muted); font-size: 0.85rem; width: 120px;">${timeStr}</div>
@@ -453,11 +505,22 @@
         </div>
       `;
       tbody.insertAdjacentHTML('afterbegin', html);
-      addModelOption(String(ev.model ?? ''));
-      const row = tbody.firstElementChild;
-      const visible = historyRowVisible(row);
-      row.style.display = visible ? '' : 'none';
-      if (visible && empty) empty.style.display = 'none';
+      const model = String(ev.model ?? '');
+      const words = [model, badgeText];
+      for (const f of findings) {
+        words.push(f.severity, { MALICIOUS: 'neutralized', SUSPICIOUS: 'sanitized' }[f.severity] ?? '');
+        words.push(`${f.role}[${f.index}]`, ...(f.codes || []), f.before, f.after);
+      }
+      tbody.firstElementChild._meta = {
+        id: ev.id,
+        t: ev.t,
+        severity: sev,
+        model,
+        text: words.join('\n').toLowerCase(),
+      };
+      addModelOption(model);
+      sortHistory();
+      filterHistory();
     }
 
     function addInspectorCard(ev, f) {
