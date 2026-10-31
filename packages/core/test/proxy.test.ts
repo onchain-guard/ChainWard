@@ -310,6 +310,78 @@ test("the buffer is bounded", async () => {
   await proxy.close();
 });
 
+test("DELETE /events empties the buffer, and later traffic is still recorded", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const llm = `http://127.0.0.1:${portOf(proxy.llm)}/v1/messages`;
+  const events = `http://127.0.0.1:${portOf(proxy.events!)}/events`;
+  await post(llm, anthropicMessage(SMUGGLED));
+  await post(llm, anthropicMessage("req"));
+
+  const res = await fetch(events, { method: "DELETE" });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.deepEqual(await res.json(), { cleared: 2 });
+  assert.equal(((await (await fetch(`${events}/recent`)).json()) as GuardEvent[]).length, 0);
+
+  await post(llm, anthropicMessage("after"));
+  assert.equal(((await (await fetch(`${events}/recent`)).json()) as GuardEvent[]).length, 1);
+
+  await proxy.close();
+});
+
+test("each event carries an id that increases with every request", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const llm = `http://127.0.0.1:${portOf(proxy.llm)}/v1/messages`;
+  await post(llm, anthropicMessage(SMUGGLED));
+  await post(llm, anthropicMessage("req"));
+
+  const body = (await (await fetch(`http://127.0.0.1:${portOf(proxy.events!)}/events/recent`)).json()) as GuardEvent[];
+  assert.deepEqual(body.map((e) => e.id), [1, 2]);
+
+  await proxy.close();
+});
+
+test("DELETE /events/:id removes only that event, and an unknown id is a 404", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const llm = `http://127.0.0.1:${portOf(proxy.llm)}/v1/messages`;
+  const events = `http://127.0.0.1:${portOf(proxy.events!)}/events`;
+  for (const text of [SMUGGLED, "a", "b"]) await post(llm, anthropicMessage(text));
+
+  const res = await fetch(`${events}/2`, { method: "DELETE" });
+  assert.equal(res.status, 200);
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.deepEqual(await res.json(), { removed: 2 });
+  const left = (await (await fetch(`${events}/recent`)).json()) as GuardEvent[];
+  assert.deepEqual(left.map((e) => e.id), [1, 3]);
+
+  assert.equal((await fetch(`${events}/2`, { method: "DELETE" })).status, 404);
+  assert.equal(((await (await fetch(`${events}/recent`)).json()) as GuardEvent[]).length, 2);
+
+  await proxy.close();
+});
+
+test("/events/:id answers a CORS preflight that allows DELETE", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const res = await fetch(`http://127.0.0.1:${portOf(proxy.events!)}/events/1`, { method: "OPTIONS" });
+
+  assert.equal(res.status, 204);
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.match(res.headers.get("access-control-allow-methods") ?? "", /DELETE/);
+
+  await proxy.close();
+});
+
+test("/events answers a CORS preflight that allows DELETE", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const res = await fetch(`http://127.0.0.1:${portOf(proxy.events!)}/events`, { method: "OPTIONS" });
+
+  assert.equal(res.status, 204);
+  assert.equal(res.headers.get("access-control-allow-origin"), "*");
+  assert.match(res.headers.get("access-control-allow-methods") ?? "", /DELETE/);
+
+  await proxy.close();
+});
+
 // ── POST /scan ────────────────────────────────────────────────────────────────────────
 //
 // A dashboard cannot reach the LLM endpoint: that port answers agents, not browsers, so it

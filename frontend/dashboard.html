@@ -200,6 +200,7 @@
         </select>
         <input type="text" id="history-search" placeholder="Search prompts or payloads..." style="flex: 1; max-width: 400px;" oninput="filterHistory()" onkeypress="if(event.key === 'Enter') filterHistory()">
         <button onclick="filterHistory()" style="background:var(--accent-brand); color:#000; font-weight:600; border:none; border-radius:4px; padding:0 16px; cursor:pointer; font-size:0.85rem; font-family:var(--font-ui); transition:opacity 0.2s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">Search</button>
+        <button class="remove-all-btn" onclick="clearAll()">Remove All</button>
       </div>
 
       <div id="history-tbody" style="display: flex; flex-direction: column; gap: 16px;">
@@ -350,49 +351,104 @@
       document.getElementById('history-empty').style.display = shown ? 'none' : '';
     }
 
+    async function clearAll() {
+      const base = (document.getElementById('events-url').value || '').replace(/\/+$/, '');
+      try {
+        const r = await fetch(`${base}/events`, { method: 'DELETE' });
+        if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      } catch (e) {
+        alert(`Failed to clear history on the proxy: ${e.message}`);
+        return;
+      }
+      const tbody = document.getElementById('history-tbody');
+      for (const row of [...tbody.children]) if (row.id !== 'history-empty') row.remove();
+      document.getElementById('history-model').length = 1;
+      document.getElementById('history-empty').style.display = '';
+
+      const aiTerm = document.getElementById('chat-history');
+      while (aiTerm.children.length > 1) aiTerm.lastElementChild.remove();
+      document.getElementById('initial-time').textContent = `[${timeOf(Date.now())}]`;
+      const secTerm = document.getElementById('inspector-feed');
+      for (const row of [...secTerm.children]) if (row.id !== 'empty-state') row.remove();
+      document.getElementById('empty-state').style.display = 'flex';
+
+      events.length = 0;
+      renderStats();
+      renderAggregates();
+    }
+
+    async function removeEvent(id) {
+      const base = (document.getElementById('events-url').value || '').replace(/\/+$/, '');
+      try {
+        const r = await fetch(`${base}/events/${id}`, { method: 'DELETE' });
+        if (!r.ok && r.status !== 404) throw new Error(`HTTP ${r.status}`);
+      } catch (e) {
+        alert(`Failed to remove the event on the proxy: ${e.message}`);
+        return;
+      }
+      document.querySelectorAll(`[data-event-id="${id}"]`).forEach((el) => el.remove());
+
+      const select = document.getElementById('history-model');
+      const models = new Set([...document.querySelectorAll('#history-tbody [data-model]')].map((r) => r.dataset.model));
+      for (const o of [...select.options].slice(1)) if (!models.has(o.value)) o.remove();
+      if (!document.querySelector('#inspector-feed [data-event-id]')) document.getElementById('empty-state').style.display = 'flex';
+
+      filterHistory();
+    }
+
     function addModelOption(model) {
       const select = document.getElementById('history-model');
       if (!model || [...select.options].some((o) => o.value === model)) return;
       select.add(new Option(model, model));
     }
 
-    function addHistoryRow(ev, f) {
+    function addHistoryRow(ev, findings) {
       const tbody = document.getElementById('history-tbody');
       const empty = document.getElementById('history-empty');
-      const sev = f.severity === 'MALICIOUS' ? 'malicious' : 'suspicious';
-      
-      const badgeText = f.severity === 'MALICIOUS' ? 'NEUTRALIZED' : 'SANITIZED';
+      const malicious = findings.some((f) => f.severity === 'MALICIOUS');
+      const sev = malicious ? 'malicious' : 'suspicious';
+      const badgeText = malicious ? 'NEUTRALIZED' : 'SANITIZED';
       const timeStr = esc(new Date(ev.t).toISOString().replace('T', ' ').slice(0, 19));
-      
-      const reasonHtml = f.severity === 'ERROR' ? esc(f.before) : `Rule Triggered: ${esc((f.codes || []).join(', '))}`;
-      
+      const labels = findings.map((f) => `${esc(f.role)}[${esc(f.index)}]`).join(', ');
+
+      const details = findings.map((f) => {
+        const color = f.severity === 'MALICIOUS' ? 'var(--color-malicious)' : 'var(--color-suspicious)';
+        const reasonHtml = f.severity === 'ERROR' ? esc(f.before) : `Rule Triggered: ${esc((f.codes || []).join(', '))}`;
+        return `
+            <div>
+              <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                <strong style="color: var(--text-primary); font-family: var(--font-mono);">${esc(f.role)}[${esc(f.index)}]</strong>
+                <span style="color: ${color}; font-weight: 700; font-size: 0.75rem; margin: 0 6px;">${esc(f.severity)}</span>
+                ${reasonHtml}
+              </div>
+              <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px;">
+                <div style="background: rgba(255,75,75,0.05); border: 1px solid rgba(255,75,75,0.1); border-radius: 6px; padding: 16px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #ff6b6b; margin-bottom: 12px; font-family: var(--font-mono);">
+                    <span>BEFORE (Raw Payload Preview)</span>
+                  </div>
+                  <pre style="font-family: var(--font-mono); font-size: 0.85rem; color: #e2e8f0; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere;">${esc(f.before)}</pre>
+                </div>
+                <div style="background: rgba(46,204,113,0.05); border: 1px solid rgba(46,204,113,0.1); border-radius: 6px; padding: 16px;">
+                  <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #4ade80; margin-bottom: 12px; font-family: var(--font-mono);">
+                    <span>AFTER (Sanitized Preview)</span>
+                  </div>
+                  <pre style="font-family: var(--font-mono); font-size: 0.85rem; color: #e2e8f0; margin: 0; white-space: pre-wrap; overflow-wrap: anywhere;">${esc(f.after)}</pre>
+                </div>
+              </div>
+            </div>`;
+      }).join('<div style="border-top: 1px solid var(--border-color);"></div>');
+
       const html = `
-        <div data-action="${sev}" data-model="${esc(ev.model)}" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
-          <div style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; border-bottom: 1px solid var(--border-color);" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'block' : 'none'">
+        <div data-event-id="${esc(ev.id ?? '')}" data-action="${sev}" data-model="${esc(ev.model)}" style="background: var(--bg-panel); border: 1px solid var(--border-color); border-radius: 8px; overflow: hidden;">
+          <div style="padding: 16px 20px; display: flex; align-items: center; gap: 16px; cursor: pointer; border-bottom: 1px solid var(--border-color);" onclick="this.nextElementSibling.style.display = this.nextElementSibling.style.display === 'none' ? 'flex' : 'none'">
             <div class="badge ${sev}">${badgeText}</div>
             <div style="color: var(--text-muted); font-size: 0.85rem; width: 120px;">${timeStr}</div>
             <div style="font-family: var(--font-mono); font-size: 0.85rem; color: #61afef; font-weight: 600; width: 150px;">model: ${esc(ev.model)}</div>
-            <div style="flex: 1; font-size: 0.9rem;">${esc(f.role)}[${esc(f.index)}]</div>
+            <div style="flex: 1; font-size: 0.9rem;">${labels}</div>
+            ${ev.id != null ? `<button class="remove-btn" onclick="event.stopPropagation(); removeEvent(${Number(ev.id)})">Remove</button>` : ''}
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);"><polyline points="6 9 12 15 18 9"></polyline></svg>
           </div>
-          <div style="padding: 20px; background: rgba(0,0,0,0.2); display: none;">
-            <div style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
-              <strong style="color: var(--text-primary);">Reason:</strong> ${reasonHtml}
-            </div>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-              <div style="background: rgba(255,75,75,0.05); border: 1px solid rgba(255,75,75,0.1); border-radius: 6px; padding: 16px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #ff6b6b; margin-bottom: 12px; font-family: var(--font-mono);">
-                  <span>BEFORE (Raw Payload Preview)</span>
-                </div>
-                <pre style="font-family: var(--font-mono); font-size: 0.85rem; color: #e2e8f0; margin: 0; white-space: pre-wrap;">${esc(f.before)}</pre>
-              </div>
-              <div style="background: rgba(46,204,113,0.05); border: 1px solid rgba(46,204,113,0.1); border-radius: 6px; padding: 16px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #4ade80; margin-bottom: 12px; font-family: var(--font-mono);">
-                  <span>AFTER (Sanitized Preview)</span>
-                </div>
-                <pre style="font-family: var(--font-mono); font-size: 0.85rem; color: #e2e8f0; margin: 0; white-space: pre-wrap;">${esc(f.after)}</pre>
-              </div>
-            </div>
+          <div style="padding: 20px; background: rgba(0,0,0,0.2); display: none; flex-direction: column; gap: 24px;">${details}
           </div>
         </div>
       `;
@@ -411,21 +467,22 @@
       if (empty) empty.style.display = 'none';
 
       const time = timeOf(ev.t);
+      const eid = esc(ev.id ?? '');
       const isMalicious = f.severity === 'MALICIOUS';
       const color = isMalicious ? 'var(--color-malicious)' : 'var(--color-suspicious)';
       const actionText = isMalicious ? 'NEUTRALIZED' : 'SANITIZED';
 
       // 1. AI Side (Left)
-      aiTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <span style="color:#fff">User/Agent Interaction (Model: ${esc(ev.model)})</span></div>`);
-      aiTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Sending Payload:</div>`);
-      aiTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 16px;"><pre style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap;">${esc(f.before)}</pre></div>`);
+      aiTerm.insertAdjacentHTML('beforeend', `<div data-event-id="${eid}" style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <span style="color:#fff">User/Agent Interaction (Model: ${esc(ev.model)})</span></div>`);
+      aiTerm.insertAdjacentHTML('beforeend', `<div data-event-id="${eid}" style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Sending Payload:</div>`);
+      aiTerm.insertAdjacentHTML('beforeend', `<div data-event-id="${eid}" style="margin-bottom: 16px;"><pre style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.1); color: #e2e8f0; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap;">${esc(f.before)}</pre></div>`);
       aiTerm.scrollTop = aiTerm.scrollHeight;
 
       // 2. Security Side (Right)
-      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <span style="color: ${color}; font-weight: bold;">INTERCEPTED:</span> Event #${esc(f.index)} [${esc(f.role)}]</div>`);
-      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <div style="background: rgba(255,75,75,0.1); border-left: 2px solid ${color}; padding: 8px 12px; color: #ff8f8f; margin-top: 4px;"><strong>[ALERT]</strong> ${esc((f.codes || []).join(', '))}</div></div>`);
-      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Action: <span style="color: var(--color-clean); font-weight: bold;">${actionText} ALLOW</span>. Forwarding sanitized message...</div>`);
-      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 16px;"><pre style="background: rgba(46,204,113,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(46,204,113,0.2); color: #e2e8f0; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap;">${esc(f.after)}</pre></div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div data-event-id="${eid}" style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <span style="color: ${color}; font-weight: bold;">INTERCEPTED:</span> Event #${esc(f.index)} [${esc(f.role)}]</div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div data-event-id="${eid}" style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <div style="background: rgba(255,75,75,0.1); border-left: 2px solid ${color}; padding: 8px 12px; color: #ff8f8f; margin-top: 4px;"><strong>[ALERT]</strong> ${esc((f.codes || []).join(', '))}</div></div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div data-event-id="${eid}" style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Action: <span style="color: var(--color-clean); font-weight: bold;">${actionText} ALLOW</span>. Forwarding sanitized message...</div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div data-event-id="${eid}" style="margin-bottom: 16px;"><pre style="background: rgba(46,204,113,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(46,204,113,0.2); color: #e2e8f0; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap;">${esc(f.after)}</pre></div>`);
       secTerm.scrollTop = secTerm.scrollHeight;
     }
 
@@ -437,11 +494,11 @@
       stored.set(key, n);
 
       const findings = ev.findings || [];
-      events.push({ t: ev.t, findings: findings.map((f) => ({ severity: f.severity, codes: f.codes || [] })) });
+      events.push({ id: ev.id, t: ev.t, findings: findings.map((f) => ({ severity: f.severity, codes: f.codes || [] })) });
       for (const f of findings) {
         addInspectorCard(ev, f);
-        addHistoryRow(ev, f);
       }
+      if (findings.length) addHistoryRow(ev, findings);
       renderStats();
       renderAggregates();
     }
