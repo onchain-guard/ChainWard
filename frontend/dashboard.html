@@ -293,7 +293,8 @@
 
     const RANGE_MS = { '1h': 60 * 60 * 1000, '24h': 24 * 60 * 60 * 1000, '7d': 7 * 24 * 60 * 60 * 1000 };
     let range = '24h';
-    const seen = new Set();
+    const stored = new Map();
+    let thisConn = new Map();
     const events = [];
 
     function inRange() {
@@ -434,9 +435,11 @@
     }
 
     function handleEvent(ev) {
-      const key = `${ev.t}:${ev.model}:${(ev.findings || []).length}`;
-      if (seen.has(key)) return;
-      seen.add(key);
+      const key = JSON.stringify(ev);
+      const n = (thisConn.get(key) ?? 0) + 1;
+      thisConn.set(key, n);
+      if (n <= (stored.get(key) ?? 0)) return;
+      stored.set(key, n);
 
       const findings = ev.findings || [];
       events.push({ t: ev.t, findings: findings.map((f) => ({ severity: f.severity, codes: f.codes || [] })) });
@@ -485,7 +488,10 @@
         setConn('off', `Connection failed: ${e.message}`);
         return;
       }
-      source.onopen = () => setConn('on', `Connected — ${base}`);
+      source.onopen = () => {
+        thisConn = new Map();
+        setConn('on', `Connected — ${base}`);
+      };
       source.onmessage = (m) => {
         try { handleEvent(JSON.parse(m.data)); } catch { /* keep the stream alive on one bad frame */ }
       };
