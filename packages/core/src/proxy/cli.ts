@@ -39,6 +39,8 @@ Point an agent you cannot modify at the proxy and change nothing else:
 Event API — and the console, on the same port
   GET  /               the console: live verdicts in a browser, no setup
   GET  /events         server-sent events; replays the recent buffer on connect
+  DELETE /events       empty the recent buffer
+  DELETE /events/:id   remove one event from the buffer
   GET  /events/recent  the buffer as JSON
   POST /scan           scan one string without routing a model call through the proxy.
                        {text, kind?, chain?, address?} in; severity, signals, sanitized out.
