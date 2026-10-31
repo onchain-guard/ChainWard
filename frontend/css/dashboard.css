@@ -891,6 +891,7 @@ body {
 
 .history-controls {
   display: flex;
+  flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 24px;
 }
@@ -909,6 +910,51 @@ body {
 .history-controls input {
   flex: 1;
   max-width: 300px;
+}
+
+#view-history {
+  --history-left-width: 216px;
+}
+
+#history-severity {
+  width: var(--history-left-width);
+}
+
+#history-severity .range-btn {
+  flex: auto;
+}
+
+.history-controls #history-model {
+  width: var(--history-left-width);
+}
+
+#history-search {
+  min-width: 280px;
+}
+
+.history-filters {
+  margin-bottom: 12px;
+}
+
+.date-range {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+.history-controls .date-range input {
+  flex: none;
+  max-width: none;
+  font-family: var(--font-ui);
+  color-scheme: dark;
+}
+
+.history-count {
+  margin: -12px 0 16px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
 }
 
 .history-table {
