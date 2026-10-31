@@ -8,7 +8,7 @@
 // ports, prints its own console URL, reports a port collision with the flag that fixes it,
 // and stops on Ctrl+C. This script exists for one reason the bin cannot cover.
 //
-// The console is edited here, at the repository root, and copied into the package at build
+// The console is edited in `frontend/` of this repository and copied into the package at build
 // time — `files` cannot reach above the package directory, so a path pointing outside it is
 // dropped from the tarball without a word. That copy is what the bin serves. Run the bin
 // directly after editing the page and you are served the copy from the last build: your
