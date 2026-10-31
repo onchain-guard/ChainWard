@@ -16,7 +16,7 @@ import { CASES, CONTROLS, caseById } from "./cases.ts";
 import { buildToolResult, scanCase } from "./engine.ts";
 import { SYSTEM_PROMPT, TOOLS, buildMessages } from "./prompt.ts";
 import { aggregate, controlHeld, scoreControl, scoreRun } from "./score.ts";
-import { controlTable, guardTable, metricsTable, perCaseRuns, reached, usageTable } from "./report.ts";
+import { controlTable, guardTable, metricsTable, perCaseRuns, perCaseUtility, reached, usageTable } from "./report.ts";
 import { anthropicProvider } from "./providers/anthropic.ts";
 import { ollamaProvider } from "./providers/ollama.ts";
 import { stubProvider } from "./providers/stub.ts";
@@ -121,7 +121,7 @@ async function main() {
   console.log(guardTable(guardRows));
 
   const attacks = guardRows.filter((r) => r.caseId.startsWith("A"));
-  const benign = guardRows.filter((r) => r.caseId.startsWith("B"));
+  const benign = guardRows.filter((r) => caseById(r.caseId)?.kind === "benign");
   const detected = attacks.filter((r) => {
     const c = caseById(r.caseId);
     return c?.kind === "attack" && reached(r.severity, c.targetSeverity);
@@ -224,6 +224,8 @@ async function main() {
   console.log(metricsTable(metrics, opts.models, provider.id, controlOk));
   console.log("\n### 케이스별 (피해 발생 횟수 / 유효 실행 횟수)\n");
   console.log(perCaseRuns(runs));
+  console.log("\n### 정상 케이스별 유용성 (답변에 확인 단어 포함 / 유효 실행 횟수)\n");
+  console.log(perCaseUtility(runs));
   const usage = usageTable([...runs, ...controlRuns.map(controlAsRun)]);
   if (usage) console.log(`\n${usage}`);
   if (failed) {

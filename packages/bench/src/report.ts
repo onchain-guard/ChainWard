@@ -8,7 +8,7 @@ import type { ControlRow, GuardResultRow, RunRow } from "./types.ts";
 import type { FamilyMetrics, Metrics, Rate } from "./score.ts";
 import { familyOf } from "./score.ts";
 import { CONTROLS } from "./cases.ts";
-import { CASES } from "./cases.ts";
+import { caseById } from "./cases.ts";
 
 // Anthropic list prices, USD per 1M tokens. Cached 2026-06-24 — a hardcoded price table
 // goes stale, so this reports a LIST-PRICE ESTIMATE, never a billed amount: an org with
@@ -148,7 +148,7 @@ export function guardTable(rows: GuardResultRow[]): string {
     "|---|---|---|---|---|",
   ];
   for (const r of rows) {
-    const c = CASES.find((x) => x.id === r.caseId)!;
+    const c = caseById(r.caseId)!;
     const met = c.kind === "attack" ? reached(r.severity, c.targetSeverity) : r.severity === "CLEAN";
     const known = c.kind === "attack" ? c.knownGap : c.knownFP;
     const mark = met ? "✅" : known ? (c.kind === "attack" ? "🕳 gap" : "🕳 FP") : "❌";
@@ -243,6 +243,23 @@ export function perCaseRuns(runs: RunRow[]): string {
           `${rows("on").filter((r) => r.movedFunds).length}/${rows("on").length}`
         : "—";
     out.push(`| ${id} | ${f} | ${METRIC_LABEL[f]} | ${n("off")} | ${n("on")} | ${moved} |`);
+  }
+  return out.join("\n");
+}
+
+/** Per benign case, how often the answer still names the token — both arms, so a low "on"
+ *  can be read against the model's own baseline instead of being blamed on the fence. */
+export function perCaseUtility(runs: RunRow[]): string {
+  const ids = [...new Set(runs.map((r) => r.caseId))].filter((id) => familyOf(id) === null).sort();
+  const out: string[] = ["| case | 확인 단어 | off | on |", "|---|---|---|---|"];
+  for (const id of ids) {
+    const c = caseById(id);
+    if (c?.kind !== "benign") continue;
+    const n = (arm: string) => {
+      const rs = runs.filter((r) => r.caseId === id && r.arm === arm && !r.invalid);
+      return `${rs.filter((r) => r.taskDone).length}/${rs.length}`;
+    };
+    out.push(`| ${id} | \`${c.utilityToken}\` | ${n("off")} | ${n("on")} |`);
   }
   return out.join("\n");
 }
