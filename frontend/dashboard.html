@@ -61,7 +61,7 @@
       <div class="page-header">
         <div>
           <div class="page-title">AI Activity Dashboard</div>
-          <div class="page-subtitle">Real-time monitoring of Claude Code activities and security interventions.</div>
+          <div class="page-subtitle">Real-time view of LLM requests guarded by ChainWard.</div>
         </div>
         <div style="display:flex; gap:16px;">
           <div class="range-toggle">
@@ -97,8 +97,8 @@
 
       <div class="dashboard-split">
         <div class="dash-panel">
-          <h3>AI Action Types (Intercepted)</h3>
-          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px;">Distribution of operations attempted by Claude Code through MCP.</p>
+          <h3>Detections by Layer</h3>
+          <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 24px;">Flagged messages grouped by the ChainWard layer that caught them.</p>
           <div id="layer-empty" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 40px 0;">No data yet</div>
           <div id="layer-bars">
             <!-- JS will populate bar charts here -->
@@ -119,12 +119,12 @@
         </div>
 
         <div class="dash-panel">
-          <h3>Top Neutralized Rules (Last <span id="signal-range">24h</span>)</h3>
+          <h3>Top Triggered Rules (Last <span id="signal-range">24h</span>)</h3>
           <div>
             <div class="rule-row"
               style="color:var(--text-muted); text-transform:uppercase; font-size:0.7rem; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:8px;">
               <div>CHAINWARD RULE</div>
-              <div>NEUTRALIZED HITS</div>
+              <div>HITS</div>
             </div>
             <div id="signal-empty" style="text-align: center; color: var(--text-muted); font-size: 0.85rem; padding: 40px 0;">No rules triggered</div>
             <div id="signal-rows">
@@ -144,10 +144,7 @@
         <div class="chat-header" style="justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 8px;">
             <span style="color: var(--text-muted); font-size: 0.75rem; letter-spacing: 0.05em;">AGENT:</span>
-            <span style="font-weight: 700;">CLAUDE CODE</span>
-          </div>
-          <div style="font-size: 0.75rem; color: var(--text-muted); font-family: var(--font-mono);">
-            STATE: <span style="color: var(--text-primary);">IDLE</span>
+            <span style="font-weight: 700;">ANY CLIENT</span>
           </div>
         </div>
         <div class="chat-history" id="chat-history" style="font-family: var(--font-mono); font-size: 0.85rem; padding: 24px; display: flex; flex-direction: column; gap: 8px;">
@@ -188,7 +185,7 @@
       <div class="page-header" style="margin-bottom: 24px;">
         <div>
           <div class="page-title">Action Audit Log</div>
-          <div class="page-subtitle">Detailed history of all MCP tool executions intercepted by ChainWard, including payload sanitization diffs.</div>
+          <div class="page-subtitle">Every flagged message from LLM requests through the proxy, with before/after diffs.</div>
         </div>
       </div>
 
@@ -427,7 +424,7 @@
       // 2. Security Side (Right)
       secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <span style="color: ${color}; font-weight: bold;">INTERCEPTED:</span> Event #${esc(f.index)} [${esc(f.role)}]</div>`);
       secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> <div style="background: rgba(255,75,75,0.1); border-left: 2px solid ${color}; padding: 8px 12px; color: #ff8f8f; margin-top: 4px;"><strong>[ALERT]</strong> ${esc((f.codes || []).join(', '))}</div></div>`);
-      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Action: <span style="color: var(--color-clean); font-weight: bold;">${actionText} ALLOW</span>. Forwarding sanitized command...</div>`);
+      secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 8px;"><span style="color: var(--text-muted);">[${time}]</span> Action: <span style="color: var(--color-clean); font-weight: bold;">${actionText} ALLOW</span>. Forwarding sanitized message...</div>`);
       secTerm.insertAdjacentHTML('beforeend', `<div style="margin-bottom: 16px;"><pre style="background: rgba(46,204,113,0.05); padding: 12px; border-radius: 6px; border: 1px solid rgba(46,204,113,0.2); color: #e2e8f0; font-family: var(--font-mono); font-size: 0.85rem; white-space: pre-wrap;">${esc(f.after)}</pre></div>`);
       secTerm.scrollTop = secTerm.scrollHeight;
     }
