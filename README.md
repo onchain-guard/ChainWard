@@ -290,8 +290,7 @@ pnpm -r build
 pnpm test          # 318개, 오프라인
 ```
 
-콘솔(`dashboard.html`)을 손보려면 `pnpm demo` 로 띄운다. 시작할 때마다 패키지 안의
-사본을 갱신하므로 전체 빌드를 다시 돌릴 필요가 없다.
+콘솔(`frontend/dashboard.html`, 스타일은 `frontend/css/`)을 손보려면 `pnpm demo` 로 띄운다. 시작할 때마다 패키지 안의 사본을 갱신하므로 전체 빌드를 다시 돌릴 필요가 없다.
 npm에 배포된 패키지로는 안 된다 — 그 안의 콘솔은 배포 시점에 고정된 사본이다.
 
 상세 설계 → [docs/PRODUCTION-DESIGN.md](docs/PRODUCTION-DESIGN.md)

@@ -74,10 +74,10 @@ positive control 을 붙여 다시 쟀다.
 packages/core    엔진 · CLI · 프록시 · 콘솔          → npm: chainward
 packages/eliza   ElizaOS 어댑터                     → npm: @chainwards/eliza
 packages/bench   측정 하네스 (코퍼스 · anvil e2e)    → 비공개 패키지
-dashboard.html   콘솔 원본. 빌드가 core 로 복사한다
+frontend/        콘솔 원본 (HTML · css/). 빌드가 CSS 를 인라인해 core 로 복사한다
 ```
 
-콘솔을 고칠 때는 **저장소 루트의 `dashboard.html`** 을 고친다.
+콘솔을 고칠 때는 **`frontend/dashboard.html`** 과 **`frontend/css/`** 를 고친다.
 `packages/core/console.html` 은 빌드 산출물이라 직접 고쳐도 사라진다.
 
 ---
