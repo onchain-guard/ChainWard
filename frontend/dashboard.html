@@ -540,7 +540,7 @@
     renderStats();
     renderAggregates();
     document.getElementById('initial-time').textContent = `[${timeOf(Date.now())}]`;
-    connect();
+    document.addEventListener('DOMContentLoaded', connect);
   </script>
 </body>
 
