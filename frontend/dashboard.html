@@ -265,9 +265,7 @@
         </div>
         <div>
           <div class="form-label">Analysis Result</div>
-          <div id="replay-out" style="background: #121214; border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; min-height: 400px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;">
-            Ready for input.
-          </div>
+          <div id="replay-out" style="background: #121214; border: 1px solid var(--border-color); border-radius: 8px; padding: 24px; min-height: 400px; font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-primary); white-space: pre-wrap; word-break: break-all;"><div class="replay-placeholder">Ready for input.</div></div>
         </div>
       </div>
     </div>
@@ -692,21 +690,26 @@
         const v = await r.json();
         if (!r.ok) { out.textContent = `Rejected: ${v.error}`; return; }
 
-        const colour = v.severity === 'MALICIOUS' ? 'var(--color-malicious)'
-          : v.severity === 'SUSPICIOUS' ? 'var(--color-suspicious)' : 'var(--color-clean)';
-        const rows = (v.signals || []).map((sig) => `
+        const verdict = v.severity === 'MALICIOUS' ? 'malicious' : v.severity === 'SUSPICIOUS' ? 'suspicious' : 'clean';
+        const layerRank = (code) => {
+          const i = LAYER_OF.findIndex(([re]) => re.test(code));
+          return i < 0 ? LAYER_OF.length : i;
+        };
+        const signals = [...(v.signals || [])].sort((a, b) => layerRank(a.code) - layerRank(b.code));
+        const rows = signals.map((sig) => `
           <div class="rule-row">
-            <div class="rule-name"><div class="rule-dot ${sig.hard ? 'red' : 'yellow'}"></div> ${esc(sig.code)}</div>
+            <div class="rule-name"><div class="rule-dot ${sig.hard ? 'red' : 'yellow'}"></div><span class="rule-layer">${esc(layerFor([sig.code]))}</span>${esc(sig.code)}</div>
             <div class="rule-hits">${esc(sig.weight)}${sig.hard ? ' HARD' : ''}</div>
           </div>`).join('') || '<div style="color:var(--text-muted); font-size:0.85rem; padding:8px 0;">No signals</div>';
 
         out.innerHTML = `
-          <div style="color:${colour}; font-weight:700; font-size:1.2rem;">${esc(v.severity)}</div>
-          <div style="color:var(--text-muted); font-size:0.8rem; margin-top:2px;">score ${esc(v.score)}</div>
-          <div style="margin-top:16px; font-size:0.8rem; color:var(--text-muted);">Signals & Weights</div>
-          ${rows}
-          <div style="margin-top:16px; font-size:0.8rem; color:var(--text-muted);">Sanitized Result</div>
-          <div class="diff-content" style="margin-top:4px;">${esc(v.sanitized)}</div>`;
+          <div class="replay-result">
+            <div class="verdict-banner ${verdict}">${esc(v.severity)}</div>
+            <div class="replay-section-label">Signals & Weights</div>
+            ${rows}
+            <div class="replay-section-label">Sanitized Result</div>
+            <div class="textarea-box replay-sanitized">${esc(v.sanitized)}</div>
+          </div>`.trim();
       } catch (e) {
         out.textContent = `Failed to reach proxy: ${e.message}. Check the Events API URL.`;
       }
