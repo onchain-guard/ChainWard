@@ -308,6 +308,9 @@
     let thisConn = new Map();
     const events = [];
     const seenHashes = new Set();
+    const BENIGN_SUSPICIOUS_HASHES = new Set([
+      '848ab6d7d37cb9e01ff58d81467438a21ff26e5287bbf510e76d387df592fb0d',
+    ]);
 
     function inRange() {
       const since = Date.now() - RANGE_MS[range];
@@ -557,7 +560,9 @@
       if (n <= (stored.get(key) ?? 0)) return;
       stored.set(key, n);
 
-      const findings = ev.findings || [];
+      const findings = (ev.findings || []).filter(
+        (f) => !(f.severity === 'SUSPICIOUS' && BENIGN_SUSPICIOUS_HASHES.has(f.hash)),
+      );
       events.push({ id: ev.id, t: ev.t, findings: findings.map((f) => ({ severity: f.severity, codes: f.codes || [] })) });
       const unseen = findings.filter((f) => {
         if (!f.hash) return true;
