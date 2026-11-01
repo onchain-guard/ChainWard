@@ -339,6 +339,25 @@ test("a finding's hash covers the whole message text, not the preview or the blo
   assert.notEqual(changedTail.findings[0]?.hash, first.findings[0]?.hash);
 });
 
+test("a finding carries the whole message, not only the 200-char preview", async () => {
+  const text = `{"token": {"description": "${INJECTION}"}, "pad": "${"x".repeat(300)}"}`;
+  const { findings } = await guardedTurn([{ role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: text }] }]);
+
+  assert.equal(findings[0]?.raw, text);
+  assert.ok(findings[0]?.sanitized);
+  assert.ok(!findings[0]?.sanitized?.includes(INJECTION));
+  assert.equal(findings[0]?.truncated, false);
+});
+
+test("a very long message is capped in the event and marked as truncated", async () => {
+  const text = `${INJECTION} ${"x".repeat(60_000)}`;
+  const { findings } = await guardedTurn([{ role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: text }] }]);
+
+  assert.equal(findings[0]?.raw, text.slice(0, 50_000));
+  assert.ok((findings[0]?.sanitized ?? "").length <= 50_000);
+  assert.equal(findings[0]?.truncated, true);
+});
+
 test("without an upstream, a non-LLM path explains itself instead of 200-ing", async () => {
   const proxy = createProxy({ port: 0 });
   const res = await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/models`, {});

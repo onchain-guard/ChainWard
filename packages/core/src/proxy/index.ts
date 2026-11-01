@@ -38,6 +38,9 @@ export interface GuardEvent {
     /** first 200 chars of what the model actually received */
     after: string;
     hash?: string;
+    raw?: string;
+    sanitized?: string;
+    truncated?: boolean;
   }>;
 }
 
@@ -76,6 +79,7 @@ const CONSOLE_ORIGIN_BOOTSTRAP =
 
 /** Request paths we treat as an LLM call. Both vendor shapes carry `messages`. */
 const LLM_PATH = /\/(chat\/completions|messages|responses)$/;
+const FULL_TEXT_LIMIT = 50_000;
 
 const CLAUDE_CODE_REMINDER = /^\s*<system-reminder>(?:(?!<\/?system-reminder>)[\s\S])*<\/system-reminder>\s*$/;
 
@@ -280,6 +284,7 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
     // show what actually arrived, not what we are about to send.
     const originals = messages.map((m) => preview(m.content));
     const hashes = messages.map((m) => contentHash(m.content));
+    const fullTexts = messages.map((m) => messageText(m.content));
 
     let event: Omit<GuardEvent, "id"> = { t: Date.now(), model, stream, findings: [] };
     if (messages.length) {
@@ -294,15 +299,22 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
           t: Date.now(),
           model,
           stream,
-          findings: findings.map((f) => ({
-            index: f.index,
-            role: f.role,
-            severity: f.severity,
-            codes: f.codes,
-            before: originals[f.index] ?? "",
-            after: preview(cleaned[f.index]?.content),
-            hash: hashes[f.index],
-          })),
+          findings: findings.map((f) => {
+            const raw = fullTexts[f.index] ?? "";
+            const sanitized = messageText(cleaned[f.index]?.content);
+            return {
+              index: f.index,
+              role: f.role,
+              severity: f.severity,
+              codes: f.codes,
+              before: originals[f.index] ?? "",
+              after: preview(cleaned[f.index]?.content),
+              hash: hashes[f.index],
+              raw: raw.slice(0, FULL_TEXT_LIMIT),
+              sanitized: sanitized.slice(0, FULL_TEXT_LIMIT),
+              truncated: raw.length > FULL_TEXT_LIMIT || sanitized.length > FULL_TEXT_LIMIT,
+            };
+          }),
         };
       } catch (e) {
         // A guard that takes the caller's agent offline is a worse failure than one that
