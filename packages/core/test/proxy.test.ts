@@ -323,6 +323,22 @@ test("a system-reminder anywhere but the first message's own text block is still
   assert.equal(spliced.findings[0]?.severity, "MALICIOUS");
 });
 
+test("a finding's hash covers the whole message text, not the preview or the block markup", async () => {
+  const tail = "x".repeat(300);
+  const first = await guardedTurn([{ role: "user", content: [{ type: "text", text: `${INJECTION} ${tail}` }] }]);
+  const resent = await guardedTurn([
+    { role: "user", content: [{ type: "text", text: "hi" }] },
+    { role: "assistant", content: [{ type: "text", text: "ok" }] },
+    { role: "user", content: [{ type: "text", text: `${INJECTION} ${tail}`, cache_control: { type: "ephemeral" } }] },
+  ]);
+  const changedTail = await guardedTurn([{ role: "user", content: [{ type: "text", text: `${INJECTION} ${tail}y` }] }]);
+
+  assert.match(first.findings[0]?.hash ?? "", /^[0-9a-f]{64}$/);
+  assert.equal(resent.findings[0]?.hash, first.findings[0]?.hash);
+  assert.equal(changedTail.findings[0]?.before, first.findings[0]?.before);
+  assert.notEqual(changedTail.findings[0]?.hash, first.findings[0]?.hash);
+});
+
 test("without an upstream, a non-LLM path explains itself instead of 200-ing", async () => {
   const proxy = createProxy({ port: 0 });
   const res = await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/models`, {});

@@ -307,6 +307,7 @@
     const stored = new Map();
     let thisConn = new Map();
     const events = [];
+    const seenHashes = new Set();
 
     function inRange() {
       const since = Date.now() - RANGE_MS[range];
@@ -558,10 +559,16 @@
 
       const findings = ev.findings || [];
       events.push({ id: ev.id, t: ev.t, findings: findings.map((f) => ({ severity: f.severity, codes: f.codes || [] })) });
-      for (const f of findings) {
+      const unseen = findings.filter((f) => {
+        if (!f.hash) return true;
+        if (seenHashes.has(f.hash)) return false;
+        seenHashes.add(f.hash);
+        return true;
+      });
+      for (const f of unseen) {
         addInspectorCard(ev, f);
       }
-      if (findings.length) addHistoryRow(ev, findings);
+      if (unseen.length) addHistoryRow(ev, unseen);
       renderStats();
       renderAggregates();
     }
