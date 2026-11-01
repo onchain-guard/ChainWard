@@ -212,6 +212,67 @@ test("a non-LLM POST body is relayed verbatim, not parsed or rewritten", async (
   up.close();
 });
 
+test("a token count is relayed untouched and records no event", async () => {
+  const up = fakeUpstream();
+  const events: GuardEvent[] = [];
+  const proxy = createProxy({ port: 0, upstream: up.url(), onEvent: (e) => events.push(e) });
+
+  const res = await post(
+    `http://127.0.0.1:${portOf(proxy.llm)}/v1/messages/count_tokens?beta=true`,
+    anthropicMessage(SMUGGLED),
+  );
+
+  assert.equal(res.status, 200);
+  assert.ok(JSON.stringify(up.received[0]).includes("\u{E0069}"), "the token count body was rewritten");
+  assert.equal(events.length, 0);
+
+  await proxy.close();
+  up.close();
+});
+
+test("a completion with a query string is still guarded and recorded", async () => {
+  const up = fakeUpstream();
+  const events: GuardEvent[] = [];
+  const proxy = createProxy({ port: 0, upstream: up.url(), onEvent: (e) => events.push(e) });
+
+  await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/messages?beta=true`, anthropicMessage(SMUGGLED));
+
+  assert.ok(!JSON.stringify(up.received[0]).includes("\u{E0069}"), "smuggled codepoint reached the model");
+  assert.equal(events.length, 1);
+  assert.equal(events[0].findings[0].severity, "MALICIOUS");
+
+  await proxy.close();
+  up.close();
+});
+
+test("a batch submission is relayed, not recorded as an empty request", async () => {
+  const up = fakeUpstream();
+  const events: GuardEvent[] = [];
+  const proxy = createProxy({ port: 0, upstream: up.url(), onEvent: (e) => events.push(e) });
+  const batch = { requests: [{ custom_id: "a", params: anthropicMessage("hello") }] };
+
+  const res = await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/messages/batches`, batch);
+
+  assert.equal(res.status, 200);
+  assert.deepEqual(up.received[0], batch);
+  assert.equal(events.length, 0);
+
+  await proxy.close();
+  up.close();
+});
+
+test("without an upstream, a token count gets the relay hint, not a fake completion", async () => {
+  const proxy = createProxy({ port: 0, eventPort: 0 });
+  const res = await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/messages/count_tokens`, anthropicMessage(SMUGGLED));
+
+  assert.equal(res.status, 404);
+  assert.match((await res.json()).hint, /--upstream/);
+  const recent = (await (await fetch(`http://127.0.0.1:${portOf(proxy.events!)}/events/recent`)).json()) as GuardEvent[];
+  assert.equal(recent.length, 0);
+
+  await proxy.close();
+});
+
 test("without an upstream, a non-LLM path explains itself instead of 200-ing", async () => {
   const proxy = createProxy({ port: 0 });
   const res = await post(`http://127.0.0.1:${portOf(proxy.llm)}/v1/models`, {});
