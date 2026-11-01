@@ -84,6 +84,7 @@ export interface GuardOptions {
   untrustedRoles?: string[];
   /** called for every non-CLEAN message */
   onFinding?: (f: GuardFinding) => void;
+  trustText?: (messageIndex: number, text: string) => boolean;
 }
 
 export interface GuardResult<T = ChatMessage> {
@@ -127,6 +128,7 @@ export async function guard<T extends ChatMessage>(
       let flagged: GuardFinding | null = null;
       const blocks = await Promise.all((m.content as any[]).map(async (b) => {
         if (b?.type === "text" && typeof b.text === "string") {
+          if (opts.trustText?.(i, b.text)) return b;
           const s = await scan(b.text);
           if (s.severity !== "CLEAN") flagged = mergeFinding(flagged, i, m.role, s);
           return { ...b, text: s.sanitized };

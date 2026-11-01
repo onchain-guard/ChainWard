@@ -75,6 +75,8 @@ const CONSOLE_ORIGIN_BOOTSTRAP =
 /** Request paths we treat as an LLM call. Both vendor shapes carry `messages`. */
 const LLM_PATH = /\/(chat\/completions|messages|responses)$/;
 
+const CLAUDE_CODE_REMINDER = /^\s*<system-reminder>(?:(?!<\/?system-reminder>)[\s\S])*<\/system-reminder>\s*$/;
+
 /** Headers worth forwarding upstream. An allow-list, because blindly copying `host` or
  *  `content-length` produces requests the upstream rejects. */
 const FORWARD_HEADERS = [
@@ -274,6 +276,7 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
         const { messages: cleaned, findings } = await guard(messages, {
           model,
           targetContext: ["llm-chat", "markdown-ui"],
+          trustText: (index, text) => index === 0 && CLAUDE_CODE_REMINDER.test(text),
         });
         body.messages = cleaned;
         event = {
