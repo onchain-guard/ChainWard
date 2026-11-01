@@ -21,6 +21,7 @@ import { defaultScanner } from "../core/scanner.ts";
 import type { FieldKind } from "../core/types.ts";
 
 export interface GuardEvent {
+  id: number;
   /** epoch ms */
   t: number;
   model: string;
@@ -214,12 +215,15 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
   const buffer: GuardEvent[] = [];
   const subscribers = new Set<ServerResponse>();
 
-  const publish = (e: GuardEvent) => {
+  let nextId = 1;
+  const publish = (draft: Omit<GuardEvent, "id">): GuardEvent => {
+    const e: GuardEvent = { id: nextId++, ...draft };
     buffer.push(e);
     while (buffer.length > bufferSize) buffer.shift();
     const frame = `data: ${JSON.stringify(e)}\n\n`;
     for (const s of subscribers) s.write(frame);
     opts.onEvent?.(e);
+    return e;
   };
 
   const llm = createServer(async (req, res) => {
@@ -263,7 +267,7 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
     // show what actually arrived, not what we are about to send.
     const originals = messages.map((m) => preview(m.content));
 
-    let event: GuardEvent = { t: Date.now(), model, stream, findings: [] };
+    let event: Omit<GuardEvent, "id"> = { t: Date.now(), model, stream, findings: [] };
     if (messages.length) {
       try {
         const { messages: cleaned, findings } = await guard(messages, {
@@ -297,10 +301,10 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
         };
       }
     }
-    publish(event);
+    const published = publish(event);
 
     if (opts.upstream) await forward(req, res, opts.upstream, body);
-    else dryRun(res, model, event);
+    else dryRun(res, model, published);
   });
   llm.listen(opts.port ?? 8787);
 
@@ -337,6 +341,47 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
         : opts.consoleHtml + CONSOLE_ORIGIN_BOOTSTRAP;
       res.writeHead(200, { "content-type": "text/html; charset=utf-8", "cache-control": "no-store" });
       res.end(page);
+      return;
+    }
+
+    const one = req.url?.match(/^\/events\/(\d+)$/);
+    if (one && req.method === "OPTIONS") {
+      res.writeHead(204, {
+        ...cors,
+        "access-control-allow-methods": "DELETE, OPTIONS",
+      });
+      res.end();
+      return;
+    }
+
+    if (one && req.method === "DELETE") {
+      const id = Number(one[1]);
+      const at = buffer.findIndex((e) => e.id === id);
+      if (at === -1) {
+        res.writeHead(404, { ...cors, "content-type": "application/json" });
+        res.end(JSON.stringify({ error: `no event ${id} in the buffer` }));
+        return;
+      }
+      buffer.splice(at, 1);
+      res.writeHead(200, { ...cors, "content-type": "application/json" });
+      res.end(JSON.stringify({ removed: id }));
+      return;
+    }
+
+    if (req.url === "/events" && req.method === "OPTIONS") {
+      res.writeHead(204, {
+        ...cors,
+        "access-control-allow-methods": "GET, DELETE, OPTIONS",
+      });
+      res.end();
+      return;
+    }
+
+    if (req.url === "/events" && req.method === "DELETE") {
+      const cleared = buffer.length;
+      buffer.length = 0;
+      res.writeHead(200, { ...cors, "content-type": "application/json" });
+      res.end(JSON.stringify({ cleared }));
       return;
     }
 
