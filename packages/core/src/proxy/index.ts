@@ -73,7 +73,7 @@ const CONSOLE_ORIGIN_BOOTSTRAP =
   'if(e)e.value=location.origin;})();</script>';
 
 /** Request paths we treat as an LLM call. Both vendor shapes carry `messages`. */
-const LLM_PATHS = ["/chat/completions", "/messages", "/responses"];
+const LLM_PATH = /\/(chat\/completions|messages|responses)$/;
 
 /** Headers worth forwarding upstream. An allow-list, because blindly copying `host` or
  *  `content-length` produces requests the upstream rejects. */
@@ -227,7 +227,8 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
   };
 
   const llm = createServer(async (req, res) => {
-    const isLLMCall = req.method === "POST" && LLM_PATHS.some((p) => req.url?.includes(p));
+    const path = new URL(req.url ?? "/", "http://proxy").pathname;
+    const isLLMCall = req.method === "POST" && LLM_PATH.test(path);
 
     if (!isLLMCall) {
       // A client pointed at this proxy sends it EVERYTHING, not just completions — token
