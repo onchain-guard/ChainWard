@@ -14,6 +14,7 @@
 //
 // Zero runtime dependencies beyond chainward itself (node:http + fetch).
 
+import { createHash } from "node:crypto";
 import { createServer, type IncomingMessage, type Server, type ServerResponse } from "node:http";
 import { Readable } from "node:stream";
 import { guard, type ChatMessage } from "../index.ts";
@@ -36,6 +37,7 @@ export interface GuardEvent {
     before: string;
     /** first 200 chars of what the model actually received */
     after: string;
+    hash?: string;
   }>;
 }
 
@@ -109,7 +111,11 @@ function readBody(req: IncomingMessage): Promise<string> {
  *  injection lives in `tool_result`, so a preview that only understood strings would show
  *  an empty line for exactly the messages worth looking at. */
 export function preview(content: unknown, limit = 200): string {
-  if (typeof content === "string") return content.slice(0, limit);
+  return messageText(content).slice(0, limit);
+}
+
+export function messageText(content: unknown): string {
+  if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
   const parts: string[] = [];
   for (const b of content as Array<Record<string, unknown>>) {
@@ -123,7 +129,11 @@ export function preview(content: unknown, limit = 200): string {
       }
     }
   }
-  return parts.join(" ⏎ ").slice(0, limit);
+  return parts.join(" ⏎ ");
+}
+
+export function contentHash(content: unknown): string {
+  return createHash("sha256").update(messageText(content)).digest("hex");
 }
 
 /** Forward the sanitized request. Streamed responses are piped rather than buffered:
@@ -269,6 +279,7 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
     // Snapshot before guarding — `guard()` returns new objects, but the previews have to
     // show what actually arrived, not what we are about to send.
     const originals = messages.map((m) => preview(m.content));
+    const hashes = messages.map((m) => contentHash(m.content));
 
     let event: Omit<GuardEvent, "id"> = { t: Date.now(), model, stream, findings: [] };
     if (messages.length) {
@@ -290,6 +301,7 @@ export function createProxy(opts: ProxyOptions = {}): Proxy {
             codes: f.codes,
             before: originals[f.index] ?? "",
             after: preview(cleaned[f.index]?.content),
+            hash: hashes[f.index],
           })),
         };
       } catch (e) {
