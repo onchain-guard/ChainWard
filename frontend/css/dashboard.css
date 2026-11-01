@@ -316,8 +316,10 @@ body {
 
 .rule-name {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
+  min-width: 0;
   color: var(--text-primary);
 }
 
@@ -339,6 +341,67 @@ body {
 
 .rule-hits {
   color: var(--text-secondary);
+}
+
+.replay-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 352px;
+  color: var(--text-muted);
+}
+
+.replay-result {
+  white-space: normal;
+}
+
+.verdict-banner {
+  padding: 16px;
+  border-radius: 6px;
+  text-align: center;
+  font-size: 1.2rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.verdict-banner.malicious {
+  background-color: var(--color-malicious-bg);
+  color: var(--color-malicious);
+  border: 1px solid rgba(252, 129, 129, 0.3);
+}
+
+.verdict-banner.suspicious {
+  background-color: var(--color-suspicious-bg);
+  color: var(--color-suspicious);
+  border: 1px solid rgba(241, 196, 15, 0.3);
+}
+
+.verdict-banner.clean {
+  background-color: var(--color-clean-bg);
+  color: var(--color-clean);
+  border: 1px solid rgba(46, 204, 113, 0.3);
+}
+
+.replay-section-label {
+  margin: 24px 0 4px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.textarea-box.replay-sanitized {
+  height: auto;
+  min-height: 80px;
+  max-height: 200px;
+  overflow-y: auto;
+  margin: 8px 0 0;
+  white-space: pre-wrap;
+  word-break: break-all;
+}
+
+.rule-layer {
+  min-width: 112px;
+  color: var(--text-muted);
+  font-size: 0.75rem;
 }
 
 /* === 2. LIVE PROXY VIEW (DATA FLOW) === */
